@@ -2,7 +2,10 @@
 
 import dataclasses
 from bpack.descriptor import descriptor, Field, EBaseUnits
-from bpack.ba_decoder import Decoder, decoder
+from bpack import ba_decoder as ba
+from bpack import bs_decoder as bs
+
+import pytest
 
 
 @descriptor(baseunits=EBaseUnits.BITS)
@@ -14,27 +17,32 @@ class Record:
     field_4: float = Field(size=32, default=1.)
 
 
-# Little Endian
+# Big Endian
 ENCODED_DATA = bytes(
-    [0b10101000, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00111111]
+    [0b10101000, 0b00000000, 0b00111111, 0b10000000, 0b00000000, 0b00000000]
 )
 DECODED_DATA = Record()
 
 
-def test_decoder():
-    d = Decoder(Record)
+@pytest.fixture(scope='module', params=[ba, bs])
+def backend(request):
+    return request.param
+
+
+def test_decoder(backend):
+    d = backend.Decoder(Record)
     record = d.decode(ENCODED_DATA)
     assert record == DECODED_DATA
 
 
-def test_decoder_func():
-    RecordType = decoder(Record)
-    record = RecordType.from_bytes(ENCODED_DATA)
+def test_decoder_func(backend):
+    record_type = backend.decoder(Record)
+    record = record_type.from_bytes(ENCODED_DATA)
     assert record == DECODED_DATA
 
 
-def test_decoder_func():
-    @decoder
+def test_decoder_decorator(backend):
+    @backend.decoder
     @descriptor(baseunits=EBaseUnits.BITS)
     @dataclasses.dataclass(frozen=True)
     class Record2:
