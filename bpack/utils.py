@@ -5,11 +5,10 @@ import functools
 
 def classdecorator(func):
     """Class decorator that can be used with or without parameters."""
-    functools.wraps(func)
-
+    @functools.wraps(func)
     def wrapper(cls=None, **kwargs):
-        def wrap(cls):
-            return func(cls, **kwargs)
+        def wrap(klass):
+            return func(klass, **kwargs)
 
         # Check if called as @decorator or @decorator(...).
         if cls is None:
