@@ -1,4 +1,4 @@
-"""Binary data descriptors."""
+"""Descriptors for binary records."""
 
 import enum
 import math
@@ -11,8 +11,8 @@ from .utils import classdecorator
 
 
 __all__ = [
-    'EBaseUnits', 'is_record', 'is_field', 'fields', 'record_size',
-    'Field', 'record',
+    'EBaseUnits', 'is_descriptor', 'is_field', 'record_size',
+    'Field', 'descriptor',
 ]
 
 
@@ -21,7 +21,8 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
-def is_record(obj):
+def is_descriptor(obj):
+    """Return true if ``obj`` is a descriptor or a descriptor instance."""
     try:
         return isinstance(dataclasses.fields(obj)[0], Field)
     except (TypeError, ValueError):
@@ -34,14 +35,12 @@ def is_record(obj):
 
 
 def is_field(obj):
+    """Return true if an ``obj`` can be considered is a descriptor field."""
     if (issubclass(obj.type, Field) or
             (hasattr(obj, 'offset') and hasattr(obj, 'size'))):
         return True
     else:
         return False
-
-
-fields = dataclasses.fields
 
 
 class Field(dataclasses.Field):
@@ -77,7 +76,7 @@ class Field(dataclasses.Field):
                     f'invalid size: {size!r}: must be a positive integer')
             metadata['size'] = size
         else:
-            # TODO: add automatic size determination form type (in record)
+            # TODO: add automatic size determination form type (in descriptor)
             raise TypeError('no size specified')
 
         field = dataclasses.field(**kwargs)
@@ -91,10 +90,18 @@ class Field(dataclasses.Field):
 
     @property
     def offset(self):
+        """Offset form the beginning of the record (in baseunits).
+
+        .. seealso: :func:`bpack.descriptor.descriptor`.
+        """
         return self.metadata['offset']
 
     @property
     def size(self):
+        """Size of the field (in baseunits).
+
+        .. seealso: :func:`bpack.descriptor.descriptor`.
+        """
         return self.metadata['size']
 
     def __repr__(self):
@@ -107,14 +114,17 @@ class Field(dataclasses.Field):
         self.metadata = types.MappingProxyType(metadata)
 
 
-class RecordConsistencyError(ValueError):
+class DescriptorConsistencyError(ValueError):
     pass
 
 
+# TODO: order for byte/bit order
 @classdecorator
-def record(cls, size: Optional[int] = None,
-           baseunits: EBaseUnits = EBaseUnits.BYTES):
-    """Class decorator to convert a dataclass into a record.
+def descriptor(cls, size: Optional[int] = None,
+               baseunits: EBaseUnits = EBaseUnits.BYTES):
+    """Class decorator to define descriptors for binary records.
+
+    It converts a dataclass into a descriptor object for binary records.
 
     * ensures that all fields are :class:`bpack.descriptor.Field` descriptors
     * offsets are automatically computed if necessary
@@ -122,18 +132,18 @@ def record(cls, size: Optional[int] = None,
     * the ``__len__`` special method is added (returning always the
       record size in bytes).
     """
-    fields = dataclasses.fields(cls)
+    fields_ = dataclasses.fields(cls)
 
-    field = fields[0]
+    field = fields_[0]
     if field.metadata.get('offset') is None:
         field._update_metadata(offset=0)
 
-    for idx, field in enumerate(fields[1:], start=1):
-        auto_offset = fields[idx - 1].offset + fields[idx - 1].size
+    for idx, field in enumerate(fields_[1:], start=1):
+        auto_offset = fields_[idx - 1].offset + fields_[idx - 1].size
         field_offset = field.metadata.get('offset')
         if field_offset is not None:
             if field_offset < auto_offset:
-                raise RecordConsistencyError(
+                raise DescriptorConsistencyError(
                     f'invalid offset for filed n. {idx}: {field}')
         else:
             field._update_metadata(offset=auto_offset)
@@ -146,8 +156,8 @@ def record(cls, size: Optional[int] = None,
         #     assert auto_size is not None
         #     field._update_metadata(size=auto_size)
 
-    content_size = sum(field.size for field in fields)
-    field = fields[-1]
+    content_size = sum(field.size for field in fields_)
+    field = fields_[-1]
     auto_size = field.offset + field.size
     assert auto_size >= content_size  # this should be already checked above
 
@@ -156,7 +166,7 @@ def record(cls, size: Optional[int] = None,
     elif int(size) != size:
         raise TypeError(f'invalid size: {size!r}')
     elif size < auto_size:
-        raise RecordConsistencyError(
+        raise DescriptorConsistencyError(
             f'the specified size ({size}) is smaller than total size of '
             f'fields ({auto_size})')
 
@@ -183,6 +193,7 @@ def record(cls, size: Optional[int] = None,
 
 
 def record_size(obj):
-    if not is_record(obj):
-        raise TypeError(f'{obj!r} is not a record')
+    """Return the size in bytes of the ``obj`` record."""
+    if not is_descriptor(obj):
+        raise TypeError(f'{obj!r} is not a descriptor')
     return obj.__len__()

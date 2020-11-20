@@ -1,18 +1,32 @@
 # -*- coding: utf-8 -*-
 
-from bpack.descriptor import (
-    Field, record, EBaseUnits, is_record, record_size, is_field, fields
-)
-from bpack.descriptor import dataclasses
+import dataclasses
 
 import pytest
+
+from bpack.descriptor import (
+    Field, descriptor, EBaseUnits, is_descriptor, record_size, is_field,
+)
 
 
 class TestRecord:
     @staticmethod
     def test_base():
-        @record
+        @descriptor
         @dataclasses.dataclass
+        class Record:
+            field_1: int = Field(size=4, default=0)
+            field_2: float = Field(size=8, default=1./3)
+
+        assert dataclasses.is_dataclass(Record)
+        assert len(dataclasses.fields(Record)) == 2
+        assert Record._BASEUNITS is EBaseUnits.BYTES  # default
+        assert all(isinstance(f, Field) for f in dataclasses.fields(Record))
+
+    @staticmethod
+    def test_frozen():
+        @descriptor
+        @dataclasses.dataclass(frozen=True)
         class Record:
             field_1: int = Field(size=4, default=0)
             field_2: float = Field(size=8, default=1./3)
@@ -27,7 +41,7 @@ class TestRecord:
                              argvalues=[EBaseUnits.BYTES, EBaseUnits.BITS,
                                         'bits', 'bytes'])
     def test_baseunits(baseunits):
-        @record(baseunits=baseunits)
+        @descriptor(baseunits=baseunits)
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=8, default=0)
@@ -38,7 +52,7 @@ class TestRecord:
     @staticmethod
     def test_byte_alignment_warning():
         with pytest.warns(UserWarning, match='bit struct not aligned to bytes'):
-            @record(baseunits=EBaseUnits.BITS)
+            @descriptor(baseunits=EBaseUnits.BITS)
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -48,7 +62,7 @@ class TestRecord:
     @pytest.mark.parametrize(argnames='baseunits', argvalues=[None, 8, 'x'])
     def test_invalid_baseunits(baseunits):
         with pytest.raises(ValueError):
-            @record(baseunits=baseunits)
+            @descriptor(baseunits=baseunits)
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -57,7 +71,7 @@ class TestRecord:
     @staticmethod
     def test_missing_field_size():
         with pytest.raises(TypeError):
-            @record
+            @descriptor
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -67,7 +81,7 @@ class TestRecord:
     @pytest.mark.parametrize(argnames='size', argvalues=[None, 1.3, 'x'])
     def test_invalid_field_size_type(size):
         with pytest.raises(TypeError):
-            @record
+            @descriptor
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -77,7 +91,7 @@ class TestRecord:
     @pytest.mark.parametrize(argnames='size', argvalues=[0, -8])
     def test_invalid_field_size(size):
         with pytest.raises(ValueError):
-            @record
+            @descriptor
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -87,7 +101,7 @@ class TestRecord:
     @pytest.mark.parametrize(argnames='offset', argvalues=[1.3, 'x'])
     def test_invalid_field_offset_type(offset):
         with pytest.raises(TypeError):
-            @record
+            @descriptor
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -97,7 +111,7 @@ class TestRecord:
     @pytest.mark.parametrize(argnames='offset', argvalues=[0, -8])
     def test_invalid_field_offset(offset):
         with pytest.raises(ValueError):
-            @record
+            @descriptor
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -106,7 +120,7 @@ class TestRecord:
     @staticmethod
     def test_invalid_inconsistent_field_offset_and_size():
         with pytest.raises(ValueError):
-            @record
+            @descriptor
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -115,7 +129,7 @@ class TestRecord:
     @staticmethod
     def test_explicit_size():
         size = 16
-        @record(size=size)
+        @descriptor(size=size)
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
@@ -128,7 +142,7 @@ class TestRecord:
     @staticmethod
     def test_invalid_explicit_size():
         with pytest.raises(ValueError):
-            @record(size=10)
+            @descriptor(size=10)
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -137,7 +151,7 @@ class TestRecord:
     @staticmethod
     def test_invalid_explicit_size_type():
         with pytest.raises(TypeError):
-            @record(size=10.5)
+            @descriptor(size=10.5)
             @dataclasses.dataclass
             class Record:
                 field_1: int = Field(size=4, default=0)
@@ -145,7 +159,7 @@ class TestRecord:
 
     @staticmethod
     def test_len():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
@@ -156,7 +170,7 @@ class TestRecord:
 
     @staticmethod
     def test_len_with_offset_01():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
@@ -167,7 +181,7 @@ class TestRecord:
 
     @staticmethod
     def test_len_with_offset_02():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, offset=10, default=0)
@@ -178,7 +192,7 @@ class TestRecord:
 
     @staticmethod
     def test_len_with_offset_03():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, offset=10, default=0)
@@ -191,7 +205,7 @@ class TestRecord:
     @staticmethod
     def test_len_with_offset_04():
         size = 30
-        @record(size=size)
+        @descriptor(size=size)
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, offset=10, default=0)
@@ -204,7 +218,7 @@ class TestRecord:
 class TestFields:
     @staticmethod
     def test_field_size_01():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
@@ -213,7 +227,7 @@ class TestFields:
         # name, type, size, offset
         field_data = [('field_1', int, 4, 0), ('field_2', float, 8, 4)]
 
-        for field, data in zip(fields(Record), field_data):
+        for field, data in zip(dataclasses.fields(Record), field_data):
             name, type, size, offset = data
             assert field.name == name
             assert field.type == type
@@ -222,7 +236,7 @@ class TestFields:
 
     @staticmethod
     def test_field_size_02():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, offset=1, default=0)
@@ -231,7 +245,7 @@ class TestFields:
         # name, type, size, offset
         field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 5)]
 
-        for field, data in zip(fields(Record), field_data):
+        for field, data in zip(dataclasses.fields(Record), field_data):
             name, type, size, offset = data
             assert field.name == name
             assert field.type == type
@@ -240,7 +254,7 @@ class TestFields:
 
     @staticmethod
     def test_field_size_03():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, offset=1, default=0)
@@ -249,7 +263,7 @@ class TestFields:
         # name, type, size, offset
         field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 6)]
 
-        for field, data in zip(fields(Record), field_data):
+        for field, data in zip(dataclasses.fields(Record), field_data):
             name, type, size, offset = data
             assert field.name == name
             assert field.type == type
@@ -260,48 +274,48 @@ class TestFields:
 class TestUtils:
     @staticmethod
     def test_is_record():
-        assert not is_record(1)
-        assert not is_record('x')
+        assert not is_descriptor(1)
+        assert not is_descriptor('x')
 
         class C:
             pass
 
-        assert not is_record(C)
-        assert not is_record(C())
+        assert not is_descriptor(C)
+        assert not is_descriptor(C())
 
         @dataclasses.dataclass
         class D:
             field_1: int = 0
 
-        assert not is_record(D)
-        assert not is_record(D())
+        assert not is_descriptor(D)
+        assert not is_descriptor(D())
 
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
             field_2: float = Field(size=8, default=1./3)
 
-        assert is_record(Record)
-        assert is_record(Record())
+        assert is_descriptor(Record)
+        assert is_descriptor(Record())
 
     @staticmethod
     def test_is_field():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
             field_2: float = Field(size=8, default=1./3)
 
-        for field in fields(Record):
+        for field in dataclasses.fields(Record):
             assert is_field(field)
 
-        for field in fields(Record()):
+        for field in dataclasses.fields(Record()):
             assert is_field(field)
 
     @staticmethod
     def test_record_size():
-        @record
+        @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
