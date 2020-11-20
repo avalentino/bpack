@@ -1,17 +1,23 @@
-# bitarray based decoder
+"""Bitarray based decoder for binary data structures."""
 
 import struct
+import dataclasses
 import collections.abc
 
 import bitarray
 import bitarray.util
 
+from .utils import classdecorator
+from .descriptor import EBaseUnits
 
-def ba_to_float(ba):
+
+def ba_to_float(ba, order='>'):
     if len(ba) == 32:
-        return struct.unpack('f', ba, tobytes())
+        return struct.unpack(f'{order}f', ba.tobytes())[0]
+    elif len(ba) == 64:
+        return struct.unpack(f'{order}d', ba.tobytes())[0]
     else:
-        struct.unpack('d', ba.tobytes())
+        raise ValueError('ba must be 32 or 64 bits')
 
 
 STD_CONVERTER_MAP = {
@@ -26,9 +32,14 @@ STD_CONVERTER_MAP = {
 
 
 class Decoder:
-    def __init__(self, record_type, converters=STD_CONVERTER_MAP):
-        fields = dataclasses.fields(record_type)
-        types_ = [field.type for field in fields]
+    def __init__(self, descriptor, converters=STD_CONVERTER_MAP):
+        if descriptor._BASEUNITS is not EBaseUnits.BITS:
+            raise ValueError(
+                'bitarray decoder only accepts descriptors with '
+                'base units "bits"')
+
+        fields_ = dataclasses.fields(descriptor)
+        types_ = [field.type for field in fields_]
 
         if isinstance(converters, collections.abc.Mapping):
             converters_map = converters
@@ -37,10 +48,10 @@ class Decoder:
         assert converters is None or isinstance(converters,
                                                 collections.abc.Iterable)
 
-        self._record_type = record_type
+        self._descriptor = descriptor
         self._converters = converters
         self._slices = [
-            slice(field.offset, field.offset + field.size) for field in fields
+            slice(field.offset, field.offset + field.size) for field in fields_
         ]
 
     def decode(self, data):
@@ -54,12 +65,12 @@ class Decoder:
                 for convert, value in zip(self._converters, values)
             ]
 
-        return self._record_type(*values)
+        return self._descriptor(*values)
 
 
-@decorator
+@classdecorator
 def decoder(cls, converter_map=STD_CONVERTER_MAP):
-    decoder_ = Decoder(record_type=cls, converters=converter_map)
+    decoder_ = Decoder(descriptor=cls, converters=converter_map)
 
     decode_func = dataclasses._create_fn(
         name='decode',
@@ -68,6 +79,6 @@ def decoder(cls, converter_map=STD_CONVERTER_MAP):
         locals={'decoder': decoder_},
     )
     decode_func = staticmethod(decode_func)
-    dataclasses._set_new_attribute(cls, 'decode', decode_func)
+    dataclasses._set_new_attribute(cls, 'from_bytes', decode_func)
 
     return cls
