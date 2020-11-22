@@ -9,11 +9,11 @@ from .descriptor import EBaseUnits
 
 
 _TYPE_TO_STR = {
+    bool: 'b',
     int: 'u',
     float: 'f',
     bytes: 'r',
     str: 't',
-    bool: 'b',
     None: 'p',
 }
 
@@ -24,7 +24,10 @@ def _type_size_order_to_str(type_, size: int, order: str = ''):
         raise TypeError(f'invalid size: {size:r}')
     if order not in ('', '>', '<'):
         raise TypeError(f'invalid order: {order:r}')
-    return f'{order}{_TYPE_TO_STR[type_]}{size}'
+    try:
+        return f'{order}{_TYPE_TO_STR[type_]}{size}'
+    except KeyError:
+        raise TypeError(f'unsupported type: {type:!r}')
 
 
 class Decoder:

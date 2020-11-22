@@ -24,13 +24,11 @@ def ba_to_float(ba, order='>'):
 
 
 STD_CONVERTER_MAP = {
-    int: bitarray.util.ba2int,
     bool: lambda ba: bool(bitarray.util.ba2int(ba)),
-    bytes: lambda ba: ba.tobytes(),
-    str: lambda ba: ba.tobytes().decode('utf-8'),
+    int: bitarray.util.ba2int,
     float: ba_to_float,
-    # np.float32: np.frombuffer(ba.tobytes(), dtype=np.float32).item(),
-    # np.float64: np.frombuffer(ba.tobytes(), dtype=np.float64).item(),
+    bytes: lambda ba: ba.tobytes(),
+    str: lambda ba: ba.tobytes().decode('ascii'),
 }
 
 
@@ -46,10 +44,20 @@ class Decoder:
 
         if isinstance(converters, collections.abc.Mapping):
             converters_map = converters
-            converters = [converters_map.get(type_) for type_ in types_]
+            try:
+                converters = [converters_map[type_] for type_ in types_]
+            except KeyError as exc:
+                type_ = str(exc)
+                raise TypeError(
+                    f'no conversion function available for type {type_!r}')
 
-        assert converters is None or isinstance(converters,
-                                                collections.abc.Iterable)
+        if converters is not None:
+            if not isinstance(converters, collections.abc.Iterable):
+                raise ValueError(f'invalid converters: {converters!r}')
+            if len(list(converters)) != len(fields_):
+                raise ValueError(
+                    f'the number of converters ({len(converters)}) does not '
+                    f'match the number of fields ({len(fields_)})')
 
         self._descriptor = descriptor
         self._converters = converters

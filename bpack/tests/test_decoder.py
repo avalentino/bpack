@@ -66,3 +66,16 @@ def test_decoder_decorator(backend):
     assert record.field_2 == decoded_data.field_2
     assert record.field_3 == decoded_data.field_3
     assert record.field_4 == decoded_data.field_4
+
+
+@pytest.mark.parametrize('backend', [ba, bs])
+def test_unsupported_type(backend):
+    class CustomType:
+        pass
+
+    with pytest.raises(TypeError):
+        @backend.decoder
+        @descriptor(baseunits=EBaseUnits.BITS)
+        @dataclasses.dataclass(frozen=True)
+        class Record:
+            field_1: CustomType = Field(size=8)
