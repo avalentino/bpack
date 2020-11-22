@@ -5,7 +5,7 @@ import dataclasses
 import pytest
 
 from bpack.descriptor import (
-    Field, descriptor, EBaseUnits, is_descriptor, record_size, is_field,
+    Field, descriptor, EBaseUnits, is_descriptor, calcsize, is_field,
 )
 
 
@@ -135,8 +135,8 @@ class TestRecord:
             field_1: int = Field(size=4, default=0)
             field_2: float = Field(size=8, default=1./3)
 
-        assert record_size(Record) == size
-        assert record_size(Record()) == size
+        assert calcsize(Record) == size
+        assert calcsize(Record()) == size
         assert len(Record()) == size
 
     @staticmethod
@@ -314,12 +314,12 @@ class TestUtils:
             assert is_field(field)
 
     @staticmethod
-    def test_record_size():
+    def test_calcsize():
         @descriptor
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=4, default=0)
             field_2: float = Field(size=8, default=1./3)
 
-        assert record_size(Record) == 12
-        assert record_size(Record()) == 12
+        assert calcsize(Record) == 12
+        assert calcsize(Record()) == 12

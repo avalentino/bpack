@@ -11,7 +11,7 @@ from .utils import classdecorator
 
 
 __all__ = [
-    'EBaseUnits', 'is_descriptor', 'is_field', 'record_size',
+    'EBaseUnits', 'is_descriptor', 'is_field', 'calcsize',
     'Field', 'descriptor',
 ]
 
@@ -192,7 +192,7 @@ def descriptor(cls, size: Optional[int] = None,
     return cls
 
 
-def record_size(obj):
+def calcsize(obj):
     """Return the size in bytes of the ``obj`` record."""
     if not is_descriptor(obj):
         raise TypeError(f'{obj!r} is not a descriptor')
