@@ -10,7 +10,7 @@ import pytest
 
 @descriptor(baseunits=EBaseUnits.BITS)
 @dataclasses.dataclass(frozen=True)
-class Record:
+class BitUnitsRecord:
     field_1: int = Field(size=3, default=0b101)
     field_2: bool = Field(size=1, default=False)
     field_3: int = Field(size=12, default=2048)
@@ -18,42 +18,47 @@ class Record:
 
 
 # Big Endian
-ENCODED_DATA = bytes(
+BIT_ENCODED_DATA_BE = bytes(
     [0b10101000, 0b00000000, 0b00111111, 0b10000000, 0b00000000, 0b00000000]
 )
-DECODED_DATA = Record()
 
 
-@pytest.fixture(scope='module', params=[ba, bs])
-def backend(request):
-    return request.param
-
-
-def test_decoder(backend):
+@pytest.mark.parametrize('backend', [ba, bs])
+@pytest.mark.parametrize(
+    'Record, encoded_data, decoded_data',
+    [(BitUnitsRecord, BIT_ENCODED_DATA_BE, BitUnitsRecord())])
+def test_decoder(backend, Record, encoded_data, decoded_data):
     d = backend.Decoder(Record)
-    record = d.decode(ENCODED_DATA)
-    assert record == DECODED_DATA
+    record = d.decode(encoded_data)
+    assert record == decoded_data
 
 
-def test_decoder_func(backend):
+@pytest.mark.parametrize('backend', [ba, bs])
+@pytest.mark.parametrize(
+    'Record, encoded_data, decoded_data',
+    [(BitUnitsRecord, BIT_ENCODED_DATA_BE, BitUnitsRecord())])
+def test_decoder_func(backend, Record, encoded_data, decoded_data):
     record_type = backend.decoder(Record)
-    record = record_type.from_bytes(ENCODED_DATA)
-    assert record == DECODED_DATA
+    record = record_type.from_bytes(encoded_data)
+    assert record == decoded_data
 
 
+@pytest.mark.parametrize('backend', [ba, bs])
 def test_decoder_decorator(backend):
     @backend.decoder
     @descriptor(baseunits=EBaseUnits.BITS)
     @dataclasses.dataclass(frozen=True)
-    class Record2:
+    class Record:
         field_1: int = Field(size=3, default=0b101)
         field_2: bool = Field(size=1, default=False)
         field_3: int = Field(size=12, default=2048)
         field_4: float = Field(size=32, default=1.)
 
-    record = Record2.from_bytes(ENCODED_DATA)
+    decoded_data = Record()
+    encoded_data = BIT_ENCODED_DATA_BE
+    record = Record.from_bytes(encoded_data)
 
-    assert record.field_1 == DECODED_DATA.field_1
-    assert record.field_2 == DECODED_DATA.field_2
-    assert record.field_3 == DECODED_DATA.field_3
-    assert record.field_4 == DECODED_DATA.field_4
+    assert record.field_1 == decoded_data.field_1
+    assert record.field_2 == decoded_data.field_2
+    assert record.field_3 == decoded_data.field_3
+    assert record.field_4 == decoded_data.field_4
