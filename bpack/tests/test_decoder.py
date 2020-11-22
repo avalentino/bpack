@@ -8,6 +8,10 @@ from bpack import bs_decoder as bs
 import pytest
 
 
+# TODO: test records with offsets and pad bit/bytes
+# TODO: add support for enums
+
+
 @descriptor(baseunits=EBaseUnits.BITS)
 @dataclasses.dataclass(frozen=True)
 class BitUnitsRecord:

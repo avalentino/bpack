@@ -21,6 +21,9 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
+# TODO: get_baseunits or baseunits -> baseunots of a record (instance)
+
+
 def is_descriptor(obj):
     """Return true if ``obj`` is a descriptor or a descriptor instance."""
     try:
@@ -118,6 +121,10 @@ class DescriptorConsistencyError(ValueError):
     pass
 
 
+# TODO: units attribute (TBD)
+# TODO: signed attribute
+# TODO: repeat attribute
+# TODO: converters (TBD, or in decoder)
 # TODO: order for byte/bit order
 @classdecorator
 def descriptor(cls, size: Optional[int] = None,
@@ -176,7 +183,7 @@ def descriptor(cls, size: Optional[int] = None,
             warnings.warn('bit struct not aligned to bytes')
         size = math.ceil(size / 8)
 
-    cls._BASEUNITS = baseunits
+    cls._BASEUNITS = baseunits      # TODO: use dunder attributes: __baseunits__
 
     get_len_func = dataclasses._create_fn(
         name='__len__',

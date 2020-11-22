@@ -18,6 +18,7 @@ _TYPE_TO_STR = {
 }
 
 
+# TODO: add repeat parameter
 def _type_size_order_to_str(type_, size: int, order: str = ''):
     if size <= 0:
         raise TypeError(f'invalid size: {size:r}')

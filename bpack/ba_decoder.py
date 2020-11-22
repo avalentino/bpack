@@ -11,6 +11,9 @@ from .utils import classdecorator
 from .descriptor import EBaseUnits
 
 
+# TODO: custom ba_to_int with size
+
+
 def ba_to_float(ba, order='>'):
     if len(ba) == 32:
         return struct.unpack(f'{order}f', ba.tobytes())[0]
