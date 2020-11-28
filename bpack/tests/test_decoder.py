@@ -9,7 +9,6 @@ from bpack import st_decoder as st
 import pytest
 
 
-# TODO: test records with offsets and pad bit/bytes
 # TODO: add support for enums
 
 
@@ -22,12 +21,22 @@ class BitRecord:
     field_4: float = Field(size=32, default=1.)
     field_5: bytes = Field(size=24, default=b'abc')
     field_6: str = Field(size=24, default='ABC')
+    # 4 padding bits ([96:100])  0b1111
+    field_8: int = Field(size=28, default=134217727, offset=100)
 
 
 # Big Endian
-BIT_ENCODED_DATA_BE = bytes(
-    [0b10101000, 0b00000000, 0b00111111, 0b10000000, 0b00000000, 0b00000000]
-) + b'abc' + 'ABC'.encode('ascii')
+BIT_ENCODED_DATA_BE = b''.join([
+    bytes([
+        0b10101000, 0b00000000,                             # fields for 1 to 3
+        0b00111111, 0b10000000, 0b00000000, 0b00000000,     # field_4 (float32)
+    ]),
+    b'abc',                                         # field_5 (bytes)
+    'ABC'.encode('ascii'),                          # field_6 (str)
+    bytes([                                         # 4 padding bits + field_8
+        0b11110111, 0b11111111, 0b11111111, 0b11111111,
+    ]),
+])
 
 
 @descriptor(baseunits=EBaseUnits.BYTES)
