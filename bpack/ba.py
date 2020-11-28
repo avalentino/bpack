@@ -31,9 +31,11 @@ STD_CONVERTER_MAP = {
     str: lambda ba: ba.tobytes().decode('ascii'),
 }
 
+DEFAULT_CONVERTERS = object()
+
 
 class Decoder:
-    def __init__(self, descriptor, converters=STD_CONVERTER_MAP):
+    def __init__(self, descriptor, converters=DEFAULT_CONVERTERS):
         if descriptor.__bpack_baseunits__ is not EBaseUnits.BITS:
             raise ValueError(
                 'bitarray decoder only accepts descriptors with '
@@ -41,6 +43,9 @@ class Decoder:
 
         fields_ = fields(descriptor)
         types_ = [field.type for field in fields_]
+
+        if converters is DEFAULT_CONVERTERS:
+            converters = STD_CONVERTER_MAP
 
         if isinstance(converters, collections.abc.Mapping):
             converters_map = converters
@@ -80,7 +85,10 @@ class Decoder:
 
 
 @classdecorator
-def decoder(cls, converter_map=STD_CONVERTER_MAP):
+def decoder(cls, converter_map=DEFAULT_CONVERTERS):
+    if converter_map is DEFAULT_CONVERTERS:
+        converter_map = STD_CONVERTER_MAP
+
     decoder_ = Decoder(descriptor=cls, converters=converter_map)
 
     decode_func = utils.create_fn(
