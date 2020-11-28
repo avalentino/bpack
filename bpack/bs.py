@@ -5,7 +5,7 @@ import dataclasses
 import bitstruct
 
 from .utils import classdecorator
-from .descriptor import EBaseUnits, fields
+from .descriptors import EBaseUnits, fields
 
 
 _TYPE_TO_STR = {

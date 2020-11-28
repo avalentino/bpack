@@ -11,8 +11,8 @@ from .utils import classdecorator
 
 
 __all__ = [
-    'EBaseUnits', 'is_descriptor', 'is_field', 'calcsize', 'fields',
-    'Field', 'descriptor', 'get_baseunits',
+    'descriptor', 'Field', 'fields', 'is_descriptor', 'is_field', 'calcsize',
+    'EBaseUnits', 'get_baseunits',
 ]
 
 

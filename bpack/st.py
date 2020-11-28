@@ -6,7 +6,7 @@ import dataclasses
 from typing import Optional
 
 from .utils import classdecorator
-from .descriptor import EBaseUnits, fields
+from .descriptors import EBaseUnits, fields
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {

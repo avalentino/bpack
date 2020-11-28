@@ -1,28 +1,30 @@
 """Test bpack decoders."""
 
 import dataclasses
-from bpack.descriptor import descriptor, Field, EBaseUnits
-from bpack import ba_decoder as ba
-from bpack import bs_decoder as bs
-from bpack import st_decoder as st
 
 import pytest
+
+import bpack
+import bpack.ba
+import bpack.bs
+import bpack.st
+from bpack import EBaseUnits
 
 
 # TODO: add support for enums
 
 
-@descriptor(baseunits=EBaseUnits.BITS)
+@bpack.descriptor(baseunits=EBaseUnits.BITS)
 @dataclasses.dataclass(frozen=True)
 class BitRecord:
-    field_1: bool = Field(size=1, default=True)
-    field_2: int = Field(size=3, default=0b010)
-    field_3: int = Field(size=12, default=2048)
-    field_4: float = Field(size=32, default=1.)
-    field_5: bytes = Field(size=24, default=b'abc')
-    field_6: str = Field(size=24, default='ABC')
+    field_1: bool = bpack.Field(size=1, default=True)
+    field_2: int = bpack.Field(size=3, default=0b010)
+    field_3: int = bpack.Field(size=12, default=2048)
+    field_4: float = bpack.Field(size=32, default=1.)
+    field_5: bytes = bpack.Field(size=24, default=b'abc')
+    field_6: str = bpack.Field(size=24, default='ABC')
     # 4 padding bits ([96:100])  0b1111
-    field_8: int = Field(size=28, default=134217727, offset=100)
+    field_8: int = bpack.Field(size=28, default=134217727, offset=100)
 
 
 # Big Endian
@@ -39,37 +41,37 @@ BIT_ENCODED_DATA_BE = b''.join([
 ])
 
 
-@descriptor(baseunits=EBaseUnits.BYTES)
+@bpack.descriptor(baseunits=EBaseUnits.BYTES)
 @dataclasses.dataclass(frozen=True)
 class ByteRecord:
-    field_01: bool = Field(size=1, default=False)
+    field_01: bool = bpack.Field(size=1, default=False)
 
-    field_02: int = Field(size=1, default=1)
+    field_02: int = bpack.Field(size=1, default=1)
     # field_03: int = Field(size=1, default=-1, signed=True)
     # field_04: int = Field(size=1, default=+1, signed=False)
 
-    field_05: int = Field(size=2, default=2)
+    field_05: int = bpack.Field(size=2, default=2)
     # field_06: int = Field(size=2, default=-2, signed=True)
     # field_07: int = Field(size=2, default=+2, signed=False)
 
-    field_08: int = Field(size=4, default=4)
+    field_08: int = bpack.Field(size=4, default=4)
     # field_09: int = Field(size=4, default=-4, signed=True)
     # field_10: int = Field(size=4, default=+4, signed=False)
 
-    field_11: int = Field(size=8, default=8)
+    field_11: int = bpack.Field(size=8, default=8)
     # field_12: int = Field(size=8, default=-8, signed=True)
     # field_13: int = Field(size=8, default=+8, signed=False)
 
-    field_14: float = Field(size=2, default=10.)
-    field_15: float = Field(size=4, default=100.)
-    field_16: float = Field(size=8, default=1000.)
+    field_14: float = bpack.Field(size=2, default=10.)
+    field_15: float = bpack.Field(size=4, default=100.)
+    field_16: float = bpack.Field(size=8, default=1000.)
 
-    field_17: bytes = Field(size=3, default=b'abc')
-    field_18: str = Field(size=3, default='ABC')
+    field_17: bytes = bpack.Field(size=3, default=b'abc')
+    field_18: str = bpack.Field(size=3, default='ABC')
 
     # 4 padding bytes ([36:40]) b'xxxx'
 
-    field_20: bytes = Field(size=4, offset=40, default=b'1234')
+    field_20: bytes = bpack.Field(size=4, offset=40, default=b'1234')
 
 
 # Big Endian
@@ -113,9 +115,9 @@ BYTE_ENCODED_DATA_BE = bytes([
 
 @pytest.mark.parametrize(
     'backend, Record, encoded_data, decoded_data',
-    [(ba, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
-     (bs, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
-     (st, ByteRecord, BYTE_ENCODED_DATA_BE, ByteRecord())],
+    [(bpack.ba, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
+     (bpack.bs, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
+     (bpack.st, ByteRecord, BYTE_ENCODED_DATA_BE, ByteRecord())],
     ids=['ba', 'bs', 'st'])
 def test_decoder(backend, Record, encoded_data, decoded_data):
     d = backend.Decoder(Record)
@@ -125,9 +127,9 @@ def test_decoder(backend, Record, encoded_data, decoded_data):
 
 @pytest.mark.parametrize(
     'backend, Record, encoded_data, decoded_data',
-    [(ba, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
-     (bs, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
-     (st, ByteRecord, BYTE_ENCODED_DATA_BE, ByteRecord())],
+    [(bpack.ba, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
+     (bpack.bs, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
+     (bpack.st, ByteRecord, BYTE_ENCODED_DATA_BE, ByteRecord())],
     ids=['ba', 'bs', 'st'])
 def test_decoder_func(backend, Record, encoded_data, decoded_data):
     record_type = backend.decoder(Record)
@@ -135,16 +137,16 @@ def test_decoder_func(backend, Record, encoded_data, decoded_data):
     assert record == decoded_data
 
 
-@pytest.mark.parametrize('backend', [ba, bs])
+@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs])
 def test_bit_decoder_decorator(backend):
     @backend.decoder
-    @descriptor(baseunits=EBaseUnits.BITS)
+    @bpack.descriptor(baseunits=EBaseUnits.BITS)
     @dataclasses.dataclass(frozen=True)
     class Record:
-        field_1: int = Field(size=3, default=0b101)
-        field_2: bool = Field(size=1, default=False)
-        field_3: int = Field(size=12, default=2048)
-        field_4: float = Field(size=32, default=1.)
+        field_1: int = bpack.Field(size=3, default=0b101)
+        field_2: bool = bpack.Field(size=1, default=False)
+        field_3: int = bpack.Field(size=12, default=2048)
+        field_4: float = bpack.Field(size=32, default=1.)
 
     decoded_data = Record()
     encoded_data = BIT_ENCODED_DATA_BE
@@ -156,14 +158,14 @@ def test_bit_decoder_decorator(backend):
     assert record.field_4 == decoded_data.field_4
 
 
-@pytest.mark.parametrize('backend', [st], ids=['st'])
+@pytest.mark.parametrize('backend', [bpack.st], ids=['st'])
 def test_byte_decoder_decorator(backend):
     @backend.decoder
-    @descriptor(baseunits=EBaseUnits.BYTES)
+    @bpack.descriptor(baseunits=EBaseUnits.BYTES)
     @dataclasses.dataclass(frozen=True)
     class Record:
-        field_1: int = Field(size=1, default=1)
-        field_2: int = Field(size=2, default=2)
+        field_1: int = bpack.Field(size=1, default=1)
+        field_2: int = bpack.Field(size=2, default=2)
 
     decoded_data = Record()
     encoded_data = bytes([0b00000001, 0b00000000, 0b00000010])
@@ -175,9 +177,9 @@ def test_byte_decoder_decorator(backend):
 
 @pytest.mark.parametrize(
     'backend, baseunits',
-    [(ba, EBaseUnits.BITS),
-     (bs, EBaseUnits.BITS),
-     (st, EBaseUnits.BYTES)],
+    [(bpack.ba, EBaseUnits.BITS),
+     (bpack.bs, EBaseUnits.BITS),
+     (bpack.st, EBaseUnits.BYTES)],
     ids=['ba', 'bs', 'st'])
 def test_unsupported_type(backend, baseunits):
     class CustomType:
@@ -185,7 +187,7 @@ def test_unsupported_type(backend, baseunits):
 
     with pytest.raises(TypeError):
         @backend.decoder
-        @descriptor(baseunits=baseunits)
+        @bpack.descriptor(baseunits=baseunits)
         @dataclasses.dataclass(frozen=True)
         class Record:
-            field_1: CustomType = Field(size=8)
+            field_1: CustomType = bpack.Field(size=8)

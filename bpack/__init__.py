@@ -28,3 +28,5 @@ Limitations: currently only fixed size records are supported.
 """
 
 __version__ = '1.0.0.dev0'
+
+from .descriptors import *

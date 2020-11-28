@@ -8,7 +8,7 @@ import bitarray
 import bitarray.util
 
 from .utils import classdecorator
-from .descriptor import EBaseUnits
+from .descriptors import EBaseUnits
 
 
 # TODO: custom ba_to_int with size
