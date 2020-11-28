@@ -12,16 +12,13 @@ from .utils import classdecorator
 
 __all__ = [
     'EBaseUnits', 'is_descriptor', 'is_field', 'calcsize',
-    'Field', 'descriptor',
+    'Field', 'descriptor', 'get_baseunits',
 ]
 
 
 class EBaseUnits(enum.Enum):
     BITS = 'bits'
     BYTES = 'bytes'
-
-
-# TODO: get_baseunits or baseunits -> baseunots of a record (instance)
 
 
 def is_descriptor(obj):
@@ -183,7 +180,7 @@ def descriptor(cls, size: Optional[int] = None,
             warnings.warn('bit struct not aligned to bytes')
         size = math.ceil(size / 8)
 
-    cls._BASEUNITS = baseunits      # TODO: use dunder attributes: __baseunits__
+    cls.__bpack_baseunits__ = baseunits
 
     get_len_func = dataclasses._create_fn(
         name='__len__',
@@ -204,6 +201,14 @@ def calcsize(obj):
     if not is_descriptor(obj):
         raise TypeError(f'{obj!r} is not a descriptor')
     return obj.__len__()
+
+
+def get_baseunits(obj) -> EBaseUnits:
+    """Return the base units of a binary record descriptor."""
+    try:
+        return obj.__bpack_baseunits__
+    except AttributeError:
+        raise TypeError(f'"{obj}" is not a descriptor')
 
 
 def _fields_with_padding(descriptor_):

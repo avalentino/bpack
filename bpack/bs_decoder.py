@@ -32,7 +32,7 @@ def _type_size_order_to_str(type_, size: int, order: str = ''):
 
 class Decoder:
     def __init__(self, descriptor, *, order=''):
-        if descriptor._BASEUNITS is not EBaseUnits.BITS:
+        if descriptor.__bpack_baseunits__ is not EBaseUnits.BITS:
             raise ValueError(
                 'bitsruct decoder only accepts descriptors with '
                 'base units "bits"')

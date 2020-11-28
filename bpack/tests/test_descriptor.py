@@ -6,6 +6,7 @@ import pytest
 
 from bpack.descriptor import (
     Field, descriptor, EBaseUnits, is_descriptor, calcsize, is_field,
+    get_baseunits
 )
 
 
@@ -20,7 +21,7 @@ class TestRecord:
 
         assert dataclasses.is_dataclass(Record)
         assert len(dataclasses.fields(Record)) == 2
-        assert Record._BASEUNITS is EBaseUnits.BYTES  # default
+        assert get_baseunits(Record) is EBaseUnits.BYTES  # default
         assert all(isinstance(f, Field) for f in dataclasses.fields(Record))
 
     @staticmethod
@@ -33,21 +34,21 @@ class TestRecord:
 
         assert dataclasses.is_dataclass(Record)
         assert len(dataclasses.fields(Record)) == 2
-        assert Record._BASEUNITS is EBaseUnits.BYTES  # default
+        assert get_baseunits(Record) is EBaseUnits.BYTES  # default
         assert all(isinstance(f, Field) for f in dataclasses.fields(Record))
 
     @staticmethod
     @pytest.mark.parametrize(argnames='baseunits',
                              argvalues=[EBaseUnits.BYTES, EBaseUnits.BITS,
                                         'bits', 'bytes'])
-    def test_baseunits(baseunits):
+    def test_base_units(baseunits):
         @descriptor(baseunits=baseunits)
         @dataclasses.dataclass
         class Record:
             field_1: int = Field(size=8, default=0)
             field_2: float = Field(size=8, default=1./3)
 
-        assert Record._BASEUNITS is EBaseUnits(baseunits)
+        assert get_baseunits(Record) is EBaseUnits(baseunits)
 
     @staticmethod
     def test_byte_alignment_warning():

@@ -34,7 +34,7 @@ STD_CONVERTER_MAP = {
 
 class Decoder:
     def __init__(self, descriptor, converters=STD_CONVERTER_MAP):
-        if descriptor._BASEUNITS is not EBaseUnits.BITS:
+        if descriptor.__bpack_baseunits__ is not EBaseUnits.BITS:
             raise ValueError(
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')

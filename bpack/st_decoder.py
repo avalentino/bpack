@@ -69,7 +69,7 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
 
 class Decoder:
     def __init__(self, descriptor, *, order='>'):
-        if descriptor._BASEUNITS is not EBaseUnits.BYTES:
+        if descriptor.__bpack_baseunits__ is not EBaseUnits.BYTES:
             raise ValueError(
                 'struct decoder only accepts descriptors with '
                 'base units "bytes"')
