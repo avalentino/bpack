@@ -1,6 +1,7 @@
 """Utility functions and classes."""
 
 import functools
+import dataclasses
 
 
 def classdecorator(func):
@@ -19,3 +20,14 @@ def classdecorator(func):
         return wrap(cls)
 
     return wrapper
+
+
+def create_fn(name, args, body, *, globals=None, locals=None,
+              return_type=dataclasses.MISSING):
+    return dataclasses._create_fn(name, args, body,
+                                  globals=globals, locals=locals,
+                                  return_type=return_type)
+
+
+def set_new_attribute(cls, name, value):
+    return dataclasses._set_new_attribute(cls, name, value)

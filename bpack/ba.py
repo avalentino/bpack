@@ -1,12 +1,12 @@
 """Bitarray based decoder for binary data structures."""
 
 import struct
-import dataclasses
 import collections.abc
 
 import bitarray
 import bitarray.util
 
+from . import utils
 from .utils import classdecorator
 from .descriptors import EBaseUnits, fields
 
@@ -83,13 +83,13 @@ class Decoder:
 def decoder(cls, converter_map=STD_CONVERTER_MAP):
     decoder_ = Decoder(descriptor=cls, converters=converter_map)
 
-    decode_func = dataclasses._create_fn(
+    decode_func = utils.create_fn(
         name='decode',
         args=('data',),
         body=['return decoder.decode(data)'],
         locals={'decoder': decoder_},
     )
     decode_func = staticmethod(decode_func)
-    dataclasses._set_new_attribute(cls, 'from_bytes', decode_func)
+    utils.set_new_attribute(cls, 'from_bytes', decode_func)
 
     return cls

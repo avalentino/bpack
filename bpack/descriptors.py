@@ -8,6 +8,7 @@ import dataclasses
 import collections.abc
 from typing import Optional, Tuple
 
+from . import utils
 from .utils import classdecorator
 
 
@@ -183,7 +184,7 @@ def descriptor(cls, size: Optional[int] = None,
 
     cls.__bpack_baseunits__ = baseunits
 
-    get_len_func = dataclasses._create_fn(
+    get_len_func = utils.create_fn(
         name='__len__',
         args=tuple(),
         body=['return size'],
@@ -192,7 +193,7 @@ def descriptor(cls, size: Optional[int] = None,
     get_len_func = staticmethod(get_len_func)
     get_len_func.__doc__ = "Return the record size in bytes"
     assert not hasattr(cls, '__len__')
-    dataclasses._set_new_attribute(cls, '__len__', get_len_func)
+    utils.set_new_attribute(cls, '__len__', get_len_func)
     collections.abc.Sized.register(cls)
 
     return cls
