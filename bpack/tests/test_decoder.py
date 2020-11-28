@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Test bpack decoders."""
 
 import dataclasses
 from bpack.descriptor import descriptor, Field, EBaseUnits

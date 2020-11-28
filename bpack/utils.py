@@ -1,4 +1,4 @@
-"""Utility finctions and classes."""
+"""Utility functions and classes."""
 
 import functools
 

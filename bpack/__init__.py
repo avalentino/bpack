@@ -23,6 +23,8 @@ Encoders/decoders rely on well known Python packages like:
 * numpy
 * bitstruct
 * bitarray (optional)
+
+Limitations: currently only fixed size records are supported.
 """
 
 __version__ = '1.0.0.dev0'
