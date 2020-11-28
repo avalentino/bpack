@@ -5,7 +5,7 @@ import math
 import types
 import warnings
 import dataclasses
-from typing import Optional
+from typing import Optional, Iterable
 
 from .utils import classdecorator
 
@@ -21,7 +21,7 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
-def is_descriptor(obj):
+def is_descriptor(obj) -> bool:
     """Return true if ``obj`` is a descriptor or a descriptor instance."""
     try:
         return isinstance(dataclasses.fields(obj)[0], Field)
@@ -34,7 +34,7 @@ def is_descriptor(obj):
         return False
 
 
-def is_field(obj):
+def is_field(obj) -> bool:
     """Return true if an ``obj`` can be considered is a descriptor field."""
     if (issubclass(obj.type, Field) or
             (hasattr(obj, 'offset') and hasattr(obj, 'size'))):
@@ -89,7 +89,7 @@ class Field(dataclasses.Field):
                          field.metadata)
 
     @property
-    def offset(self):
+    def offset(self) -> int:
         """Offset form the beginning of the record (in baseunits).
 
         .. seealso: :func:`bpack.descriptor.descriptor`.
@@ -97,14 +97,14 @@ class Field(dataclasses.Field):
         return self.metadata['offset']
 
     @property
-    def size(self):
+    def size(self) -> int:
         """Size of the field (in baseunits).
 
         .. seealso: :func:`bpack.descriptor.descriptor`.
         """
         return self.metadata['size']
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return super().__repr__().replace(dataclasses.Field.__name__,
                                           self.__class__.__name__)
 
@@ -196,7 +196,7 @@ def descriptor(cls, size: Optional[int] = None,
     return cls
 
 
-def calcsize(obj):
+def calcsize(obj) -> int:
     """Return the size in bytes of the ``obj`` record."""
     if not is_descriptor(obj):
         raise TypeError(f'{obj!r} is not a descriptor')
@@ -211,7 +211,7 @@ def get_baseunits(obj) -> EBaseUnits:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def _fields_with_padding(descriptor_):
+def _fields_with_padding(descriptor_) -> Iterable[Field]:
     offset = 0
     for field in dataclasses.fields(descriptor_):
         assert field.offset >= offset
