@@ -58,6 +58,10 @@ class ByteRecord:
     field_17: bytes = Field(size=3, default=b'abc')
     field_18: str = Field(size=3, default='ABC')
 
+    # 4 padding bytes ([36:40]) b'xxxx'
+
+    field_20: bytes = Field(size=4, offset=40, default=b'1234')
+
 
 # Big Endian
 BYTE_ENCODED_DATA_BE = bytes([
@@ -89,6 +93,12 @@ BYTE_ENCODED_DATA_BE = bytes([
 
     0b01100001, 0b01100010, 0b01100011,                 # b'abc'    bytes
     0b01000001, 0b01000010, 0b01000011,                 # 'ABC'     str
+
+    # 4 padding bytes ([36:40])
+    0b01111000, 0b01111000, 0b01111000, 0b01111000,     # b'xxxx'   bytes
+
+    # field_20
+    0b00110001, 0b00110010, 0b00110011, 0b00110100,     # b'1234'   bytes
 ])
 
 

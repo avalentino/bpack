@@ -6,7 +6,7 @@ import dataclasses
 from typing import Optional
 
 from .utils import classdecorator
-from .descriptor import EBaseUnits
+from .descriptor import EBaseUnits, _fields_with_padding
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
@@ -29,7 +29,7 @@ _TYPE_SIGNED_AND_SIZE_TO_STR = {
     (float, None, 8): 'd',
     (bytes, None, None): 's',
     (str, None, None): 's',
-    (None, None, 1): 'x',       # padding
+    (None, None, None): 'x',        # padding
 }
 
 _DEFAULT_SIZE = {
@@ -52,7 +52,7 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     # signed = bool(signed)  # TODO: check
 
     try:
-        if type_ in (str, bytes):
+        if type_ in (str, bytes, None):  # none is for padding bytes
             repeat = 1 if repeat is None else repeat
             key = (type_, signed, None)
             return f'{order}{size}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}' * repeat
@@ -79,7 +79,7 @@ class Decoder:
 
         fmt = order + ''.join(
             _to_fmt(field.type, field.size, order='')
-            for field in dataclasses.fields(descriptor)
+            for field in _fields_with_padding(descriptor)
         )
 
         self._codec = struct.Struct(fmt)

@@ -204,3 +204,17 @@ def calcsize(obj):
     if not is_descriptor(obj):
         raise TypeError(f'{obj!r} is not a descriptor')
     return obj.__len__()
+
+
+def _fields_with_padding(descriptor_):
+    offset = 0
+    for field in dataclasses.fields(descriptor_):
+        assert field.offset >= offset
+        if field.offset > offset:
+            # padding
+            padfield = Field(size=field.offset - offset, offset=offset)
+            assert padfield.type is None  # padding
+            yield padfield
+            # offset = field.offset
+        yield field
+        offset = field.offset + field.size
