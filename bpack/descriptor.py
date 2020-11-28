@@ -5,13 +5,13 @@ import math
 import types
 import warnings
 import dataclasses
-from typing import Optional, Iterable
+from typing import Optional, Tuple
 
 from .utils import classdecorator
 
 
 __all__ = [
-    'EBaseUnits', 'is_descriptor', 'is_field', 'calcsize',
+    'EBaseUnits', 'is_descriptor', 'is_field', 'calcsize', 'fields',
     'Field', 'descriptor', 'get_baseunits',
 ]
 
@@ -211,15 +211,26 @@ def get_baseunits(obj) -> EBaseUnits:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def _fields_with_padding(descriptor_) -> Iterable[Field]:
-    offset = 0
-    for field in dataclasses.fields(descriptor_):
-        assert field.offset >= offset
-        if field.offset > offset:
-            # padding
-            padfield = Field(size=field.offset - offset, offset=offset)
-            assert padfield.type is None  # padding
-            yield padfield
-            # offset = field.offset
-        yield field
-        offset = field.offset + field.size
+def fields(descriptor_, pad=False) -> Tuple[Field, ...]:
+    """Return a tuple containing fields of the specified descriptor.
+
+    Items are instances of the :class:`Field` describing characteristics
+    of each field of the input descriptor.
+
+    If the ``pad`` parameter is set to True then"""
+    if pad:
+        fields_ = []
+        offset = 0
+        for field in dataclasses.fields(descriptor_):
+            assert field.offset >= offset
+            if field.offset > offset:
+                # padding
+                padfield = Field(size=field.offset - offset, offset=offset)
+                assert padfield.type is None  # padding
+                fields_.append(padfield)
+                # offset = field.offset
+            fields_.append(field)
+            offset = field.offset + field.size
+        return tuple(fields_)
+    else:
+        return dataclasses.fields(descriptor_)

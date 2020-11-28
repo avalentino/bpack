@@ -5,7 +5,7 @@ import dataclasses
 import bitstruct
 
 from .utils import classdecorator
-from .descriptor import EBaseUnits, _fields_with_padding
+from .descriptor import EBaseUnits, fields
 
 
 _TYPE_TO_STR = {
@@ -39,7 +39,7 @@ class Decoder:
 
         fmt = ''.join(
             _type_size_order_to_str(field.type, field.size, order)
-            for field in _fields_with_padding(descriptor)
+            for field in fields(descriptor, True)
         )
 
         self._codec = bitstruct.compile(fmt)

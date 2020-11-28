@@ -6,7 +6,7 @@ import dataclasses
 from typing import Optional
 
 from .utils import classdecorator
-from .descriptor import EBaseUnits, _fields_with_padding
+from .descriptor import EBaseUnits, fields
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
@@ -79,7 +79,7 @@ class Decoder:
 
         fmt = order + ''.join(
             _to_fmt(field.type, field.size, order='')
-            for field in _fields_with_padding(descriptor)
+            for field in fields(descriptor, True)
         )
 
         self._codec = struct.Struct(fmt)
