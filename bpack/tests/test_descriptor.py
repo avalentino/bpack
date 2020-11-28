@@ -18,11 +18,9 @@ class TestRecord:
             field_2: float = bpack.Field(size=8, default=1./3)
 
         assert dataclasses.is_dataclass(Record)
-        assert len(dataclasses.fields(Record)) == 2
+        assert len(bpack.fields(Record)) == 2
         assert bpack.get_baseunits(Record) is EBaseUnits.BYTES  # default
-        assert all(
-            isinstance(f, bpack.Field) for f in dataclasses.fields(Record)
-        )
+        assert all(isinstance(f, bpack.Field) for f in bpack.fields(Record))
 
     @staticmethod
     def test_frozen():
@@ -33,11 +31,9 @@ class TestRecord:
             field_2: float = bpack.Field(size=8, default=1./3)
 
         assert dataclasses.is_dataclass(Record)
-        assert len(dataclasses.fields(Record)) == 2
+        assert len(bpack.fields(Record)) == 2
         assert bpack.get_baseunits(Record) is EBaseUnits.BYTES  # default
-        assert all(
-            isinstance(f, bpack.Field) for f in dataclasses.fields(Record)
-        )
+        assert all(isinstance(f, bpack.Field) for f in bpack.fields(Record))
 
     @staticmethod
     @pytest.mark.parametrize(argnames='baseunits',
@@ -231,7 +227,7 @@ class TestFields:
         # name, type, size, offset
         field_data = [('field_1', int, 4, 0), ('field_2', float, 8, 4)]
 
-        for field, data in zip(dataclasses.fields(Record), field_data):
+        for field, data in zip(bpack.fields(Record), field_data):
             name, type_, size, offset = data
             assert field.name == name
             assert field.type == type_
@@ -249,7 +245,7 @@ class TestFields:
         # name, type, size, offset
         field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 5)]
 
-        for field, data in zip(dataclasses.fields(Record), field_data):
+        for field, data in zip(bpack.fields(Record), field_data):
             name, type_, size, offset = data
             assert field.name == name
             assert field.type == type_
@@ -267,7 +263,7 @@ class TestFields:
         # name, type, size, offset
         field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 6)]
 
-        for field, data in zip(dataclasses.fields(Record), field_data):
+        for field, data in zip(bpack.fields(Record), field_data):
             name, type_, size, offset = data
             assert field.name == name
             assert field.type == type_
@@ -311,10 +307,10 @@ class TestUtils:
             field_1: int = bpack.Field(size=4, default=0)
             field_2: float = bpack.Field(size=8, default=1./3)
 
-        for field in dataclasses.fields(Record):
+        for field in bpack.fields(Record):
             assert bpack.is_field(field)
 
-        for field in dataclasses.fields(Record()):
+        for field in bpack.fields(Record()):
             assert bpack.is_field(field)
 
     @staticmethod

@@ -96,7 +96,7 @@ class Decoder:
         #     if issubclass(field.type, enum.Enum))
         self._converters = [
             (idx, converters[field.type])
-            for idx, field in enumerate(dataclasses.fields(self._descriptor))
+            for idx, field in enumerate(fields(self._descriptor))
             if field.type in converters
         ]
 

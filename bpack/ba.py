@@ -8,7 +8,7 @@ import bitarray
 import bitarray.util
 
 from .utils import classdecorator
-from .descriptors import EBaseUnits
+from .descriptors import EBaseUnits, fields
 
 
 # TODO: custom ba_to_int with size
@@ -39,7 +39,7 @@ class Decoder:
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')
 
-        fields_ = dataclasses.fields(descriptor)
+        fields_ = fields(descriptor)
         types_ = [field.type for field in fields_]
 
         if isinstance(converters, collections.abc.Mapping):
