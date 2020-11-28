@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Test bpack desctiptors."""
 
 import dataclasses
 
@@ -130,6 +130,7 @@ class TestRecord:
     @staticmethod
     def test_explicit_size():
         size = 16
+
         @descriptor(size=size)
         @dataclasses.dataclass
         class Record:
@@ -202,10 +203,10 @@ class TestRecord:
         assert len(Record()) == 28
         assert Record.__len__() == 28
 
-
     @staticmethod
     def test_len_with_offset_04():
         size = 30
+
         @descriptor(size=size)
         @dataclasses.dataclass
         class Record:
@@ -229,9 +230,9 @@ class TestFields:
         field_data = [('field_1', int, 4, 0), ('field_2', float, 8, 4)]
 
         for field, data in zip(dataclasses.fields(Record), field_data):
-            name, type, size, offset = data
+            name, type_, size, offset = data
             assert field.name == name
-            assert field.type == type
+            assert field.type == type_
             assert field.size == size
             assert field.offset == offset
 
@@ -247,9 +248,9 @@ class TestFields:
         field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 5)]
 
         for field, data in zip(dataclasses.fields(Record), field_data):
-            name, type, size, offset = data
+            name, type_, size, offset = data
             assert field.name == name
-            assert field.type == type
+            assert field.type == type_
             assert field.size == size
             assert field.offset == offset
 
@@ -265,9 +266,9 @@ class TestFields:
         field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 6)]
 
         for field, data in zip(dataclasses.fields(Record), field_data):
-            name, type, size, offset = data
+            name, type_, size, offset = data
             assert field.name == name
-            assert field.type == type
+            assert field.type == type_
             assert field.size == size
             assert field.offset == offset
 
