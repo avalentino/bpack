@@ -50,7 +50,8 @@ class TestRecord:
 
     @staticmethod
     def test_byte_alignment_warning():
-        with pytest.warns(UserWarning, match='bit struct not aligned to bytes'):
+        with pytest.warns(UserWarning,
+                          match='bit struct not aligned to bytes'):
             @bpack.descriptor(baseunits=EBaseUnits.BITS)
             @dataclasses.dataclass
             class Record:
@@ -104,7 +105,8 @@ class TestRecord:
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.Field(size=4, default=0)
-                field_2: float = bpack.Field(size=8, offset=offset, default=1/3)
+                field_2: float = bpack.Field(size=8, default=1/3,
+                                             offset=offset)
 
     @staticmethod
     @pytest.mark.parametrize(argnames='offset', argvalues=[0, -8])
@@ -114,7 +116,8 @@ class TestRecord:
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.Field(size=4, default=0)
-                field_2: float = bpack.Field(size=8, offset=offset, default=1/3)
+                field_2: float = bpack.Field(size=8, default=1/3,
+                                             offset=offset)
 
     @staticmethod
     def test_invalid_inconsistent_field_offset_and_size():

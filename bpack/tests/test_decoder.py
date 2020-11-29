@@ -119,7 +119,7 @@ BYTE_ENCODED_DATA_BE = bytes([
      (bpack.bs, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
      (bpack.st, ByteRecord, BYTE_ENCODED_DATA_BE, ByteRecord())],
     ids=['ba', 'bs', 'st'])
-def test_decoder(backend, Record, encoded_data, decoded_data):
+def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
     d = backend.Decoder(Record)
     record = d.decode(encoded_data)
     assert record == decoded_data
@@ -131,7 +131,7 @@ def test_decoder(backend, Record, encoded_data, decoded_data):
      (bpack.bs, BitRecord, BIT_ENCODED_DATA_BE, BitRecord()),
      (bpack.st, ByteRecord, BYTE_ENCODED_DATA_BE, ByteRecord())],
     ids=['ba', 'bs', 'st'])
-def test_decoder_func(backend, Record, encoded_data, decoded_data):
+def test_decoder_func(backend, Record, encoded_data, decoded_data):  # noqa
     record_type = backend.decoder(Record)
     record = record_type.from_bytes(encoded_data)
     assert record == decoded_data
