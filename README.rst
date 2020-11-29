@@ -1,7 +1,7 @@
 bpack - Binary data structures (un-)packing library
 ===================================================
 
-:HomePage:  https://avalentino.github.io/bpack
+:HomePage:  https://github.com/avalentino/bpack
 :Author:    Antonio Valentino
 :Contact:   antonio.valentino@tiscali.it
 :Copyright: 2020, Antonio Valentino <antonio.valentino@tiscali.it>
@@ -27,10 +27,14 @@ The package provides classes and functions that can be used to:
 
 Encoders/decoders rely on well known Python packages like:
 
-* struct (form the standard library)
-* numpy
-* bitstruct
-* bitarray (optional)
+* struct_ (form the standard library)
+* numpy_ (optional)
+* bitstruct_ (optional)
+* bitarray_ (optional)
 
 Currently only fixed size records are supported.
 
+.. _struct: https://docs.python.org/3/library/struct.html
+.. _numpy: https://numpy.org
+.. _bitstruct: https://github.com/eerimoq/bitstruct
+.. _bitarray: https://github.com/ilanschnell/bitarray
