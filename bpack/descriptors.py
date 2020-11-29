@@ -19,6 +19,8 @@ __all__ = [
 
 
 class EBaseUnits(enum.Enum):
+    """Base units used to specify size and offset parameters in descriptors."""
+
     BITS = 'bits'
     BYTES = 'bytes'
 
@@ -107,6 +109,7 @@ class Field(dataclasses.Field):
         return self.metadata['size']
 
     def __repr__(self) -> str:
+        """Return the string representation of the Field object."""
         return super().__repr__().replace(dataclasses.Field.__name__,
                                           self.__class__.__name__)
 
@@ -220,7 +223,9 @@ def fields(descriptor_, pad=False) -> Tuple[Field, ...]:
     Items are instances of the :class:`Field` describing characteristics
     of each field of the input descriptor.
 
-    If the ``pad`` parameter is set to True then"""
+    If the ``pad`` parameter is set to True then also generate dummy fields
+    describing the padding necessary to take into account of offsets.
+    """
     if pad:
         fields_ = []
         offset = 0

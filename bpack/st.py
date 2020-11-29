@@ -68,6 +68,8 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
 
 
 class Decoder:
+    """Struct based data decoder."""
+
     def __init__(self, descriptor, *, order='>'):
         if descriptor.__bpack_baseunits__ is not EBaseUnits.BYTES:
             raise ValueError(
@@ -101,6 +103,7 @@ class Decoder:
         ]
 
     def decode(self, data):
+        """Decode binary data and return a record object."""
         values = list(self._codec.unpack(data))
         for idx, func in self._converters:
             values[idx] = func(values[idx])
@@ -109,6 +112,12 @@ class Decoder:
 
 @classdecorator
 def decoder(cls, **kwargs):
+    """Class decorator to add decoding methods to a descriptor classes.
+
+    The decorator automatically generates a :class:`Decoder` object
+    form the input descriptor class and attach a "from_bytes" method
+    using the decoder to the descriptor class itself.
+    """
     decoder_ = Decoder(descriptor=cls, **kwargs)
 
     decode_func = utils.create_fn(

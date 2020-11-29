@@ -15,6 +15,7 @@ from .descriptors import EBaseUnits, fields
 
 
 def ba_to_float(ba, order='>'):
+    """Convert a bitarray into a float."""
     if len(ba) == 32:
         return struct.unpack(f'{order}f', ba.tobytes())[0]
     elif len(ba) == 64:
@@ -35,6 +36,8 @@ DEFAULT_CONVERTERS = object()
 
 
 class Decoder:
+    """Bitarray based data decoder."""
+
     def __init__(self, descriptor, converters=DEFAULT_CONVERTERS):
         if descriptor.__bpack_baseunits__ is not EBaseUnits.BITS:
             raise ValueError(
@@ -71,6 +74,7 @@ class Decoder:
         ]
 
     def decode(self, data):
+        """Decode binary data and return a record object."""
         ba = bitarray.bitarray()
         ba.frombytes(data)
         values = [ba[slice_] for slice_ in self._slices]
@@ -86,6 +90,12 @@ class Decoder:
 
 @classdecorator
 def decoder(cls, converter_map=DEFAULT_CONVERTERS):
+    """Class decorator to add decoding methods to a descriptor classes.
+
+    The decorator automatically generates a :class:`Decoder` object
+    form the input descriptor class and attach a "from_bytes" method
+    using the decoder to the descriptor class itself.
+    """
     if converter_map is DEFAULT_CONVERTERS:
         converter_map = STD_CONVERTER_MAP
 

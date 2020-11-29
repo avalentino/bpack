@@ -30,6 +30,8 @@ def _type_size_order_to_str(type_, size: int, order: str = ''):
 
 
 class Decoder:
+    """Bitstruct based data decoder."""
+
     def __init__(self, descriptor, *, order=''):
         if descriptor.__bpack_baseunits__ is not EBaseUnits.BITS:
             raise ValueError(
@@ -45,12 +47,19 @@ class Decoder:
         self._descriptor = descriptor
 
     def decode(self, data):
+        """Decode binary data and return a record object."""
         values = self._codec.unpack(data)
         return self._descriptor(*values)
 
 
 @classdecorator
 def decoder(cls, **kwargs):
+    """Class decorator to add decoding methods to a descriptor classes.
+
+    The decorator automatically generates a :class:`Decoder` object
+    form the input descriptor class and attach a "from_bytes" method
+    using the decoder to the descriptor class itself.
+    """
     decoder_ = Decoder(descriptor=cls, **kwargs)
 
     decode_func = utils.create_fn(
