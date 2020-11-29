@@ -1,5 +1,6 @@
-bpack - Binary data structures (un-)packing library
-===================================================
+===========================================
+Binary data structures (un-)packing library
+===========================================
 
 :HomePage:  https://github.com/avalentino/bpack
 :Author:    Antonio Valentino
@@ -7,7 +8,9 @@ bpack - Binary data structures (un-)packing library
 :Copyright: 2020, Antonio Valentino <antonio.valentino@tiscali.it>
 :Version:   0.1.0
 
-The bpack Python package provides tools to describe and encode/decode
+.. description
+
+The *bpack* Python package provides tools to describe and encode/decode
 binary data.
 
 Binary data are assumed to be organised in *records*, each composed by a
@@ -28,7 +31,7 @@ The package provides classes and functions that can be used to:
 Encoders/decoders rely on well known Python packages like:
 
 * struct_ (form the standard library)
-* numpy_ (optional)
+* numpy_ (optional) - **TODO**
 * bitstruct_ (optional)
 * bitarray_ (optional)
 
