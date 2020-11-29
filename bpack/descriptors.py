@@ -81,7 +81,7 @@ class Field(dataclasses.Field):
             metadata['size'] = size
         else:
             # TODO: add automatic size determination form type (in descriptor)
-            raise TypeError('no size specified')
+            raise TypeError('no field size specified')
 
         field = dataclasses.field(**kwargs)
         super().__init__(field.default,
@@ -142,6 +142,25 @@ def descriptor(cls, size: Optional[int] = None,
       record size in bytes).
     """
     fields_ = dataclasses.fields(cls)
+
+    # replace dataclasses.Field with descriptors.Field if necessary
+    # WARNING: this operation relies on implementation details
+    fields_dict = getattr(cls, dataclasses._FIELDS)
+    for field in fields_:
+        assert isinstance(field, dataclasses.Field)
+        if not isinstance(field, Field):
+            new_field = Field(default=field.default,
+                              default_factory=field.default_factory,
+                              init=field.init,
+                              repr=field.repr,
+                              hash=field.hash,
+                              compare=field.compare,
+                              metadata=field.metadata,
+                              # size id mandatory in the current implementation
+                              size=None)
+            new_field.name = field.name
+            new_field.type = field.type
+            fields_dict[field.name] = new_field
 
     field = fields_[0]
     if field.metadata.get('offset') is None:

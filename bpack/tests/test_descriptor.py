@@ -15,7 +15,7 @@ class TestRecord:
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.Field(size=4, default=0)
-            field_2: float = bpack.Field(size=8, default=1./3)
+            field_2: float = bpack.Field(size=8, default=1/3)
 
         assert dataclasses.is_dataclass(Record)
         assert len(bpack.fields(Record)) == 2
@@ -28,12 +28,21 @@ class TestRecord:
         @dataclasses.dataclass(frozen=True)
         class Record:
             field_1: int = bpack.Field(size=4, default=0)
-            field_2: float = bpack.Field(size=8, default=1./3)
+            field_2: float = bpack.Field(size=8, default=1/3)
 
         assert dataclasses.is_dataclass(Record)
         assert len(bpack.fields(Record)) == 2
         assert bpack.get_baseunits(Record) is EBaseUnits.BYTES  # default
         assert all(isinstance(f, bpack.Field) for f in bpack.fields(Record))
+
+    @staticmethod
+    def test_no_dataclass():
+        error_msg = 'must be called with a dataclass type or instance'
+        with pytest.raises(TypeError, match=error_msg):
+            @bpack.descriptor
+            class Record:
+                field_1: int = bpack.Field(size=8, default=0)
+                field_2: float = bpack.Field(size=8, default=1/3)
 
     @staticmethod
     @pytest.mark.parametrize(argnames='baseunits',
@@ -44,7 +53,7 @@ class TestRecord:
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.Field(size=8, default=0)
-            field_2: float = bpack.Field(size=8, default=1./3)
+            field_2: float = bpack.Field(size=8, default=1/3)
 
         assert bpack.get_baseunits(Record) is EBaseUnits(baseunits)
 
@@ -56,7 +65,7 @@ class TestRecord:
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.Field(size=4, default=0)
-                field_2: float = bpack.Field(size=8, default=1./3)
+                field_2: float = bpack.Field(size=8, default=1/3)
 
     @staticmethod
     @pytest.mark.parametrize(argnames='baseunits', argvalues=[None, 8, 'x'])
@@ -66,7 +75,16 @@ class TestRecord:
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.Field(size=4, default=0)
-                field_2: float = bpack.Field(size=8, default=1./3)
+                field_2: float = bpack.Field(size=8, default=1/3)
+
+    @staticmethod
+    def test_invalid_field_class():
+        with pytest.raises(TypeError, match='no field size specified'):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: int = 0
+                field_2: float = 1/3
 
     @staticmethod
     def test_missing_field_size():
@@ -75,7 +93,7 @@ class TestRecord:
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.Field(size=4, default=0)
-                field_2: float = bpack.Field(default=1./3)
+                field_2: float = bpack.Field(default=1/3)
 
     @staticmethod
     @pytest.mark.parametrize(argnames='size', argvalues=[None, 1.3, 'x'])
@@ -95,7 +113,7 @@ class TestRecord:
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.Field(size=4, default=0)
-                field_2: float = bpack.Field(size=size, default=1./3)
+                field_2: float = bpack.Field(size=size, default=1/3)
 
     @staticmethod
     @pytest.mark.parametrize(argnames='offset', argvalues=[1.3, 'x'])
@@ -177,7 +195,7 @@ class TestRecord:
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.Field(size=4, default=0)
-            field_2: float = bpack.Field(size=8, offset=10, default=1./3)
+            field_2: float = bpack.Field(size=8, offset=10, default=1/3)
 
         assert len(Record()) == 18
         assert Record.__len__() == 18
@@ -188,7 +206,7 @@ class TestRecord:
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.Field(size=4, offset=10, default=0)
-            field_2: float = bpack.Field(size=8, default=1./3)
+            field_2: float = bpack.Field(size=8, default=1/3)
 
         assert len(Record()) == 22
         assert Record.__len__() == 22
@@ -308,7 +326,7 @@ class TestUtils:
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.Field(size=4, default=0)
-            field_2: float = bpack.Field(size=8, default=1./3)
+            field_2: float = bpack.Field(size=8, default=1/3)
 
         for field in bpack.fields(Record):
             assert bpack.is_field(field)
