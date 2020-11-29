@@ -42,7 +42,8 @@ _DEFAULT_SIZE = {
 
 
 def _to_fmt(type_, size: Optional[int] = None, order: str = '',
-            signed: Optional[bool] = None, repeat: Optional[int] = None):
+            signed: Optional[bool] = None,
+            repeat: Optional[int] = None) -> str:
     size = _DEFAULT_SIZE.get(type_, size) if size is None else size
 
     if size is None or size <= 0:
@@ -70,7 +71,7 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
 class Decoder:
     """Struct based data decoder."""
 
-    def __init__(self, descriptor, *, order='>'):
+    def __init__(self, descriptor, *, order: str = '>'):
         if descriptor.__bpack_baseunits__ is not EBaseUnits.BYTES:
             raise ValueError(
                 'struct decoder only accepts descriptors with '
@@ -102,7 +103,7 @@ class Decoder:
             if field.type in converters
         ]
 
-    def decode(self, data):
+    def decode(self, data: bytes):
         """Decode binary data and return a record object."""
         values = list(self._codec.unpack(data))
         for idx, func in self._converters:

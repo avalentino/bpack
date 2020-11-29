@@ -18,7 +18,7 @@ _TYPE_TO_STR = {
 
 
 # TODO: add repeat parameter
-def _type_size_order_to_str(type_, size: int, order: str = ''):
+def _type_size_order_to_str(type_, size: int, order: str = '') -> str:
     if size <= 0:
         raise TypeError(f'invalid size: {size:r}')
     if order not in ('', '>', '<'):
@@ -46,7 +46,7 @@ class Decoder:
         self._codec = bitstruct.compile(fmt)
         self._descriptor = descriptor
 
-    def decode(self, data):
+    def decode(self, data: bytes):
         """Decode binary data and return a record object."""
         values = self._codec.unpack(data)
         return self._descriptor(*values)

@@ -14,7 +14,7 @@ from .descriptors import EBaseUnits, fields
 # TODO: custom ba_to_int with size
 
 
-def ba_to_float(ba, order='>'):
+def ba_to_float(ba: bitarray.bitarray, order: str = '>') -> float:
     """Convert a bitarray into a float."""
     if len(ba) == 32:
         return struct.unpack(f'{order}f', ba.tobytes())[0]
@@ -73,7 +73,7 @@ class Decoder:
             slice(field.offset, field.offset + field.size) for field in fields_
         ]
 
-    def decode(self, data):
+    def decode(self, data: bytes):
         """Decode binary data and return a record object."""
         ba = bitarray.bitarray()
         ba.frombytes(data)
