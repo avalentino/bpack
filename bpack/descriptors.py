@@ -28,6 +28,58 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
+# class EOrder(enum.Enum):
+#     """Enumeration ofr bit/byte order."""
+#
+#     MSB = '>'
+#     LSB = '<'
+#     NATIVE = '='
+#     DEFAULT = ''
+
+
+@dataclasses.dataclass
+class FieldDescriptor:
+    """Descriptor for bpack fields."""
+
+    size: Optional[int] = None
+    offset: Optional[int] = None
+    # signed: Optional[int] = None
+    # order: Optional[EOrder] = None
+    # units: Optional[str] = None
+    # doc: Optional[str] = None
+
+    def _validate_offset(self):
+        if not isinstance(self.offset, int):
+            raise TypeError(
+                f'invalid offset: {self.offset!r} '
+                f'(must be a positive or null integer)')
+        if self.offset < 0:
+            raise ValueError(
+                f'invalid offset: {self.offset!r} '
+                f'(must be a positive or null integer)')
+
+    def _validate_size(self):
+        if not isinstance(self.size, int):
+            raise TypeError(
+                f'invalid size: {self.size!r} '
+                f'(must be a positive integer)')
+        if self.size <= 0:
+            raise ValueError(
+                f'invalid size: {self.size!r} '
+                f'(must be a positive integer)')
+
+    def __post_init__(self):
+        if self.offset is not None:
+            self._validate_offset()
+
+        if self.size is not None:
+            self._validate_size()
+
+    def validate(self):
+        self._validate_size()
+        self._validate_offset()
+
+
 class Field(dataclasses.Field):
     """Descriptor for binary fields.
 
