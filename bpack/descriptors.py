@@ -19,6 +19,7 @@ __all__ = [
 
 
 BASEUNITS_ATTR_NAME = '__bpack_baseunits__'
+METADATA_KEY = '__bpack_metadata__'
 
 
 class EBaseUnits(enum.Enum):
@@ -146,11 +147,6 @@ class Field(dataclasses.Field):
         return super().__repr__().replace(dataclasses.Field.__name__,
                                           self.__class__.__name__)
 
-    def _update_metadata(self, **kwargs):
-        metadata = dict(self.metadata)
-        metadata.update(**kwargs)
-        self.metadata = types.MappingProxyType(metadata)
-
 
 field = Field
 
@@ -162,6 +158,31 @@ def is_field(obj) -> bool:
         return True
     else:
         return False
+
+
+def _update_field_metadata(field_, **kwargs):
+    metadata = field_.metadata.copy() if field_.metadata is not None else {}
+    metadata.update(**kwargs)
+    field_.metadata = types.MappingProxyType(metadata)
+    return field_
+
+
+def _get_field_descriptor(field_: Field) -> FieldDescriptor:
+    """Return the field descriptor attached to a :class:`Field`."""
+    if not is_field(field_):
+        raise TypeError(f'not a field descriptor: {field_}')
+    return FieldDescriptor(**field_.metadata[METADATA_KEY])
+
+
+def _set_field_descriptor(field_: Field,
+                          field_descr: FieldDescriptor) -> Field:
+    field_descr.validate()
+    field_descr_dict = dataclasses.asdict(field_descr)
+    new_metadata = {
+        METADATA_KEY: field_descr_dict,
+    }
+    _update_field_metadata(field_, **new_metadata)
+    return field_
 
 
 class DescriptorConsistencyError(ValueError):
@@ -209,7 +230,7 @@ def descriptor(cls, size: Optional[int] = None,
 
     field_ = fields_[0]
     if field_.metadata.get('offset') is None:
-        field_._update_metadata(offset=0)
+        _update_field_metadata(field_, offset=0)
 
     for idx, field_ in enumerate(fields_[1:], start=1):
         auto_offset = fields_[idx - 1].offset + fields_[idx - 1].size
@@ -219,7 +240,7 @@ def descriptor(cls, size: Optional[int] = None,
                 raise DescriptorConsistencyError(
                     f'invalid offset for filed n. {idx}: {field}')
         else:
-            field_._update_metadata(offset=auto_offset)
+            _update_field_metadata(field_, offset=auto_offset)
 
         # TODO: auto-size
         # field_size = field_.metadata.get('size')
@@ -227,7 +248,7 @@ def descriptor(cls, size: Optional[int] = None,
         #     assert field_.type is not None  # TODO: check in get size
         #     auto_size = get_size_for_type(field_.type)
         #     assert auto_size is not None
-        #     field_._update_metadata(size=auto_size)
+        #     _update_field_metadata(field_, size=auto_size)
 
     content_size = sum(field_.size for field_ in fields_)
     field_ = fields_[-1]
