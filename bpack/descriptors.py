@@ -18,6 +18,9 @@ __all__ = [
 ]
 
 
+BASEUNITS_ATTR_NAME = '__bpack_baseunits__'
+
+
 class EBaseUnits(enum.Enum):
     """Base units used to specify size and offset parameters in descriptors."""
 
@@ -28,7 +31,8 @@ class EBaseUnits(enum.Enum):
 def is_descriptor(obj) -> bool:
     """Return true if ``obj`` is a descriptor or a descriptor instance."""
     try:
-        return isinstance(dataclasses.fields(obj)[0], Field)
+        return (hasattr(obj, BASEUNITS_ATTR_NAME) and
+                is_field(dataclasses.fields(obj)[0]))
     except (TypeError, ValueError):
         # dataclass.fields(...) --> TypeError
         # attr.fields(...)      --> NotAnAttrsClassError(ValueError)
@@ -207,7 +211,7 @@ def descriptor(cls, size: Optional[int] = None,
             warnings.warn('bit struct not aligned to bytes')
         size = math.ceil(size / 8)
 
-    cls.__bpack_baseunits__ = baseunits
+    setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
 
     get_len_func = utils.create_fn(
         name='__len__',
@@ -234,7 +238,7 @@ def calcsize(obj) -> int:
 def get_baseunits(obj) -> EBaseUnits:
     """Return the base units of a binary record descriptor."""
     try:
-        return obj.__bpack_baseunits__
+        return getattr(obj, BASEUNITS_ATTR_NAME)
     except AttributeError:
         raise TypeError(f'"{obj}" is not a descriptor')
 
