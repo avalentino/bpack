@@ -28,29 +28,6 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
-def is_descriptor(obj) -> bool:
-    """Return true if ``obj`` is a descriptor or a descriptor instance."""
-    try:
-        return (hasattr(obj, BASEUNITS_ATTR_NAME) and
-                is_field(dataclasses.fields(obj)[0]))
-    except (TypeError, ValueError):
-        # dataclass.fields(...) --> TypeError
-        # attr.fields(...)      --> NotAnAttrsClassError(ValueError)
-        return False
-    except IndexError:
-        # no fields
-        return False
-
-
-def is_field(obj) -> bool:
-    """Return true if an ``obj`` can be considered is a descriptor field."""
-    if (issubclass(obj.type, Field) or
-            (hasattr(obj, 'offset') and hasattr(obj, 'size'))):
-        return True
-    else:
-        return False
-
-
 class Field(dataclasses.Field):
     """Descriptor for binary fields.
 
@@ -124,6 +101,15 @@ class Field(dataclasses.Field):
 
 
 field = Field
+
+
+def is_field(obj) -> bool:
+    """Return true if an ``obj`` can be considered is a descriptor field."""
+    if (issubclass(obj.type, Field) or
+            (hasattr(obj, 'offset') and hasattr(obj, 'size'))):
+        return True
+    else:
+        return False
 
 
 class DescriptorConsistencyError(ValueError):
@@ -226,6 +212,20 @@ def descriptor(cls, size: Optional[int] = None,
     collections.abc.Sized.register(cls)
 
     return cls
+
+
+def is_descriptor(obj) -> bool:
+    """Return true if ``obj`` is a descriptor or a descriptor instance."""
+    try:
+        return (hasattr(obj, BASEUNITS_ATTR_NAME) and
+                is_field(dataclasses.fields(obj)[0]))
+    except (TypeError, ValueError):
+        # dataclass.fields(...) --> TypeError
+        # attr.fields(...)      --> NotAnAttrsClassError(ValueError)
+        return False
+    except IndexError:
+        # no fields
+        return False
 
 
 def calcsize(obj) -> int:
