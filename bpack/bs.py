@@ -4,7 +4,7 @@ import bitstruct
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields
+from .descriptors import EBaseUnits, fields, _get_field_descriptor
 
 
 _TYPE_TO_STR = {
@@ -39,7 +39,9 @@ class Decoder:
                 'base units "bits"')
 
         fmt = ''.join(
-            _type_size_order_to_str(field_.type, field_.size, order)
+            _type_size_order_to_str(field_.type,
+                                    _get_field_descriptor(field_).size,
+                                    order)
             for field_ in fields(descriptor, pad=True)
         )
 

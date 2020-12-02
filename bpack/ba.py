@@ -8,7 +8,7 @@ import bitarray.util
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields
+from .descriptors import EBaseUnits, fields, _get_field_descriptor
 
 
 # TODO: custom ba_to_int with size
@@ -46,6 +46,8 @@ class Decoder:
 
         fields_ = fields(descriptor)
         types_ = [field_.type for field_ in fields_]
+        field_desciptors = [
+            _get_field_descriptor(field_) for field_ in fields_]
 
         if converters is DEFAULT_CONVERTERS:
             converters = STD_CONVERTER_MAP
@@ -70,8 +72,8 @@ class Decoder:
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [
-            slice(field_.offset, field_.offset + field_.size)
-            for field_ in fields_
+            slice(descr.offset, descr.offset + descr.size)
+            for descr in field_desciptors
         ]
 
     def decode(self, data: bytes):

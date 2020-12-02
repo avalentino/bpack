@@ -81,83 +81,29 @@ class FieldDescriptor:
         self._validate_offset()
 
 
-class Field(dataclasses.Field):
-    """Descriptor for binary fields.
+Field = dataclasses.Field
 
-    This class inherits form :class:`dataclass.Field` and adds the
-    the possibility to describe easily the size of the binary field
-    and, optionally, its offset with respect to the beginning of the
-    binary record.
+
+def field(*, size: int, offset: Optional[int] = None,
+          # signed: Optional[int] = None, order: Optional[EOrder] = None,
+          # units: Optional[str] = None, doc: Optional[str] = None,
+          metadata=None, **kwargs) -> Field:
+    """Initialize a field descriptor.
+
+    Returned object is a :class:`Field` instance with metadata properly
+    initialized to describe the field of a binary record.
     """
-
-    def __init__(self, **kwargs):
-        metadata = kwargs.setdefault('metadata', {})
-
-        offset = kwargs.pop('offset', None)
-        if offset is not None:
-            if not isinstance(offset, int):
-                raise TypeError(
-                    f'invalid offset: {offset!r}: must be a positive integer')
-            if offset < 0:
-                raise ValueError(
-                    f'invalid offset: {offset!r}: '
-                    f'must be a positive or null integer')
-            metadata['offset'] = offset
-
-        size = kwargs.pop('size', None)
-        if size is not None:
-            if not isinstance(size, int):
-                raise TypeError(
-                    f'invalid size: {size!r}: must be a positive integer')
-            if size <= 0:
-                raise ValueError(
-                    f'invalid size: {size!r}: must be a positive integer')
-            metadata['size'] = size
-        else:
-            # TODO: add automatic size determination form type (in descriptor)
-            raise TypeError('no field size specified')
-
-        field_ = dataclasses.field(**kwargs)
-        super().__init__(field_.default,
-                         field_.default_factory,
-                         field_.init,
-                         field_.repr,
-                         field_.hash,
-                         field_.compare,
-                         field_.metadata)
-
-    @property
-    def offset(self) -> int:
-        """Offset form the beginning of the record (in baseunits).
-
-        .. seealso: :func:`bpack.descriptor.descriptor`.
-        """
-        return self.metadata['offset']
-
-    @property
-    def size(self) -> int:
-        """Size of the field (in baseunits).
-
-        .. seealso: :func:`bpack.descriptor.descriptor`.
-        """
-        return self.metadata['size']
-
-    def __repr__(self) -> str:
-        """Return the string representation of the Field object."""
-        return super().__repr__().replace(dataclasses.Field.__name__,
-                                          self.__class__.__name__)
-
-
-field = Field
+    descriptor_ = FieldDescriptor(size, offset)
+    metadata = metadata.copy() if metadata is not None else {}
+    metadata[METADATA_KEY] = types.MappingProxyType(
+        dataclasses.asdict(descriptor_))
+    return dataclasses.field(metadata=metadata, **kwargs)
 
 
 def is_field(obj) -> bool:
-    """Return true if an ``obj`` can be considered is a descriptor field."""
-    if (issubclass(obj.type, Field) or
-            (hasattr(obj, 'offset') and hasattr(obj, 'size'))):
-        return True
-    else:
-        return False
+    """Return true if an ``obj`` can be considered is a field descriptor."""
+    return (isinstance(obj, Field) and obj.metadata and
+            METADATA_KEY in obj.metadata)
 
 
 def _update_field_metadata(field_, **kwargs):
@@ -209,50 +155,47 @@ def descriptor(cls, size: Optional[int] = None,
     """
     fields_ = dataclasses.fields(cls)
 
-    # replace dataclasses.Field with descriptors.Field if necessary
-    # WARNING: this operation relies on implementation details
-    fields_dict = getattr(cls, dataclasses._FIELDS)
-    for field_ in fields_:
-        assert isinstance(field_, dataclasses.Field)
-        if not isinstance(field_, Field):
-            new_field = field(default=field_.default,
-                              default_factory=field_.default_factory,
-                              init=field_.init,
-                              repr=field_.repr,
-                              hash=field_.hash,
-                              compare=field_.compare,
-                              metadata=field_.metadata,
-                              # size id mandatory in the current implementation
-                              size=None)
-            new_field.name = field_.name
-            new_field.type = field_.type
-            fields_dict[field_.name] = new_field
+    # Initialize to a dummy value with initial offset + size = 0
+    prev_field_descr = FieldDescriptor(size=None, offset=0)
+    prev_field_descr.size = 0
 
-    field_ = fields_[0]
-    if field_.metadata.get('offset') is None:
-        _update_field_metadata(field_, offset=0)
+    for idx, field_ in enumerate(fields_):
+        assert isinstance(field_, Field)
 
-    for idx, field_ in enumerate(fields_[1:], start=1):
-        auto_offset = fields_[idx - 1].offset + fields_[idx - 1].size
-        field_offset = field_.metadata.get('offset')
-        if field_offset is not None:
-            if field_offset < auto_offset:
-                raise DescriptorConsistencyError(
-                    f'invalid offset for filed n. {idx}: {field}')
-        else:
-            _update_field_metadata(field_, offset=auto_offset)
+        if field_.type is None:
+            raise TypeError(f'type not specified for field: "{field_.name}"')
+
+        try:
+            field_descr = _get_field_descriptor(field_)
+        except TypeError:
+            # size is mandatory in the current implementation
+            field_descr = FieldDescriptor(size=None)
 
         # TODO: auto-size
-        # field_size = field_.metadata.get('size')
-        # if size is None:
-        #     assert field_.type is not None  # TODO: check in get size
-        #     auto_size = get_size_for_type(field_.type)
+        # if field_descr.size is None:
+        #     assert field.type is not None  # TODO: check in get_size_for_type
+        #     auto_size = get_size_for_type(field.type)
         #     assert auto_size is not None
-        #     _update_field_metadata(field_, size=auto_size)
+        #     field_descr.size = auto_size
 
-    content_size = sum(field_.size for field_ in fields_)
-    field_ = fields_[-1]
-    auto_size = field_.offset + field_.size
+        if field_descr.size is None:
+            raise TypeError(f'size not specified for field: "{field_.name}"')
+
+        auto_offset = prev_field_descr.offset + prev_field_descr.size
+
+        if field_descr.offset is None:
+            field_descr.offset = auto_offset
+        elif field_descr.offset < auto_offset:
+            raise DescriptorConsistencyError(
+                f'invalid offset for filed n. {idx}: {field_}')
+
+        _set_field_descriptor(field_, field_descr)
+        prev_field_descr = field_descr
+
+    content_size = sum(
+        _get_field_descriptor(field_).size for field_ in fields_)
+    field_descr = _get_field_descriptor(fields_[-1])
+    auto_size = field_descr.offset + field_descr.size
     assert auto_size >= content_size  # this should be already checked above
 
     if size is None:
@@ -329,15 +272,17 @@ def fields(descriptor_, pad=False) -> Tuple[Field, ...]:
         fields_ = []
         offset = 0
         for field_ in dataclasses.fields(descriptor_):
-            assert field_.offset >= offset
-            if field_.offset > offset:
+            field_descr = _get_field_descriptor(field_)
+            assert field_descr.offset >= offset
+            if field_descr.offset > offset:
                 # padding
-                padfield = field(size=field_.offset - offset, offset=offset)
-                assert padfield.type is None  # padding
-                fields_.append(padfield)
+                pad_field = field(size=field_descr.offset - offset,
+                                  offset=offset)
+                assert pad_field.type is None  # padding
+                fields_.append(pad_field)
                 # offset = field.offset
             fields_.append(field_)
-            offset = field_.offset + field_.size
+            offset = field_descr.offset + field_descr.size
         return tuple(fields_)
     else:
         return dataclasses.fields(descriptor_)

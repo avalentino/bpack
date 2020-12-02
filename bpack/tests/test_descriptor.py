@@ -6,7 +6,7 @@ import pytest
 
 import bpack
 from bpack import EBaseUnits
-from bpack.descriptors import Field as BPackField
+from bpack.descriptors import _get_field_descriptor, Field as BPackField
 
 
 class TestRecord:
@@ -80,7 +80,7 @@ class TestRecord:
 
     @staticmethod
     def test_invalid_field_class():
-        with pytest.raises(TypeError, match='no field size specified'):
+        with pytest.raises(TypeError, match='size not specified'):
             @bpack.descriptor
             @dataclasses.dataclass
             class Record:
@@ -253,8 +253,9 @@ class TestFields:
             name, type_, size, offset = data
             assert field_.name == name
             assert field_.type == type_
-            assert field_.size == size
-            assert field_.offset == offset
+            field_descr = _get_field_descriptor(field_)
+            assert field_descr.size == size
+            assert field_descr.offset == offset
 
     @staticmethod
     def test_field_size_02():
@@ -271,8 +272,9 @@ class TestFields:
             name, type_, size, offset = data
             assert field_.name == name
             assert field_.type == type_
-            assert field_.size == size
-            assert field_.offset == offset
+            field_descr = _get_field_descriptor(field_)
+            assert field_descr.size == size
+            assert field_descr.offset == offset
 
     @staticmethod
     def test_field_size_03():
@@ -289,8 +291,9 @@ class TestFields:
             name, type_, size, offset = data
             assert field_.name == name
             assert field_.type == type_
-            assert field_.size == size
-            assert field_.offset == offset
+            field_descr = _get_field_descriptor(field_)
+            assert field_descr.size == size
+            assert field_descr.offset == offset
 
 
 class TestUtils:
