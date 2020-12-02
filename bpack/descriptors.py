@@ -13,8 +13,8 @@ from .utils import classdecorator
 
 
 __all__ = [
-    'descriptor', 'Field', 'fields', 'is_descriptor', 'is_field', 'calcsize',
-    'EBaseUnits', 'get_baseunits',
+    'descriptor', 'field', 'Field', 'fields', 'is_descriptor', 'is_field',
+    'calcsize', 'EBaseUnits', 'get_baseunits',
 ]
 
 
@@ -83,14 +83,14 @@ class Field(dataclasses.Field):
             # TODO: add automatic size determination form type (in descriptor)
             raise TypeError('no field size specified')
 
-        field = dataclasses.field(**kwargs)
-        super().__init__(field.default,
-                         field.default_factory,
-                         field.init,
-                         field.repr,
-                         field.hash,
-                         field.compare,
-                         field.metadata)
+        field_ = dataclasses.field(**kwargs)
+        super().__init__(field_.default,
+                         field_.default_factory,
+                         field_.init,
+                         field_.repr,
+                         field_.hash,
+                         field_.compare,
+                         field_.metadata)
 
     @property
     def offset(self) -> int:
@@ -117,6 +117,9 @@ class Field(dataclasses.Field):
         metadata = dict(self.metadata)
         metadata.update(**kwargs)
         self.metadata = types.MappingProxyType(metadata)
+
+
+field = Field
 
 
 class DescriptorConsistencyError(ValueError):
@@ -146,47 +149,47 @@ def descriptor(cls, size: Optional[int] = None,
     # replace dataclasses.Field with descriptors.Field if necessary
     # WARNING: this operation relies on implementation details
     fields_dict = getattr(cls, dataclasses._FIELDS)
-    for field in fields_:
-        assert isinstance(field, dataclasses.Field)
-        if not isinstance(field, Field):
-            new_field = Field(default=field.default,
-                              default_factory=field.default_factory,
-                              init=field.init,
-                              repr=field.repr,
-                              hash=field.hash,
-                              compare=field.compare,
-                              metadata=field.metadata,
+    for field_ in fields_:
+        assert isinstance(field_, dataclasses.Field)
+        if not isinstance(field_, Field):
+            new_field = field(default=field_.default,
+                              default_factory=field_.default_factory,
+                              init=field_.init,
+                              repr=field_.repr,
+                              hash=field_.hash,
+                              compare=field_.compare,
+                              metadata=field_.metadata,
                               # size id mandatory in the current implementation
                               size=None)
-            new_field.name = field.name
-            new_field.type = field.type
-            fields_dict[field.name] = new_field
+            new_field.name = field_.name
+            new_field.type = field_.type
+            fields_dict[field_.name] = new_field
 
-    field = fields_[0]
-    if field.metadata.get('offset') is None:
-        field._update_metadata(offset=0)
+    field_ = fields_[0]
+    if field_.metadata.get('offset') is None:
+        field_._update_metadata(offset=0)
 
-    for idx, field in enumerate(fields_[1:], start=1):
+    for idx, field_ in enumerate(fields_[1:], start=1):
         auto_offset = fields_[idx - 1].offset + fields_[idx - 1].size
-        field_offset = field.metadata.get('offset')
+        field_offset = field_.metadata.get('offset')
         if field_offset is not None:
             if field_offset < auto_offset:
                 raise DescriptorConsistencyError(
                     f'invalid offset for filed n. {idx}: {field}')
         else:
-            field._update_metadata(offset=auto_offset)
+            field_._update_metadata(offset=auto_offset)
 
         # TODO: auto-size
-        # field_size = field.metadata.get('size')
+        # field_size = field_.metadata.get('size')
         # if size is None:
-        #     assert field.type is not None  # TODO: check in get size
-        #     auto_size = get_size_for_type(field.type)
+        #     assert field_.type is not None  # TODO: check in get size
+        #     auto_size = get_size_for_type(field_.type)
         #     assert auto_size is not None
-        #     field._update_metadata(size=auto_size)
+        #     field_._update_metadata(size=auto_size)
 
-    content_size = sum(field.size for field in fields_)
-    field = fields_[-1]
-    auto_size = field.offset + field.size
+    content_size = sum(field_.size for field_ in fields_)
+    field_ = fields_[-1]
+    auto_size = field_.offset + field_.size
     assert auto_size >= content_size  # this should be already checked above
 
     if size is None:
@@ -248,16 +251,16 @@ def fields(descriptor_, pad=False) -> Tuple[Field, ...]:
     if pad:
         fields_ = []
         offset = 0
-        for field in dataclasses.fields(descriptor_):
-            assert field.offset >= offset
-            if field.offset > offset:
+        for field_ in dataclasses.fields(descriptor_):
+            assert field_.offset >= offset
+            if field_.offset > offset:
                 # padding
-                padfield = Field(size=field.offset - offset, offset=offset)
+                padfield = field(size=field_.offset - offset, offset=offset)
                 assert padfield.type is None  # padding
                 fields_.append(padfield)
                 # offset = field.offset
-            fields_.append(field)
-            offset = field.offset + field.size
+            fields_.append(field_)
+            offset = field_.offset + field_.size
         return tuple(fields_)
     else:
         return dataclasses.fields(descriptor_)

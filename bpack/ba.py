@@ -45,7 +45,7 @@ class Decoder:
                 'base units "bits"')
 
         fields_ = fields(descriptor)
-        types_ = [field.type for field in fields_]
+        types_ = [field_.type for field_ in fields_]
 
         if converters is DEFAULT_CONVERTERS:
             converters = STD_CONVERTER_MAP
@@ -70,7 +70,8 @@ class Decoder:
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [
-            slice(field.offset, field.offset + field.size) for field in fields_
+            slice(field_.offset, field_.offset + field_.size)
+            for field_ in fields_
         ]
 
     def decode(self, data: bytes):

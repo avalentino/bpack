@@ -81,8 +81,8 @@ class Decoder:
             raise TypeError(f'invalid order: {order!r}')
 
         fmt = order + ''.join(
-            _to_fmt(field.type, field.size, order='')
-            for field in fields(descriptor, True)
+            _to_fmt(field_.type, field_.size, order='')
+            for field_ in fields(descriptor, pad=True)
         )
 
         self._codec = struct.Struct(fmt)
@@ -94,13 +94,13 @@ class Decoder:
         }
         # TODO: enum support
         # converters.update(
-        #     (field.type, field.type)
-        #     for field in dataclasses.fields(self._descriptor)
-        #     if issubclass(field.type, enum.Enum))
+        #     (field_.type, field_.type)
+        #     for field_ in dataclasses.fields(self._descriptor)
+        #     if issubclass(field_.type, enum.Enum))
         self._converters = [
-            (idx, converters[field.type])
-            for idx, field in enumerate(fields(self._descriptor))
-            if field.type in converters
+            (idx, converters[field_.type])
+            for idx, field_ in enumerate(fields(self._descriptor))
+            if field_.type in converters
         ]
 
     def decode(self, data: bytes):
