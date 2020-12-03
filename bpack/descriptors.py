@@ -49,8 +49,6 @@ class BinFieldDescriptor:
     offset: Optional[int] = None
     # signed: Optional[int] = None
     # order: Optional[EOrder] = None
-    # units: Optional[str] = None
-    # doc: Optional[str] = None
 
     def _validate_offset(self):
         if not isinstance(self.offset, int):
@@ -89,7 +87,6 @@ Field = dataclasses.Field
 
 def field(*, size: int, offset: Optional[int] = None,
           # signed: Optional[int] = None, order: Optional[EOrder] = None,
-          # units: Optional[str] = None, doc: Optional[str] = None,
           metadata=None, **kwargs) -> Field:
     """Initialize a field descriptor.
 
@@ -138,7 +135,6 @@ class DescriptorConsistencyError(ValueError):
     pass
 
 
-# TODO: units attribute (TBD)
 # TODO: signed attribute
 # TODO: repeat attribute
 # TODO: converters (TBD, or in decoder)
