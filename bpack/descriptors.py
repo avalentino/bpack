@@ -39,7 +39,7 @@ class EBaseUnits(enum.Enum):
 
 
 @dataclasses.dataclass
-class FieldDescriptor:
+class BinFieldDescriptor:
     """Descriptor for bpack fields."""
 
     size: Optional[int] = None
@@ -93,10 +93,10 @@ def field(*, size: int, offset: Optional[int] = None,
     Returned object is a :class:`Field` instance with metadata properly
     initialized to describe the field of a binary record.
     """
-    descriptor_ = FieldDescriptor(size, offset)
+    field_descr = BinFieldDescriptor(size, offset)
     metadata = metadata.copy() if metadata is not None else {}
     metadata[METADATA_KEY] = types.MappingProxyType(
-        dataclasses.asdict(descriptor_))
+        dataclasses.asdict(field_descr))
     return dataclasses.field(metadata=metadata, **kwargs)
 
 
@@ -113,15 +113,15 @@ def _update_field_metadata(field_, **kwargs):
     return field_
 
 
-def _get_field_descriptor(field_: Field) -> FieldDescriptor:
+def _get_field_descriptor(field_: Field) -> BinFieldDescriptor:
     """Return the field descriptor attached to a :class:`Field`."""
     if not is_field(field_):
         raise TypeError(f'not a field descriptor: {field_}')
-    return FieldDescriptor(**field_.metadata[METADATA_KEY])
+    return BinFieldDescriptor(**field_.metadata[METADATA_KEY])
 
 
 def _set_field_descriptor(field_: Field,
-                          field_descr: FieldDescriptor) -> Field:
+                          field_descr: BinFieldDescriptor) -> Field:
     field_descr.validate()
     field_descr_dict = dataclasses.asdict(field_descr)
     new_metadata = {
@@ -156,7 +156,7 @@ def descriptor(cls, size: Optional[int] = None,
     fields_ = dataclasses.fields(cls)
 
     # Initialize to a dummy value with initial offset + size = 0
-    prev_field_descr = FieldDescriptor(size=None, offset=0)
+    prev_field_descr = BinFieldDescriptor(size=None, offset=0)
     prev_field_descr.size = 0
 
     for idx, field_ in enumerate(fields_):
@@ -169,7 +169,7 @@ def descriptor(cls, size: Optional[int] = None,
             field_descr = _get_field_descriptor(field_)
         except TypeError:
             # size is mandatory in the current implementation
-            field_descr = FieldDescriptor(size=None)
+            field_descr = BinFieldDescriptor(size=None)
 
         # TODO: auto-size
         # if field_descr.size is None:

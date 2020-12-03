@@ -46,7 +46,7 @@ class Decoder:
 
         fields_ = fields(descriptor)
         types_ = [field_.type for field_ in fields_]
-        field_desciptors = [
+        field_descriptors = [
             _get_field_descriptor(field_) for field_ in fields_]
 
         if converters is DEFAULT_CONVERTERS:
@@ -73,7 +73,7 @@ class Decoder:
         self._converters = converters
         self._slices = [
             slice(descr.offset, descr.offset + descr.size)
-            for descr in field_desciptors
+            for descr in field_descriptors
         ]
 
     def decode(self, data: bytes):
