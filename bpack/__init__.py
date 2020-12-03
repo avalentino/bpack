@@ -31,6 +31,6 @@ Currently only fixed size records are supported.
 __version__ = '0.1.0.dev0'
 
 from .descriptors import (                                          # noqa
-    descriptor, field, fields, is_descriptor, is_field, calcsize,
-    EBaseUnits, get_baseunits,
+    descriptor, field, fields, is_descriptor, calcsize, get_baseunits,
+    EBaseUnits,
 )

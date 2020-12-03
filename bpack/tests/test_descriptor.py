@@ -6,7 +6,7 @@ import pytest
 
 import bpack
 from bpack import EBaseUnits
-from bpack.descriptors import get_field_descriptor
+from bpack.descriptors import get_field_descriptor, is_field
 from bpack.descriptors import Field as BPackField
 
 
@@ -334,10 +334,13 @@ class TestUtils:
             field_2: float = bpack.field(size=8, default=1/3)
 
         for field_ in bpack.fields(Record):
-            assert bpack.is_field(field_)
+            assert is_field(field_)
 
         for field_ in bpack.fields(Record()):
-            assert bpack.is_field(field_)
+            assert is_field(field_)
+
+        dataclasses_field_ = dataclasses.field()
+        assert not is_field(dataclasses_field_)
 
     @staticmethod
     def test_calcsize():

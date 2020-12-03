@@ -13,8 +13,11 @@ from .utils import classdecorator
 
 
 __all__ = [
-    'descriptor', 'field', 'Field', 'fields', 'is_descriptor', 'is_field',
-    'calcsize', 'EBaseUnits', 'get_baseunits',
+    'descriptor', 'is_descriptor', 'fields', 'calcsize',
+    'EBaseUnits', 'get_baseunits',
+    'field', 'Field', 'is_field',
+    'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
+    'BASEUNITS_ATTR_NAME', 'METADATA_KEY',
 ]
 
 
