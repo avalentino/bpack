@@ -6,14 +6,14 @@ import types
 import warnings
 import dataclasses
 import collections.abc
-from typing import Optional, Tuple
+from typing import Optional, Iterable, Type
 
 from . import utils
 from .utils import classdecorator
 
 
 __all__ = [
-    'descriptor', 'is_descriptor', 'fields', 'calcsize',
+    'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
     'EBaseUnits', 'get_baseunits',
     'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
@@ -45,10 +45,16 @@ class EBaseUnits(enum.Enum):
 class BinFieldDescriptor:
     """Descriptor for bpack fields."""
 
+    type: Optional[Type] = None
     size: Optional[int] = None
     offset: Optional[int] = None
     # signed: Optional[int] = None
     # order: Optional[EOrder] = None
+    # converter: Optional[Callable] = None
+
+    def _validate_type(self):
+        if self.type is None:
+            raise TypeError(str(self.type))
 
     def _validate_offset(self):
         if not isinstance(self.offset, int):
@@ -71,6 +77,7 @@ class BinFieldDescriptor:
                 f'(must be a positive integer)')
 
     def __post_init__(self):
+        """Finalize BinFieldDescriptor instance initialization."""
         if self.offset is not None:
             self._validate_offset()
 
@@ -78,6 +85,8 @@ class BinFieldDescriptor:
             self._validate_size()
 
     def validate(self):
+        """Perform validity check on the BinFieldDescriptor instance."""
+        self._validate_type()
         self._validate_size()
         self._validate_offset()
 
@@ -93,7 +102,7 @@ def field(*, size: int, offset: Optional[int] = None,
     Returned object is a :class:`Field` instance with metadata properly
     initialized to describe the field of a binary record.
     """
-    field_descr = BinFieldDescriptor(size, offset)
+    field_descr = BinFieldDescriptor(size=size, offset=offset)
     metadata = metadata.copy() if metadata is not None else {}
     metadata[METADATA_KEY] = types.MappingProxyType(
         dataclasses.asdict(field_descr))
@@ -113,22 +122,37 @@ def _update_field_metadata(field_, **kwargs):
     return field_
 
 
-def get_field_descriptor(field_: Field) -> BinFieldDescriptor:
+def get_field_descriptor(field: Field,
+                         validate: bool = True) -> BinFieldDescriptor:
     """Return the field descriptor attached to a :class:`Field`."""
-    if not is_field(field_):
-        raise TypeError(f'not a field descriptor: {field_}')
-    return BinFieldDescriptor(**field_.metadata[METADATA_KEY])
+    if not is_field(field):
+        raise TypeError(f'not a field descriptor: {field}')
+    field_descr = BinFieldDescriptor(**field.metadata[METADATA_KEY])
+    field_descr.type = field.type
+    if validate:
+        field_descr.validate()
+    return field_descr
 
 
-def set_field_descriptor(field_: Field,
-                         field_descr: BinFieldDescriptor) -> Field:
-    field_descr.validate()
-    field_descr_dict = dataclasses.asdict(field_descr)
-    new_metadata = {
-        METADATA_KEY: field_descr_dict,
+def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,
+                         validate: bool = True) -> Field:
+    """Set the field metadata according to the specified descriptor."""
+    if validate:
+        descriptor.validate()
+    field_descr_metadata = {
+        k: v for k, v in dataclasses.asdict(descriptor).items()
+        if v is not None
     }
-    _update_field_metadata(field_, **new_metadata)
-    return field_
+    type_ = field_descr_metadata.pop('type', None)
+    if type_ != field.type:
+        raise TypeError(
+            f'type mismatch between BinFieldDescriptor.type ({type_!r}) and '
+            f'filed.type ({field.type!r})')
+    new_metadata = {
+        METADATA_KEY: types.MappingProxyType(field_descr_metadata),
+    }
+    _update_field_metadata(field, **new_metadata)
+    return field
 
 
 class DescriptorConsistencyError(ValueError):
@@ -156,7 +180,7 @@ def descriptor(cls, size: Optional[int] = None,
 
     # Initialize to a dummy value with initial offset + size = 0
     prev_field_descr = BinFieldDescriptor(size=None, offset=0)
-    prev_field_descr.size = 0
+    prev_field_descr.size = 0  # trick to bypass checks on BinFieldDescriptor
 
     for idx, field_ in enumerate(fields_):
         assert isinstance(field_, Field)
@@ -165,10 +189,9 @@ def descriptor(cls, size: Optional[int] = None,
             raise TypeError(f'type not specified for field: "{field_.name}"')
 
         try:
-            field_descr = get_field_descriptor(field_)
+            field_descr = get_field_descriptor(field_, validate=False)
         except TypeError:
-            # size is mandatory in the current implementation
-            field_descr = BinFieldDescriptor(size=None)
+            field_descr = BinFieldDescriptor()
 
         # TODO: auto-size
         # if field_descr.size is None:
@@ -258,30 +281,31 @@ def get_baseunits(obj) -> EBaseUnits:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def fields(descriptor_, pad=False) -> Tuple[Field, ...]:
-    """Return a tuple containing fields of the specified descriptor.
+fields = dataclasses.fields
 
-    Items are instances of the :class:`Field` describing characteristics
-    of each field of the input descriptor.
 
-    If the ``pad`` parameter is set to True then also generate dummy fields
-    describing the padding necessary to take into account of offsets.
+def field_descriptors(descriptor, pad=False) -> Iterable[BinFieldDescriptor]:
+    """Return the list of field descriptors for the input record descriptor.
+
+    Items are instances of the :class:`BinFieldDescriptor` class describing
+    characteristics of each field of the input binary record descriptor.
+
+    If the ``pad`` parameter is set to True then also generate dummy field
+    descriptors for padding elements necessary to take into account offsets
+    between fields.
     """
     if pad:
-        fields_ = []
         offset = 0
-        for field_ in dataclasses.fields(descriptor_):
+        for field_ in dataclasses.fields(descriptor):
             field_descr = get_field_descriptor(field_)
             assert field_descr.offset >= offset
             if field_descr.offset > offset:
                 # padding
-                pad_field = field(size=field_descr.offset - offset,
-                                  offset=offset)
-                assert pad_field.type is None  # padding
-                fields_.append(pad_field)
-                # offset = field.offset
-            fields_.append(field_)
+                yield BinFieldDescriptor(size=field_descr.offset - offset,
+                                         offset=offset)
+                # offset = field_.offset
+            yield field_descr
             offset = field_descr.offset + field_descr.size
-        return tuple(fields_)
     else:
-        return dataclasses.fields(descriptor_)
+        for field_ in dataclasses.fields(descriptor):
+            yield get_field_descriptor(field_)

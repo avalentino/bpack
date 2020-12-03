@@ -6,7 +6,7 @@ from typing import Optional
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields, get_field_descriptor
+from .descriptors import EBaseUnits, fields, field_descriptors
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
@@ -81,8 +81,8 @@ class Decoder:
             raise TypeError(f'invalid order: {order!r}')
 
         fmt = order + ''.join(
-            _to_fmt(field_.type, get_field_descriptor(field_).size, order='')
-            for field_ in fields(descriptor, pad=True)
+            _to_fmt(field_descr.type, field_descr.size, order='')
+            for field_descr in field_descriptors(descriptor, pad=True)
         )
 
         self._codec = struct.Struct(fmt)

@@ -8,7 +8,7 @@ import bitarray.util
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields, get_field_descriptor
+from .descriptors import EBaseUnits, fields, field_descriptors
 
 
 # TODO: custom ba_to_int with size
@@ -44,36 +44,35 @@ class Decoder:
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')
 
-        fields_ = fields(descriptor)
-        types_ = [field_.type for field_ in fields_]
-        field_descriptors = [
-            get_field_descriptor(field_) for field_ in fields_]
-
         if converters is DEFAULT_CONVERTERS:
             converters = STD_CONVERTER_MAP
 
         if isinstance(converters, collections.abc.Mapping):
             converters_map = converters
             try:
-                converters = [converters_map[type_] for type_ in types_]
+                converters = [
+                    converters_map[field_.type]
+                    for field_ in fields(descriptor)
+                ]
+
             except KeyError as exc:
                 type_ = str(exc)
                 raise TypeError(
                     f'no conversion function available for type {type_!r}')
 
         if converters is not None:
-            if not isinstance(converters, collections.abc.Iterable):
-                raise ValueError(f'invalid converters: {converters!r}')
-            if len(list(converters)) != len(fields_):
+            converters = list(converters)
+            n_fields = len(list(fields(descriptor)))
+            if len(converters) != n_fields:
                 raise ValueError(
                     f'the number of converters ({len(converters)}) does not '
-                    f'match the number of fields ({len(fields_)})')
+                    f'match the number of fields ({n_fields})')
 
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [
-            slice(descr.offset, descr.offset + descr.size)
-            for descr in field_descriptors
+            slice(field_descr.offset, field_descr.offset + field_descr.size)
+            for field_descr in field_descriptors(descriptor)
         ]
 
     def decode(self, data: bytes):
