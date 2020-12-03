@@ -6,7 +6,8 @@ import pytest
 
 import bpack
 from bpack import EBaseUnits
-from bpack.descriptors import _get_field_descriptor, Field as BPackField
+from bpack.descriptors import get_field_descriptor
+from bpack.descriptors import Field as BPackField
 
 
 class TestRecord:
@@ -253,7 +254,7 @@ class TestFields:
             name, type_, size, offset = data
             assert field_.name == name
             assert field_.type == type_
-            field_descr = _get_field_descriptor(field_)
+            field_descr = get_field_descriptor(field_)
             assert field_descr.size == size
             assert field_descr.offset == offset
 
@@ -272,7 +273,7 @@ class TestFields:
             name, type_, size, offset = data
             assert field_.name == name
             assert field_.type == type_
-            field_descr = _get_field_descriptor(field_)
+            field_descr = get_field_descriptor(field_)
             assert field_descr.size == size
             assert field_descr.offset == offset
 
@@ -291,7 +292,7 @@ class TestFields:
             name, type_, size, offset = data
             assert field_.name == name
             assert field_.type == type_
-            field_descr = _get_field_descriptor(field_)
+            field_descr = get_field_descriptor(field_)
             assert field_descr.size == size
             assert field_descr.offset == offset
 

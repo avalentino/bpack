@@ -113,15 +113,15 @@ def _update_field_metadata(field_, **kwargs):
     return field_
 
 
-def _get_field_descriptor(field_: Field) -> BinFieldDescriptor:
+def get_field_descriptor(field_: Field) -> BinFieldDescriptor:
     """Return the field descriptor attached to a :class:`Field`."""
     if not is_field(field_):
         raise TypeError(f'not a field descriptor: {field_}')
     return BinFieldDescriptor(**field_.metadata[METADATA_KEY])
 
 
-def _set_field_descriptor(field_: Field,
-                          field_descr: BinFieldDescriptor) -> Field:
+def set_field_descriptor(field_: Field,
+                         field_descr: BinFieldDescriptor) -> Field:
     field_descr.validate()
     field_descr_dict = dataclasses.asdict(field_descr)
     new_metadata = {
@@ -166,7 +166,7 @@ def descriptor(cls, size: Optional[int] = None,
             raise TypeError(f'type not specified for field: "{field_.name}"')
 
         try:
-            field_descr = _get_field_descriptor(field_)
+            field_descr = get_field_descriptor(field_)
         except TypeError:
             # size is mandatory in the current implementation
             field_descr = BinFieldDescriptor(size=None)
@@ -189,12 +189,12 @@ def descriptor(cls, size: Optional[int] = None,
             raise DescriptorConsistencyError(
                 f'invalid offset for filed n. {idx}: {field_}')
 
-        _set_field_descriptor(field_, field_descr)
+        set_field_descriptor(field_, field_descr)
         prev_field_descr = field_descr
 
     content_size = sum(
-        _get_field_descriptor(field_).size for field_ in fields_)
-    field_descr = _get_field_descriptor(fields_[-1])
+        get_field_descriptor(field_).size for field_ in fields_)
+    field_descr = get_field_descriptor(fields_[-1])
     auto_size = field_descr.offset + field_descr.size
     assert auto_size >= content_size  # this should be already checked above
 
@@ -272,7 +272,7 @@ def fields(descriptor_, pad=False) -> Tuple[Field, ...]:
         fields_ = []
         offset = 0
         for field_ in dataclasses.fields(descriptor_):
-            field_descr = _get_field_descriptor(field_)
+            field_descr = get_field_descriptor(field_)
             assert field_descr.offset >= offset
             if field_descr.offset > offset:
                 # padding
