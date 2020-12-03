@@ -54,7 +54,7 @@ class BinFieldDescriptor:
 
     def _validate_type(self):
         if self.type is None:
-            raise TypeError(str(self.type))
+            raise TypeError(f'invalid type "{self.type}"')
 
     def _validate_offset(self):
         if not isinstance(self.offset, int):
@@ -88,7 +88,8 @@ class BinFieldDescriptor:
         """Perform validity check on the BinFieldDescriptor instance."""
         self._validate_type()
         self._validate_size()
-        self._validate_offset()
+        if self.offset is not None:
+            self._validate_offset()
 
 
 Field = dataclasses.Field
@@ -185,6 +186,7 @@ def descriptor(cls, size: Optional[int] = None,
     for idx, field_ in enumerate(fields_):
         assert isinstance(field_, Field)
 
+        # NOTE: this is ensured by dataclasses but not by attr
         if field_.type is None:
             raise TypeError(f'type not specified for field: "{field_.name}"')
 
@@ -306,6 +308,11 @@ def field_descriptors(descriptor, pad=False) -> Iterable[BinFieldDescriptor]:
                 # offset = field_.offset
             yield field_descr
             offset = field_descr.offset + field_descr.size
+
+        size = calcsize(descriptor)
+        if offset < size:
+            # padding
+            yield BinFieldDescriptor(size=size - offset, offset=offset)
     else:
         for field_ in dataclasses.fields(descriptor):
             yield get_field_descriptor(field_)
