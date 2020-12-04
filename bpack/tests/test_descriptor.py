@@ -697,7 +697,6 @@ class TestFieldDescriptorUtils:
         with pytest.raises(TypeError, match='mismatch'):
             bpack.descriptors.set_field_descriptor(field, descr)
 
-
     @staticmethod
     def test_set_field_descriptor_values():
         field = dataclasses.field()
