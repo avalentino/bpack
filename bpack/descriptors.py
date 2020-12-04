@@ -48,23 +48,13 @@ class BinFieldDescriptor:
     type: Optional[Type] = None
     size: Optional[int] = None
     offset: Optional[int] = None
-    # signed: Optional[int] = None
+    signed: Optional[bool] = None
     # order: Optional[EOrder] = None
     # converter: Optional[Callable] = None
 
     def _validate_type(self):
         if self.type is None:
             raise TypeError(f'invalid type "{self.type}"')
-
-    def _validate_offset(self):
-        if not isinstance(self.offset, int):
-            raise TypeError(
-                f'invalid offset: {self.offset!r} '
-                f'(must be a positive or null integer)')
-        if self.offset < 0:
-            raise ValueError(
-                f'invalid offset: {self.offset!r} '
-                f'(must be a positive or null integer)')
 
     def _validate_size(self):
         if not isinstance(self.size, int):
@@ -76,6 +66,22 @@ class BinFieldDescriptor:
                 f'invalid size: {self.size!r} '
                 f'(must be a positive integer)')
 
+    def _validate_offset(self):
+        if not isinstance(self.offset, int):
+            raise TypeError(
+                f'invalid offset: {self.offset!r} '
+                f'(must be a positive or null integer)')
+        if self.offset < 0:
+            raise ValueError(
+                f'invalid offset: {self.offset!r} '
+                f'(must be a positive or null integer)')
+
+    def _validate_signed(self):
+        if not isinstance(self.signed, bool):
+            raise TypeError(
+                f'invalid "signed" parameter: {self.signed!r} '
+                f'(must be a bool or None)')
+
     def __post_init__(self):
         """Finalize BinFieldDescriptor instance initialization."""
         if self.offset is not None:
@@ -84,26 +90,40 @@ class BinFieldDescriptor:
         if self.size is not None:
             self._validate_size()
 
+        if self.signed is not None:
+            self._validate_signed()
+
+    @staticmethod
+    def is_int(type_):
+        # TODO: improve integer type detection
+        return type_ is int
+
     def validate(self):
         """Perform validity check on the BinFieldDescriptor instance."""
         self._validate_type()
         self._validate_size()
         if self.offset is not None:
             self._validate_offset()
+        if self.signed is not None:
+            self._validate_signed()
+            if not self.is_int(self.type):
+                warnings.warn(
+                    f'the "signed" parameter will be ignored for non-integer '
+                    f'type: "{self.type}"')
 
 
 Field = dataclasses.Field
 
 
 def field(*, size: int, offset: Optional[int] = None,
-          # signed: Optional[int] = None, order: Optional[EOrder] = None,
+          signed: Optional[bool] = None,  # order: Optional[EOrder] = None,
           metadata=None, **kwargs) -> Field:
     """Initialize a field descriptor.
 
     Returned object is a :class:`Field` instance with metadata properly
     initialized to describe the field of a binary record.
     """
-    field_descr = BinFieldDescriptor(size=size, offset=offset)
+    field_descr = BinFieldDescriptor(size=size, offset=offset, signed=signed)
     metadata = metadata.copy() if metadata is not None else {}
     metadata[METADATA_KEY] = types.MappingProxyType(
         dataclasses.asdict(field_descr))

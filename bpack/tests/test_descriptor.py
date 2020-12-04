@@ -486,24 +486,27 @@ class TestFieldDescriptor:
         assert descr.type is None
         assert descr.size is None
         assert descr.offset is None
-        assert len(vars(descr)) == 3
+        assert descr.signed is None
+        assert len(vars(descr)) == 4
 
     @staticmethod
     def test_init():
-        descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2)
+        descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, True)
         assert descr.type is int
         assert descr.size == 1
         assert descr.offset == 2
-        assert len(vars(descr)) == 3
+        assert descr.signed is True
+        assert len(vars(descr)) == 4
 
     @staticmethod
     def test_init_kw():
         descr = bpack.descriptors.BinFieldDescriptor(type=int, size=1,
-                                                     offset=2)
+                                                     offset=2, signed=True)
         assert descr.type is int
         assert descr.size == 1
         assert descr.offset == 2
-        assert len(vars(descr)) == 3
+        assert descr.signed is True
+        assert len(vars(descr)) == 4
 
     @staticmethod
     def test_init_invalid_type():
@@ -512,6 +515,9 @@ class TestFieldDescriptor:
 
         with pytest.raises(TypeError):
             bpack.descriptors.BinFieldDescriptor(offset=2.1)
+
+        with pytest.raises(TypeError):
+            bpack.descriptors.BinFieldDescriptor(signed=complex(3.1, 0))
 
     @staticmethod
     def test_init_invalid_value():
@@ -531,6 +537,16 @@ class TestFieldDescriptor:
 
         descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2)
         descr.validate()
+
+        descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, True)
+        descr.validate()
+
+    @staticmethod
+    def test_validation_warning():
+        descr = bpack.descriptors.BinFieldDescriptor(type=float, size=4,
+                                                     signed=True)
+        with pytest.warns(UserWarning, match='ignore'):
+            descr.validate()
 
     @staticmethod
     def test_validation_error():
@@ -576,6 +592,14 @@ class TestFieldDescriptor:
         descr.validate()
         descr.offset = offset
         with pytest.raises(error_type):
+            descr.validate()
+
+    @staticmethod
+    def test_post_validation_warning_on_signed():
+        descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, signed=True)
+        descr.validate()
+        descr.type = float
+        with pytest.warns(UserWarning, match='ignore'):
             descr.validate()
 
 
@@ -639,7 +663,7 @@ class TestFieldDescriptorUtils:
 
     @staticmethod
     def test_get_field_descriptor_01():
-        field = bpack.field(size=1, offset=2)
+        field = bpack.field(size=1, offset=2, signed=True)
         with pytest.raises(TypeError):
             bpack.descriptors.get_field_descriptor(field)
 
@@ -647,34 +671,41 @@ class TestFieldDescriptorUtils:
         assert descr.type is None
         assert descr.size == 1
         assert descr.offset == 2
+        assert descr.signed is True
 
         field.type = int
         descr = bpack.descriptors.get_field_descriptor(field)
         assert descr.type is int
         assert descr.size == 1
         assert descr.offset == 2
+        assert descr.signed is True
 
     @staticmethod
     def test_get_field_descriptor_02():
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
-            field_1: int = bpack.field(size=1, offset=2, default=0)
+            field_1: int = bpack.field(size=1, offset=2, default=0,
+                                       signed=True)
             field_2: float = bpack.field(size=3, offset=4, default=0.1)
 
-        data = [(int, 1, 2), (float, 3, 4)]
-        for field, (type, size, offset) in zip(bpack.fields(Record), data):
+        data = [(int, 1, 2, True), (float, 3, 4, None)]
+        for field, (type, size, offset, signed) in zip(bpack.fields(Record),
+                                                       data):
             descr = bpack.descriptors.get_field_descriptor(field)
             assert descr.type is type
             assert descr.size == size
             assert descr.offset == offset
+            assert descr.signed is signed
 
         record = Record()
-        for field, (type, size, offset) in zip(bpack.fields(record), data):
+        for field, (type, size, offset, signed) in zip(bpack.fields(record),
+                                                       data):
             descr = bpack.descriptors.get_field_descriptor(field)
             assert descr.type is type
             assert descr.size == size
             assert descr.offset == offset
+            assert descr.signed is signed
 
     @staticmethod
     def test_set_field_descriptor():
@@ -704,7 +735,8 @@ class TestFieldDescriptorUtils:
         assert not is_field(field)
 
         descr = bpack.descriptors.BinFieldDescriptor(type=field.type,
-                                                     size=1, offset=2)
+                                                     size=1, offset=2,
+                                                     signed=True)
         bpack.descriptors.set_field_descriptor(field, descr)
         assert is_field(field)
 
@@ -712,13 +744,15 @@ class TestFieldDescriptorUtils:
         assert descr_out.type is field.type
         assert descr_out.size == 1
         assert descr_out.offset == 2
+        assert descr_out.signed is True
 
     @staticmethod
     def test_field_descriptor_metadata():
         field = dataclasses.field()
         field.type = int
         descr = bpack.descriptors.BinFieldDescriptor(type=field.type,
-                                                     size=1, offset=2)
+                                                     size=1, offset=2,
+                                                     signed=True)
         bpack.descriptors.set_field_descriptor(field, descr)
         assert field.metadata is not None
 
@@ -736,7 +770,9 @@ class TestFieldDescriptorUtils:
         assert descr_metadata['size'] == 1
         assert 'offset' in descr_metadata
         assert descr_metadata['offset'] == 2
-        assert len(descr_metadata) == 2
+        assert 'signed' in descr_metadata
+        assert descr_metadata['signed'] is True
+        assert len(descr_metadata) == 3
 
     @staticmethod
     def test_field_descriptor_minimal_metadata():
