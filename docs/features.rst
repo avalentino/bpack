@@ -1,9 +1,9 @@
 Features
 ========
 
-* basic support for declarative data description for binary data structures
-* basic support for description of binary data structures at *bit* level
-* basic decoding infrastructure (byte and bit based structures)
+* declarative data description for binary data structures
+* description of binary data structures at *bit* level
+* data decoding (byte and bit based structures)
 * backend:
 
   - **st** backend based on the standard Python library :mod:`struct` module
@@ -15,18 +15,29 @@ Features
 .. _bitarray: https://github.com/ilanschnell/bitarray
 
 
+Limitations
+-----------
+
+* only fixed size binary records are supported by design, the size of the
+  record shall be known at the moment of the record descriptor definition.
+  It is should be easy for the user to leverage tools provided by the *bpack*
+  Python package to support more complex decoding scenarios.
+* currently it is assumed that all fields in a binary record share the
+  same bit/byte order. The management of different bit/byte order in the same
+  binary record is, in principle, possible but not planned at the moment.
+
+
 Possible additional features still not implemented
 --------------------------------------------------
 
+* support for signed/unsigned integer specification
+* support bit/byte order specification at descriptor level
+  (and at field level TBD)
+* support for list fields (including list length specification)
 * record nesting (the field of a descriptor cna be another descriptor)
 * support for enums
-* support for signed/unsigned integer specification
-* support for list fields (including list length specification)
 * numpy based backend
 * automatic size determination for data type
-* support for *units* specification in fields descriptors
-* support for *doc* description in fields descriptors
-* support bit/byte order specification at descriptor level and at field level
 * user defined converters
 * extended type specification based typing
 * possibility to specify data types using string specifiers with
