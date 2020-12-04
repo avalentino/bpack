@@ -64,7 +64,7 @@ class TestRecord:
 
         assert dataclasses.is_dataclass(Record)
         assert len(bpack.fields(Record)) == 2
-        assert bpack.get_baseunits(Record) is EBaseUnits.BYTES  # default
+        assert bpack.baseunits(Record) is EBaseUnits.BYTES  # default
         assert all(isinstance(f, BPackField) for f in bpack.fields(Record))
 
     @staticmethod
@@ -77,7 +77,7 @@ class TestRecord:
 
         assert dataclasses.is_dataclass(Record)
         assert len(bpack.fields(Record)) == 2
-        assert bpack.get_baseunits(Record) is EBaseUnits.BYTES  # default
+        assert bpack.baseunits(Record) is EBaseUnits.BYTES  # default
         assert all(isinstance(f, BPackField) for f in bpack.fields(Record))
 
     @staticmethod
@@ -100,8 +100,8 @@ class TestRecord:
             field_1: int = bpack.field(size=8, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert bpack.get_baseunits(Record) is EBaseUnits(baseunits)
-        assert bpack.get_baseunits(Record()) is EBaseUnits(baseunits)
+        assert bpack.baseunits(Record) is EBaseUnits(baseunits)
+        assert bpack.baseunits(Record()) is EBaseUnits(baseunits)
 
     @staticmethod
     def test_byte_alignment_warning():
@@ -478,8 +478,8 @@ class TestUtils:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert bpack.get_baseunits(Record) == EBaseUnits.BYTES
-        assert bpack.get_baseunits(Record()) == EBaseUnits.BYTES
+        assert bpack.baseunits(Record) == EBaseUnits.BYTES
+        assert bpack.baseunits(Record()) == EBaseUnits.BYTES
 
         @bpack.descriptor(baseunits=EBaseUnits.BYTES)
         @dataclasses.dataclass
@@ -487,8 +487,8 @@ class TestUtils:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert bpack.get_baseunits(Record) == EBaseUnits.BYTES
-        assert bpack.get_baseunits(Record()) == EBaseUnits.BYTES
+        assert bpack.baseunits(Record) == EBaseUnits.BYTES
+        assert bpack.baseunits(Record()) == EBaseUnits.BYTES
 
         @bpack.descriptor(baseunits=EBaseUnits.BITS, size=16)
         @dataclasses.dataclass
@@ -496,15 +496,15 @@ class TestUtils:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert bpack.get_baseunits(Record) == EBaseUnits.BITS
-        assert bpack.get_baseunits(Record()) == EBaseUnits.BITS
+        assert bpack.baseunits(Record) == EBaseUnits.BITS
+        assert bpack.baseunits(Record()) == EBaseUnits.BITS
 
         @dataclasses.dataclass
         class Record:
             field_1: int = 0
 
         with pytest.raises(TypeError):
-            bpack.get_baseunits(Record)
+            bpack.baseunits(Record)
 
     @staticmethod
     def test_order():

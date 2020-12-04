@@ -14,7 +14,7 @@ from .utils import classdecorator
 
 __all__ = [
     'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
-    'EOrder', 'EBaseUnits', 'order', 'get_baseunits',
+    'EOrder', 'EBaseUnits', 'order', 'baseunits',
     'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
     'BASEUNITS_ATTR_NAME', 'METADATA_KEY',
@@ -298,7 +298,7 @@ def calcsize(obj) -> int:
     return obj.__len__()
 
 
-def get_baseunits(obj) -> EBaseUnits:
+def baseunits(obj) -> EBaseUnits:
     """Return the base units of a binary record descriptor."""
     try:
         return getattr(obj, BASEUNITS_ATTR_NAME)
