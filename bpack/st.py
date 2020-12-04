@@ -1,4 +1,4 @@
-"""Bitarray based decoder for binary data structures."""
+"""Struct based codec for binary data structures."""
 
 import struct
 
@@ -6,7 +6,12 @@ from typing import Optional
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields, field_descriptors, baseunits
+from .descriptors import (
+    EBaseUnits, EOrder, fields, field_descriptors, baseunits, order,
+)
+
+
+__all__ = ['Decoder', 'decoder']
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
@@ -69,18 +74,31 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
 
 
 class Decoder:
-    """Struct based data decoder."""
+    """Struct based data decoder.
 
-    def __init__(self, descriptor, *, order: str = '>'):
+    Default byte-order: MSB.
+    """
+
+    def __init__(self, descriptor):
         if baseunits(descriptor) is not EBaseUnits.BYTES:
             raise ValueError(
                 'struct decoder only accepts descriptors with '
                 'base units "bytes"')
 
-        if order not in ('', '>', '<', '=', '@', '!'):
-            raise TypeError(f'invalid order: {order!r}')
+        byteorder = order(descriptor)
+        if byteorder is None:
+            byteorder = EOrder.MSB
 
-        fmt = order + ''.join(
+        if byteorder.value not in ('', '>', '<', '=', '@', '!'):
+            raise TypeError(f'invalid byte order: {byteorder!r}')
+
+        # assert all(descr.order for descr in field_descriptors(descriptor))
+
+        byteorder = byteorder.value
+
+        # NOTE: struct expects that the byteorder specifier is used only
+        #       once at the beginning of the format string
+        fmt = byteorder + ''.join(
             _to_fmt(field_descr.type, field_descr.size, order='')
             for field_descr in field_descriptors(descriptor, pad=True)
         )
@@ -112,14 +130,14 @@ class Decoder:
 
 
 @classdecorator
-def decoder(cls, **kwargs):
+def decoder(cls):
     """Class decorator to add decoding methods to a descriptor classes.
 
     The decorator automatically generates a :class:`Decoder` object
     form the input descriptor class and attach a "from_bytes" method
     using the decoder to the descriptor class itself.
     """
-    decoder_ = Decoder(descriptor=cls, **kwargs)
+    decoder_ = Decoder(descriptor=cls)
 
     decode_func = utils.create_fn(
         name='decode',

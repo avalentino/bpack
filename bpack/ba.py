@@ -1,64 +1,99 @@
-"""Bitarray based decoder for binary data structures."""
+"""Bitarray based codec for binary data structures."""
 
+import sys
 import struct
-import collections.abc
 
 import bitarray
 import bitarray.util
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields, field_descriptors, baseunits
+from .descriptors import (
+    EBaseUnits, EOrder, fields, field_descriptors, baseunits, order,
+)
 
 
-# TODO: custom ba_to_int with size
+__all__ = ['Decoder', 'decoder']
 
 
-def ba_to_float(ba: bitarray.bitarray, order: str = '>') -> float:
+ba2int = bitarray.util.ba2int
+
+
+def ba_to_float_factory(size, order: str = '>'):
     """Convert a bitarray into a float."""
-    if len(ba) == 32:
-        return struct.unpack(f'{order}f', ba.tobytes())[0]
-    elif len(ba) == 64:
-        return struct.unpack(f'{order}d', ba.tobytes())[0]
+    if size == 16:
+        fmt = f'{order}e'
+    elif size == 32:
+        fmt = f'{order}f'
+    elif size == 64:
+        fmt = f'{order}d'
     else:
-        raise ValueError('ba must be 32 or 64 bits')
+        raise ValueError('floating point item size must be 16, 32 or 64 bits')
+
+    codec = struct.Struct(fmt)
+
+    def func(ba):
+        return codec.unpack(ba.tobytes())[0]
+
+    return func
 
 
-STD_CONVERTER_MAP = {
-    bool: lambda ba: bool(bitarray.util.ba2int(ba)),
-    int: bitarray.util.ba2int,
-    float: ba_to_float,
-    bytes: lambda ba: ba.tobytes(),
-    str: lambda ba: ba.tobytes().decode('ascii'),
-}
+def converter_factory(type_, size=None, signed=False, order='>'):
+    if type_ is int:
+        def func(ba):
+            return ba2int(ba, signed)
+    elif type_ is float:
+        func = ba_to_float_factory(size, order)
+    elif type_ is bytes:
+        def func(ba):
+            return ba.tobytes()
+    elif type_ is str:
+        def func(ba):
+            return ba.tobytes().decode('ascii')
+    elif type_ is bool:
+        def func(ba):
+            return bool(bitarray.util.ba2int(ba))
+    else:
+        raise TypeError(
+            f'type "{type_}" is not supported by the bpack.ba backend '
+            f'(bitarray)')
 
-DEFAULT_CONVERTERS = object()
+    return func
+
+
+def _order_to_endian(order: EOrder) -> str:
+    if order is EOrder.NATIVE:
+        endian = sys.byteorder
+    elif order in {EOrder.MSB, EOrder.DEFAULT}:
+        endian = 'big'
+    else:
+        endian = 'little'
+    return endian
 
 
 class Decoder:
-    """Bitarray based data decoder."""
+    """Bitarray based data decoder.
 
-    def __init__(self, descriptor, converters=DEFAULT_CONVERTERS):
+    Default bit-order: MSB.
+    """
+
+    def __init__(self, descriptor, converters=converter_factory):
         if baseunits(descriptor) is not EBaseUnits.BITS:
             raise ValueError(
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')
 
-        if converters is DEFAULT_CONVERTERS:
-            converters = STD_CONVERTER_MAP
+        bitorder = order(descriptor)
+        if bitorder is None:
+            bitorder = EOrder.MSB
 
-        if isinstance(converters, collections.abc.Mapping):
-            converters_map = converters
-            try:
-                converters = [
-                    converters_map[field_.type]
-                    for field_ in fields(descriptor)
-                ]
-
-            except KeyError as exc:
-                type_ = str(exc)
-                raise TypeError(
-                    f'no conversion function available for type {type_!r}')
+        if callable(converters):
+            conv_factory = converters
+            converters = [
+                conv_factory(field_descr.type, field_descr.size,
+                             field_descr.signed, str(bitorder.value))
+                for field_descr in field_descriptors(descriptor)
+            ]
 
         if converters is not None:
             converters = list(converters)
@@ -68,6 +103,7 @@ class Decoder:
                     f'the number of converters ({len(converters)}) does not '
                     f'match the number of fields ({n_fields})')
 
+        self._endian = _order_to_endian(bitorder)
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [
@@ -77,7 +113,7 @@ class Decoder:
 
     def decode(self, data: bytes):
         """Decode binary data and return a record object."""
-        ba = bitarray.bitarray()
+        ba = bitarray.bitarray(endian=self._endian)
         ba.frombytes(data)
         values = [ba[slice_] for slice_ in self._slices]
 
@@ -91,17 +127,14 @@ class Decoder:
 
 
 @classdecorator
-def decoder(cls, converter_map=DEFAULT_CONVERTERS):
+def decoder(cls, *, converters=converter_factory):
     """Class decorator to add decoding methods to a descriptor classes.
 
     The decorator automatically generates a :class:`Decoder` object
     form the input descriptor class and attach a "from_bytes" method
     using the decoder to the descriptor class itself.
     """
-    if converter_map is DEFAULT_CONVERTERS:
-        converter_map = STD_CONVERTER_MAP
-
-    decoder_ = Decoder(descriptor=cls, converters=converter_map)
+    decoder_ = Decoder(descriptor=cls, converters=converters)
 
     decode_func = utils.create_fn(
         name='decode',
