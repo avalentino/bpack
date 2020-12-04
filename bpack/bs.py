@@ -4,7 +4,7 @@ import bitstruct
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, field_descriptors
+from .descriptors import EBaseUnits, field_descriptors, baseunits
 
 
 _TYPE_TO_STR = {
@@ -33,7 +33,7 @@ class Decoder:
     """Bitstruct based data decoder."""
 
     def __init__(self, descriptor, *, order=''):
-        if descriptor.__bpack_baseunits__ is not EBaseUnits.BITS:
+        if baseunits(descriptor) is not EBaseUnits.BITS:
             raise ValueError(
                 'bitsruct decoder only accepts descriptors with '
                 'base units "bits"')

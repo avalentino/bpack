@@ -6,7 +6,7 @@ from typing import Optional
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields, field_descriptors
+from .descriptors import EBaseUnits, fields, field_descriptors, baseunits
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
@@ -72,7 +72,7 @@ class Decoder:
     """Struct based data decoder."""
 
     def __init__(self, descriptor, *, order: str = '>'):
-        if descriptor.__bpack_baseunits__ is not EBaseUnits.BYTES:
+        if baseunits(descriptor) is not EBaseUnits.BYTES:
             raise ValueError(
                 'struct decoder only accepts descriptors with '
                 'base units "bytes"')

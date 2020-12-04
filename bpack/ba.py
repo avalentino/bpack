@@ -8,7 +8,7 @@ import bitarray.util
 
 from . import utils
 from .utils import classdecorator
-from .descriptors import EBaseUnits, fields, field_descriptors
+from .descriptors import EBaseUnits, fields, field_descriptors, baseunits
 
 
 # TODO: custom ba_to_int with size
@@ -39,7 +39,7 @@ class Decoder:
     """Bitarray based data decoder."""
 
     def __init__(self, descriptor, converters=DEFAULT_CONVERTERS):
-        if descriptor.__bpack_baseunits__ is not EBaseUnits.BITS:
+        if baseunits(descriptor) is not EBaseUnits.BITS:
             raise ValueError(
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')
