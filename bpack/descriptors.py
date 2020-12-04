@@ -306,7 +306,7 @@ def baseunits(obj) -> EBaseUnits:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def order(obj) -> EBaseUnits:
+def order(obj) -> EOrder:
     """Return the bit/byte order of a binary record descriptor."""
     try:
         return getattr(obj, ORDER_ATTR_NAME)
