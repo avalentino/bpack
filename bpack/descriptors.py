@@ -6,7 +6,7 @@ import types
 import warnings
 import dataclasses
 import collections.abc
-from typing import Optional, Iterable, Type
+from typing import Optional, Iterable, Type, Union
 
 from . import utils
 from .utils import classdecorator
@@ -14,7 +14,7 @@ from .utils import classdecorator
 
 __all__ = [
     'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
-    'EBaseUnits', 'get_baseunits',
+    'EOrder', 'EBaseUnits', 'order', 'get_baseunits',
     'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
     'BASEUNITS_ATTR_NAME', 'METADATA_KEY',
@@ -22,6 +22,7 @@ __all__ = [
 
 
 BASEUNITS_ATTR_NAME = '__bpack_baseunits__'
+ORDER_ATTR_NAME = '__bpack_order__'
 METADATA_KEY = '__bpack_metadata__'
 
 
@@ -32,15 +33,17 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
-# class EOrder(enum.Enum):
-#     """Enumeration ofr bit/byte order."""
-#
-#     MSB = '>'
-#     LSB = '<'
-#     NATIVE = '='
-#     DEFAULT = ''
+class EOrder(enum.Enum):
+    """Enumeration ofr bit/byte order."""
+
+    MSB = '>'
+    LSB = '<'
+    NATIVE = '='
+    DEFAULT = ''
 
 
+# TODO: repeat attribute
+# TODO: converters (TBD, or in decoder)
 @dataclasses.dataclass
 class BinFieldDescriptor:
     """Descriptor for bpack fields."""
@@ -49,6 +52,7 @@ class BinFieldDescriptor:
     size: Optional[int] = None
     offset: Optional[int] = None
     signed: Optional[bool] = None
+    # repeat: Optional[int] = None
     # order: Optional[EOrder] = None
     # converter: Optional[Callable] = None
 
@@ -180,12 +184,10 @@ class DescriptorConsistencyError(ValueError):
     pass
 
 
-# TODO: signed attribute
-# TODO: repeat attribute
-# TODO: converters (TBD, or in decoder)
 # TODO: order for byte/bit order
 @classdecorator
-def descriptor(cls, size: Optional[int] = None,
+def descriptor(cls, *, size: Optional[int] = None,
+               order: Optional[Union[str, EOrder]] = None,
                baseunits: EBaseUnits = EBaseUnits.BYTES):
     """Class decorator to define descriptors for binary records.
 
@@ -258,6 +260,7 @@ def descriptor(cls, size: Optional[int] = None,
         size = math.ceil(size / 8)
 
     setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
+    setattr(cls, ORDER_ATTR_NAME, EOrder(order) if order is not None else None)
 
     get_len_func = utils.create_fn(
         name='__len__',
@@ -299,6 +302,14 @@ def get_baseunits(obj) -> EBaseUnits:
     """Return the base units of a binary record descriptor."""
     try:
         return getattr(obj, BASEUNITS_ATTR_NAME)
+    except AttributeError:
+        raise TypeError(f'"{obj}" is not a descriptor')
+
+
+def order(obj) -> EBaseUnits:
+    """Return the bit/byte order of a binary record descriptor."""
+    try:
+        return getattr(obj, ORDER_ATTR_NAME)
     except AttributeError:
         raise TypeError(f'"{obj}" is not a descriptor')
 

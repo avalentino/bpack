@@ -7,7 +7,7 @@ import pytest
 
 import bpack
 import bpack.descriptors
-from bpack import EBaseUnits
+from bpack import EBaseUnits, EOrder
 from bpack.descriptors import get_field_descriptor, is_field
 from bpack.descriptors import Field as BPackField
 
@@ -101,6 +101,7 @@ class TestRecord:
             field_2: float = bpack.field(size=8, default=1/3)
 
         assert bpack.get_baseunits(Record) is EBaseUnits(baseunits)
+        assert bpack.get_baseunits(Record()) is EBaseUnits(baseunits)
 
     @staticmethod
     def test_byte_alignment_warning():
@@ -131,6 +132,33 @@ class TestRecord:
             class Record:
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: float = bpack.field(size=8, default=1/3)
+
+    @staticmethod
+    @pytest.mark.parametrize(argnames='order',
+                             argvalues=[EOrder.LSB, EOrder.MSB,
+                                        EOrder.NATIVE, EOrder.DEFAULT,
+                                        '<', '>', '=', '', None])
+    def test_order(order):
+        @bpack.descriptor(order=order)
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=8, default=0)
+            field_2: float = bpack.field(size=8, default=1/3)
+
+        if isinstance(order, str):
+            assert bpack.order(Record) is EOrder(order)
+            assert bpack.order(Record()) is EOrder(order)
+        else:
+            assert bpack.order(Record) is order
+            assert bpack.order(Record()) is order
+
+    @staticmethod
+    def test_invalid_order():
+        with pytest.raises(ValueError):
+            @bpack.descriptor(order='invalid')
+            @dataclasses.dataclass
+            class Record:
+                field_1: int = bpack.field(size=8, default=0)
 
     @staticmethod
     def test_invalid_field_class():
@@ -478,6 +506,17 @@ class TestUtils:
         with pytest.raises(TypeError):
             bpack.get_baseunits(Record)
 
+    @staticmethod
+    def test_order():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: float = bpack.field(size=8, default=1/3)
+
+        assert bpack.order(Record) is None
+        assert bpack.order(Record()) is None
+
 
 class TestFieldDescriptor:
     @staticmethod
@@ -690,19 +729,19 @@ class TestFieldDescriptorUtils:
             field_2: float = bpack.field(size=3, offset=4, default=0.1)
 
         data = [(int, 1, 2, True), (float, 3, 4, None)]
-        for field, (type, size, offset, signed) in zip(bpack.fields(Record),
-                                                       data):
+        for field, (type_, size, offset, signed) in zip(bpack.fields(Record),
+                                                        data):
             descr = bpack.descriptors.get_field_descriptor(field)
-            assert descr.type is type
+            assert descr.type is type_
             assert descr.size == size
             assert descr.offset == offset
             assert descr.signed is signed
 
         record = Record()
-        for field, (type, size, offset, signed) in zip(bpack.fields(record),
-                                                       data):
+        for field, (type_, size, offset, signed) in zip(bpack.fields(record),
+                                                        data):
             descr = bpack.descriptors.get_field_descriptor(field)
-            assert descr.type is type
+            assert descr.type is type_
             assert descr.size == size
             assert descr.offset == offset
             assert descr.signed is signed
