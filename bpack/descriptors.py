@@ -14,7 +14,7 @@ from .utils import classdecorator
 
 __all__ = [
     'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
-    'EOrder', 'EBaseUnits', 'order', 'baseunits',
+    'EEndian', 'EBaseUnits', 'byteorder', 'baseunits',
     'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
     'BASEUNITS_ATTR_NAME', 'METADATA_KEY',
@@ -22,7 +22,7 @@ __all__ = [
 
 
 BASEUNITS_ATTR_NAME = '__bpack_baseunits__'
-ORDER_ATTR_NAME = '__bpack_order__'
+BYTEORDER_ATTR_NAME = '__bpack_byteorder__'
 METADATA_KEY = '__bpack_metadata__'
 
 
@@ -33,11 +33,11 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
-class EOrder(enum.Enum):
-    """Enumeration for bit/byte order."""
+class EEndian(enum.Enum):
+    """Enumeration for byte order (endianess)."""
 
-    MSB = '>'
-    LSB = '<'
+    BIG = '>'
+    LITTLE = '<'
     NATIVE = '='
     DEFAULT = ''
 
@@ -187,7 +187,7 @@ class DescriptorConsistencyError(ValueError):
 # TODO: order for byte/bit order
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
-               order: Optional[Union[str, EOrder]] = None,
+               byteorder: Optional[Union[str, EEndian]] = None,
                baseunits: EBaseUnits = EBaseUnits.BYTES):
     """Class decorator to define descriptors for binary records.
 
@@ -260,7 +260,8 @@ def descriptor(cls, *, size: Optional[int] = None,
         size = math.ceil(size / 8)
 
     setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
-    setattr(cls, ORDER_ATTR_NAME, EOrder(order) if order is not None else None)
+    setattr(cls, BYTEORDER_ATTR_NAME,
+            EEndian(byteorder) if byteorder is not None else None)
 
     get_len_func = utils.create_fn(
         name='__len__',
@@ -306,10 +307,10 @@ def baseunits(obj) -> EBaseUnits:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def order(obj) -> EOrder:
-    """Return the bit/byte order of a binary record descriptor."""
+def byteorder(obj) -> EEndian:
+    """Return the byte order of a binary record descriptor (endianess)."""
     try:
-        return getattr(obj, ORDER_ATTR_NAME)
+        return getattr(obj, BYTEORDER_ATTR_NAME)
     except AttributeError:
         raise TypeError(f'"{obj}" is not a descriptor')
 

@@ -9,7 +9,7 @@ import bitarray.util
 from . import utils
 from .utils import classdecorator
 from .descriptors import (
-    EBaseUnits, EOrder, fields, field_descriptors, baseunits, order,
+    EBaseUnits, EEndian, fields, field_descriptors, baseunits, byteorder,
 )
 
 
@@ -19,14 +19,14 @@ __all__ = ['Decoder', 'decoder']
 ba2int = bitarray.util.ba2int
 
 
-def ba_to_float_factory(size, order: str = '>'):
+def ba_to_float_factory(size, byteorder: str = '>'):
     """Convert a bitarray into a float."""
     if size == 16:
-        fmt = f'{order}e'
+        fmt = f'{byteorder}e'
     elif size == 32:
-        fmt = f'{order}f'
+        fmt = f'{byteorder}f'
     elif size == 64:
-        fmt = f'{order}d'
+        fmt = f'{byteorder}d'
     else:
         raise ValueError('floating point item size must be 16, 32 or 64 bits')
 
@@ -61,10 +61,10 @@ def converter_factory(type_, size=None, signed=False, order='>'):
     return func
 
 
-def _order_to_endian(order: EOrder) -> str:
-    if order is EOrder.NATIVE:
+def _order_to_endian(order: EEndian) -> str:
+    if order is EEndian.NATIVE:
         endian = sys.byteorder
-    elif order in {EOrder.MSB, EOrder.DEFAULT}:
+    elif order in {EEndian.BIG, EEndian.DEFAULT}:
         endian = 'big'
     else:
         endian = 'little'
@@ -83,15 +83,15 @@ class Decoder:
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')
 
-        bitorder = order(descriptor)
-        if bitorder is None:
-            bitorder = EOrder.MSB
+        order = byteorder(descriptor)
+        if order is None:
+            order = EEndian.BIG
 
         if callable(converters):
             conv_factory = converters
             converters = [
                 conv_factory(field_descr.type, field_descr.size,
-                             field_descr.signed, str(bitorder.value))
+                             field_descr.signed, str(order.value))
                 for field_descr in field_descriptors(descriptor)
             ]
 
@@ -103,7 +103,7 @@ class Decoder:
                     f'the number of converters ({len(converters)}) does not '
                     f'match the number of fields ({n_fields})')
 
-        self._endian = _order_to_endian(bitorder)
+        self._endian = _order_to_endian(order)
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [

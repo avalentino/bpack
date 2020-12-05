@@ -7,7 +7,7 @@ from typing import Optional
 from . import utils
 from .utils import classdecorator
 from .descriptors import (
-    EBaseUnits, EOrder, fields, field_descriptors, baseunits, order,
+    EBaseUnits, EEndian, fields, field_descriptors, baseunits, byteorder,
 )
 
 
@@ -36,6 +36,7 @@ _TYPE_SIGNED_AND_SIZE_TO_STR = {
     (str, None, None): 's',
     (None, None, None): 'x',        # padding
 }
+
 
 _DEFAULT_SIZE = {
     bool: 1,
@@ -85,20 +86,20 @@ class Decoder:
                 'struct decoder only accepts descriptors with '
                 'base units "bytes"')
 
-        byteorder = order(descriptor)
-        if byteorder is None:
-            byteorder = EOrder.MSB
+        byteorder_ = byteorder(descriptor)
+        if byteorder_ is None:
+            byteorder_ = EEndian.BIG
 
-        if byteorder.value not in ('', '>', '<', '=', '@', '!'):
-            raise TypeError(f'invalid byte order: {byteorder!r}')
+        if byteorder_.value not in ('', '>', '<', '=', '@', '!'):
+            raise TypeError(f'invalid byte order: {byteorder_!r}')
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
 
-        byteorder = byteorder.value
+        byteorder_ = byteorder_.value
 
         # NOTE: struct expects that the byteorder specifier is used only
         #       once at the beginning of the format string
-        fmt = byteorder + ''.join(
+        fmt = byteorder_ + ''.join(
             _to_fmt(field_descr.type, field_descr.size, order='')
             for field_descr in field_descriptors(descriptor, pad=True)
         )

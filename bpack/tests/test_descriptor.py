@@ -7,7 +7,7 @@ import pytest
 
 import bpack
 import bpack.descriptors
-from bpack import EBaseUnits, EOrder
+from bpack import EBaseUnits, EEndian
 from bpack.descriptors import get_field_descriptor, is_field
 from bpack.descriptors import BinFieldDescriptor, METADATA_KEY
 from bpack.descriptors import Field as BPackField
@@ -136,27 +136,27 @@ class TestRecord:
 
     @staticmethod
     @pytest.mark.parametrize(argnames='order',
-                             argvalues=[EOrder.LSB, EOrder.MSB,
-                                        EOrder.NATIVE, EOrder.DEFAULT,
+                             argvalues=[EEndian.LITTLE, EEndian.BIG,
+                                        EEndian.NATIVE, EEndian.DEFAULT,
                                         '<', '>', '=', '', None])
     def test_order(order):
-        @bpack.descriptor(order=order)
+        @bpack.descriptor(byteorder=order)
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=8, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
         if isinstance(order, str):
-            assert bpack.order(Record) is EOrder(order)
-            assert bpack.order(Record()) is EOrder(order)
+            assert bpack.byteorder(Record) is EEndian(order)
+            assert bpack.byteorder(Record()) is EEndian(order)
         else:
-            assert bpack.order(Record) is order
-            assert bpack.order(Record()) is order
+            assert bpack.byteorder(Record) is order
+            assert bpack.byteorder(Record()) is order
 
     @staticmethod
     def test_invalid_order():
         with pytest.raises(ValueError):
-            @bpack.descriptor(order='invalid')
+            @bpack.descriptor(byteorder='invalid')
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.field(size=8, default=0)
@@ -515,8 +515,8 @@ class TestUtils:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert bpack.order(Record) is None
-        assert bpack.order(Record()) is None
+        assert bpack.byteorder(Record) is None
+        assert bpack.byteorder(Record()) is None
 
 
 class TestFieldDescriptor:

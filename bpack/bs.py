@@ -8,7 +8,7 @@ import bitstruct
 from . import utils
 from .utils import classdecorator
 from .descriptors import (
-    EBaseUnits, EOrder, field_descriptors, baseunits, order,
+    EBaseUnits, EEndian, field_descriptors, baseunits, byteorder,
 )
 
 
@@ -27,12 +27,13 @@ _TYPE_TO_STR = {
 }
 
 
-def _to_fmt(type_, size: int, order: str = '', signed: Optional[bool] = None,
+def _to_fmt(type_, size: int, bitorder: str = '',
+            signed: Optional[bool] = None,
             repeat: Optional[int] = None) -> str:
     if size <= 0:
         raise TypeError(f'invalid size: {size:r}')
-    if order not in ('', '>', '<'):
-        raise TypeError(f'invalid order: {order:r}')
+    if bitorder not in ('', '>', '<'):
+        raise TypeError(f'invalid order: {bitorder:r}')
     if repeat is None:
         repeat = 1
     elif repeat <= 0:
@@ -40,15 +41,15 @@ def _to_fmt(type_, size: int, order: str = '', signed: Optional[bool] = None,
 
     key = (type_, signed) if type_ is int and signed is not None else type_
     try:
-        fmt = f'{order}{_TYPE_TO_STR[key]}{size}' * repeat
+        fmt = f'{bitorder}{_TYPE_TO_STR[key]}{size}' * repeat
     except KeyError:
-        raise TypeError(f'unsupported type: {type:!r}')
+        raise TypeError(f'unsupported type: {type_:!r}')
 
     return fmt
 
 
-def _order_to_str(order: EOrder) -> str:
-    if order is EOrder.NATIVE:
+def _endianess_to_str(order: EEndian) -> str:
+    if order is EEndian.NATIVE:
         return '<' if sys.byteorder == 'little' else '>'
     return order.value
 
@@ -65,18 +66,21 @@ class Decoder:
                 'bitsruct decoder only accepts descriptors with '
                 'base units "bits"')
 
-        bitorder = order(descriptor)
-        if bitorder is None:
-            bitorder = EOrder.MSB
+        order = byteorder(descriptor)
+        if order is None:
+            order = EEndian.BIG
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
-        bitorder = _order_to_str(bitorder)
+        order = _endianess_to_str(order)
 
+        # NOTE: bit order is not specified hence the default bitstruct order
+        #       (MSB) is assumed
         fmt = ''.join(
-            _to_fmt(field_descr.type, field_descr.size, bitorder,
-                    field_descr.signed)  # field_descr.repeat
+            _to_fmt(field_descr.type, size=field_descr.size, bitorder='',
+                    signed=field_descr.signed)  # field_descr.repeat
             for field_descr in field_descriptors(descriptor, pad=True)
         )
+        fmt = fmt + order  # byte order
 
         self._codec = bitstruct.compile(fmt)
         self._descriptor = descriptor

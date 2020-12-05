@@ -23,16 +23,18 @@ Limitations
   It is should be easy for the user to leverage tools provided by the *bpack*
   Python package to support more complex decoding scenarios.
 * currently it is assumed that all fields in a binary record share the
-  same bit/byte order. The management of different bit/byte order in the same
+  same byte order. The management of different byte order in the same
   binary record is, in principle, possible but not planned at the moment.
+* currently it is not possible to specify the bit order.
 
 
 Possible additional features still not implemented
 --------------------------------------------------
 
 * support for signed/unsigned integer specification
-* support bit/byte order specification at descriptor level
+* support byte order specification at descriptor level
   (and at field level TBD)
+* support for bit order specification (TBD)
 * support for list fields (including list length specification)
 * record nesting (the field of a descriptor cna be another descriptor)
 * support for enums
