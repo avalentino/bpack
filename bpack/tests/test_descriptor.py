@@ -9,6 +9,7 @@ import bpack
 import bpack.descriptors
 from bpack import EBaseUnits, EOrder
 from bpack.descriptors import get_field_descriptor, is_field
+from bpack.descriptors import BinFieldDescriptor, METADATA_KEY
 from bpack.descriptors import Field as BPackField
 
 
@@ -187,7 +188,7 @@ class TestRecord:
                 field_2: float = bpack.field(size=None, default=1/3)
 
     @staticmethod
-    def test_invalid_inconsistent_field_offset_and_size():
+    def test_inconsistent_field_offset_and_size():
         with pytest.raises(ValueError):
             @bpack.descriptor
             @dataclasses.dataclass
@@ -651,8 +652,6 @@ class TestFieldDescriptorUtils:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        BinFieldDescriptor = bpack.descriptors.BinFieldDescriptor
-
         field_descriptors = bpack.descriptors.field_descriptors(Record)
         assert isinstance(field_descriptors, collections.abc.Iterable)
         field_descriptors = list(field_descriptors)
@@ -676,7 +675,6 @@ class TestFieldDescriptorUtils:
             field_2: float = bpack.field(size=8, default=1/3, offset=8)
 
         types_ = [int, None, float, None]
-        BinFieldDescriptor = bpack.descriptors.BinFieldDescriptor
 
         field_descriptors = bpack.descriptors.field_descriptors(Record,
                                                                 pad=True)
@@ -794,8 +792,6 @@ class TestFieldDescriptorUtils:
                                                      signed=True)
         bpack.descriptors.set_field_descriptor(field, descr)
         assert field.metadata is not None
-
-        METADATA_KEY = bpack.descriptors.METADATA_KEY
         assert METADATA_KEY in field.metadata
 
         descr_metadata = field.metadata[METADATA_KEY]

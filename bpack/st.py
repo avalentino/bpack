@@ -63,9 +63,9 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
             key = (type_, signed, None)
             return f'{order}{size}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}' * repeat
         else:
-            repeat = '' if repeat is None else str(repeat)
+            repeat_str = '' if repeat is None else str(repeat)
             key = (type_, signed, size)
-            return f'{order}{repeat}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}'
+            return f'{order}{repeat_str}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}'
     except KeyError:
         raise TypeError(
             f'unable to generate format string for '

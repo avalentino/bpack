@@ -34,7 +34,7 @@ class EBaseUnits(enum.Enum):
 
 
 class EOrder(enum.Enum):
-    """Enumeration ofr bit/byte order."""
+    """Enumeration for bit/byte order."""
 
     MSB = '>'
     LSB = '<'
@@ -98,7 +98,7 @@ class BinFieldDescriptor:
             self._validate_signed()
 
     @staticmethod
-    def is_int(type_):
+    def _is_int(type_):
         # TODO: improve integer type detection
         return type_ is int
 
@@ -110,7 +110,7 @@ class BinFieldDescriptor:
             self._validate_offset()
         if self.signed is not None:
             self._validate_signed()
-            if not self.is_int(self.type):
+            if not self._is_int(self.type):
                 warnings.warn(
                     f'the "signed" parameter will be ignored for non-integer '
                     f'type: "{self.type}"')
