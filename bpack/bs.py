@@ -5,11 +5,11 @@ from typing import Optional
 
 import bitstruct
 
+import bpack
+
 from . import utils
 from .utils import classdecorator
-from .descriptors import (
-    EBaseUnits, EEndian, field_descriptors, baseunits, byteorder,
-)
+from .descriptors import field_descriptors
 
 
 __all__ = ['Decoder', 'decoder']
@@ -48,8 +48,8 @@ def _to_fmt(type_, size: int, bitorder: str = '',
     return fmt
 
 
-def _endianess_to_str(order: EEndian) -> str:
-    if order is EEndian.NATIVE:
+def _endianess_to_str(order: bpack.EEndian) -> str:
+    if order is bpack.EEndian.NATIVE:
         return '<' if sys.byteorder == 'little' else '>'
     return order.value
 
@@ -61,17 +61,17 @@ class Decoder:
     """
 
     def __init__(self, descriptor):
-        if baseunits(descriptor) is not EBaseUnits.BITS:
+        if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BITS:
             raise ValueError(
                 'bitsruct decoder only accepts descriptors with '
                 'base units "bits"')
 
-        order = byteorder(descriptor)
-        if order is None:
-            order = EEndian.BIG
+        byteorder = bpack.byteorder(descriptor)
+        if byteorder is None:
+            byteorder = bpack.EEndian.BIG
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
-        order = _endianess_to_str(order)
+        byteorder = _endianess_to_str(byteorder)
 
         # NOTE: bit order is not specified hence the default bitstruct order
         #       (MSB) is assumed
@@ -80,7 +80,7 @@ class Decoder:
                     signed=field_descr.signed)  # field_descr.repeat
             for field_descr in field_descriptors(descriptor, pad=True)
         )
-        fmt = fmt + order  # byte order
+        fmt = fmt + byteorder  # byte order
 
         self._codec = bitstruct.compile(fmt)
         self._descriptor = descriptor

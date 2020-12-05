@@ -4,11 +4,11 @@ import struct
 
 from typing import Optional
 
+import bpack
+
 from . import utils
 from .utils import classdecorator
-from .descriptors import (
-    EBaseUnits, EEndian, fields, field_descriptors, baseunits, byteorder,
-)
+from .descriptors import field_descriptors
 
 
 __all__ = ['Decoder', 'decoder']
@@ -81,25 +81,25 @@ class Decoder:
     """
 
     def __init__(self, descriptor):
-        if baseunits(descriptor) is not EBaseUnits.BYTES:
+        if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BYTES:
             raise ValueError(
                 'struct decoder only accepts descriptors with '
                 'base units "bytes"')
 
-        byteorder_ = byteorder(descriptor)
-        if byteorder_ is None:
-            byteorder_ = EEndian.BIG
+        byteorder = bpack.byteorder(descriptor)
+        if byteorder is None:
+            byteorder = bpack.EEndian.BIG
 
-        if byteorder_.value not in ('', '>', '<', '=', '@', '!'):
-            raise TypeError(f'invalid byte order: {byteorder_!r}')
+        if byteorder.value not in ('', '>', '<', '=', '@', '!'):
+            raise TypeError(f'invalid byte order: {byteorder!r}')
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
 
-        byteorder_ = byteorder_.value
+        byteorder = byteorder.value
 
         # NOTE: struct expects that the byteorder specifier is used only
         #       once at the beginning of the format string
-        fmt = byteorder_ + ''.join(
+        fmt = byteorder + ''.join(
             _to_fmt(field_descr.type, field_descr.size, order='')
             for field_descr in field_descriptors(descriptor, pad=True)
         )
@@ -118,7 +118,7 @@ class Decoder:
         #     if issubclass(field_.type, enum.Enum))
         self._converters = [
             (idx, converters[field_.type])
-            for idx, field_ in enumerate(fields(self._descriptor))
+            for idx, field_ in enumerate(bpack.fields(self._descriptor))
             if field_.type in converters
         ]
 

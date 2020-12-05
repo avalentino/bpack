@@ -6,11 +6,11 @@ import struct
 import bitarray
 import bitarray.util
 
+import bpack
+
 from . import utils
 from .utils import classdecorator
-from .descriptors import (
-    EBaseUnits, EEndian, fields, field_descriptors, baseunits, byteorder,
-)
+from .descriptors import field_descriptors
 
 
 __all__ = ['Decoder', 'decoder']
@@ -61,10 +61,10 @@ def converter_factory(type_, size=None, signed=False, order='>'):
     return func
 
 
-def _order_to_endian(order: EEndian) -> str:
-    if order is EEndian.NATIVE:
+def _byteorder_to_str(byteorder: bpack.EEndian) -> str:
+    if byteorder is bpack.EEndian.NATIVE:
         endian = sys.byteorder
-    elif order in {EEndian.BIG, EEndian.DEFAULT}:
+    elif byteorder in {bpack.EEndian.BIG, bpack.EEndian.DEFAULT}:
         endian = 'big'
     else:
         endian = 'little'
@@ -78,32 +78,32 @@ class Decoder:
     """
 
     def __init__(self, descriptor, converters=converter_factory):
-        if baseunits(descriptor) is not EBaseUnits.BITS:
+        if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BITS:
             raise ValueError(
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')
 
-        order = byteorder(descriptor)
-        if order is None:
-            order = EEndian.BIG
+        byteorder = bpack.byteorder(descriptor)
+        if byteorder is None:
+            byteorder = bpack.EEndian.BIG
 
         if callable(converters):
             conv_factory = converters
             converters = [
                 conv_factory(field_descr.type, field_descr.size,
-                             field_descr.signed, str(order.value))
+                             field_descr.signed, str(byteorder.value))
                 for field_descr in field_descriptors(descriptor)
             ]
 
         if converters is not None:
             converters = list(converters)
-            n_fields = len(list(fields(descriptor)))
+            n_fields = len(list(bpack.fields(descriptor)))
             if len(converters) != n_fields:
                 raise ValueError(
                     f'the number of converters ({len(converters)}) does not '
                     f'match the number of fields ({n_fields})')
 
-        self._endian = _order_to_endian(order)
+        self._endian = _byteorder_to_str(byteorder)
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [

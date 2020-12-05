@@ -8,13 +8,12 @@ import bpack
 import bpack.ba
 import bpack.bs
 import bpack.st
-from bpack import EBaseUnits
 
 
 # TODO: add support for enums
 
 
-@bpack.descriptor(baseunits=EBaseUnits.BITS)
+@bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
 @dataclasses.dataclass(frozen=True)
 class BitRecord:
     field_1: bool = bpack.field(size=1, default=True)
@@ -41,7 +40,7 @@ BIT_ENCODED_DATA_BE = b''.join([
 ])
 
 
-@bpack.descriptor(baseunits=EBaseUnits.BYTES)
+@bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
 @dataclasses.dataclass(frozen=True)
 class ByteRecord:
     field_01: bool = bpack.field(size=1, default=False)
@@ -140,7 +139,7 @@ def test_decoder_func(backend, Record, encoded_data, decoded_data):  # noqa
 @pytest.mark.parametrize('backend', [bpack.ba, bpack.bs])
 def test_bit_decoder_decorator(backend):
     @backend.decoder
-    @bpack.descriptor(baseunits=EBaseUnits.BITS)
+    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=3, default=0b101)
@@ -161,7 +160,7 @@ def test_bit_decoder_decorator(backend):
 @pytest.mark.parametrize('backend', [bpack.st], ids=['st'])
 def test_byte_decoder_decorator(backend):
     @backend.decoder
-    @bpack.descriptor(baseunits=EBaseUnits.BYTES)
+    @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=1, default=1)
@@ -177,9 +176,9 @@ def test_byte_decoder_decorator(backend):
 
 @pytest.mark.parametrize(
     'backend, baseunits',
-    [(bpack.ba, EBaseUnits.BITS),
-     (bpack.bs, EBaseUnits.BITS),
-     (bpack.st, EBaseUnits.BYTES)],
+    [(bpack.ba, bpack.EBaseUnits.BITS),
+     (bpack.bs, bpack.EBaseUnits.BITS),
+     (bpack.st, bpack.EBaseUnits.BYTES)],
     ids=['ba', 'bs', 'st'])
 def test_unsupported_type(backend, baseunits):
     class CustomType:
