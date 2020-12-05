@@ -46,8 +46,8 @@ BIT_ENCODED_DATA_BE = b''.join([
         0b10101000, 0b00000000,                             # fields for 1 to 3
         0b00111111, 0b10000000, 0b00000000, 0b00000000,     # field_4 (float32)
     ]),
-    b'abc',                                         # field_5 (bytes)
-    'ABC'.encode('ascii'),                          # field_6 (str)
+    b'abc',                                                 # field_5 (bytes)
+    'ABC'.encode('ascii'),                                  # field_6 (str)
     bytes([                                         # 4 padding bits + field_8
         0b11110111, 0b11111111, 0b11111111, 0b11111111,
     ]),
