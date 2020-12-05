@@ -15,6 +15,10 @@ from bpack.descriptors import Field as BPackField
 
 class TestFieldFactory:
     @staticmethod
+    def test_base():
+        bpack.field(size=1, offset=0, signed=False, default=0)
+
+    @staticmethod
     def test_field():
         with pytest.raises(TypeError):
             bpack.field()
@@ -52,6 +56,12 @@ class TestFieldFactory:
     def test_invalid_offset():
         with pytest.raises(ValueError):
             bpack.field(size=8, default=1/3, offset=-8)
+
+    @staticmethod
+    @pytest.mark.parametrize('value', [-8, 'a'])
+    def test_invalid_signed_type(value):
+        with pytest.raises(TypeError):
+            bpack.field(size=8, default=1, signed=value)
 
 
 class TestRecord:
@@ -197,6 +207,15 @@ class TestRecord:
                 field_2: float = bpack.field(size=8, offset=1, default=1/3)
 
     @staticmethod
+    def test_inconsistent_field_type_and_signed():
+        with pytest.warns(UserWarning, match='ignore'):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: int = bpack.field(size=4, default=0)
+                field_2: float = bpack.field(size=8, default=1/3, signed=True)
+
+    @staticmethod
     def test_explicit_size():
         size = 16
 
@@ -301,40 +320,49 @@ class TestFields:
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
-            field_1: int = bpack.field(size=4, default=0)
+            field_1: int = bpack.field(size=4, default=0, signed=True)
             field_2: float = bpack.field(size=8, default=1/3)
 
         # name, type, size, offset
-        field_data = [('field_1', int, 4, 0), ('field_2', float, 8, 4)]
+        field_data = [
+            ('field_1', int, 4, 0, True),
+            ('field_2', float, 8, 4, None),
+        ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
-            name, type_, size, offset = data
+            name, type_, size, offset, signed = data
             assert field_.name == name
             assert field_.type == type_
             field_descr = get_field_descriptor(field_)
             assert field_descr.type == type_
             assert field_descr.size == size
             assert field_descr.offset == offset
+            assert field_descr.signed == signed
 
     @staticmethod
     def test_field_size_02():
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
-            field_1: int = bpack.field(size=4, offset=1, default=0)
+            field_1: int = bpack.field(size=4, offset=1, default=0,
+                                       signed=False)
             field_2: float = bpack.field(size=8, default=1/3)
 
         # name, type, size, offset
-        field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 5)]
+        field_data = [
+            ('field_1', int, 4, 1, False),
+            ('field_2', float, 8, 5, None),
+        ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
-            name, type_, size, offset = data
+            name, type_, size, offset, signed = data
             assert field_.name == name
             assert field_.type == type_
             field_descr = get_field_descriptor(field_)
             assert field_descr.type == type_
             assert field_descr.size == size
             assert field_descr.offset == offset
+            assert field_descr.signed == signed
 
     @staticmethod
     def test_field_size_03():
@@ -345,16 +373,20 @@ class TestFields:
             field_2: float = bpack.field(size=8, offset=6, default=1/3)
 
         # name, type, size, offset
-        field_data = [('field_1', int, 4, 1), ('field_2', float, 8, 6)]
+        field_data = [
+            ('field_1', int, 4, 1, None),
+            ('field_2', float, 8, 6, None),
+        ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
-            name, type_, size, offset = data
+            name, type_, size, offset, signed = data
             assert field_.name == name
             assert field_.type == type_
             field_descr = get_field_descriptor(field_)
             assert field_descr.type == type_
             assert field_descr.size == size
             assert field_descr.offset == offset
+            assert field_descr.signed == signed
 
 
 class TestUtils:
