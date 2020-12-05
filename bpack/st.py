@@ -11,7 +11,11 @@ from .utils import classdecorator
 from .descriptors import field_descriptors
 
 
-__all__ = ['Decoder', 'decoder']
+__all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
+
+
+BACKEND_NAME = 'bitstruct'
+BACKEND_TYPE = bpack.EBaseUnits.BYTES
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
@@ -52,11 +56,9 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
             repeat: Optional[int] = None) -> str:
     size = _DEFAULT_SIZE.get(type_, size) if size is None else size
 
-    if size is None or size <= 0:
-        raise TypeError(f'invalid size: {size!r} for type {type_!r}')
-    if order not in ('', '>', '<', '=', '@', '!'):
-        raise TypeError(f'invalid order: {order!r}')
-    # signed = bool(signed)  # TODO: check
+    assert size is not None and size > 0
+    assert order in ('', '>', '<', '=', '@', '!'), f'invalid order: {order!r}'
+    assert signed in (True, False, None)
 
     try:
         if type_ in (str, bytes, None):  # none is for padding bytes
@@ -90,8 +92,7 @@ class Decoder:
         if byteorder is None:
             byteorder = bpack.EEndian.BIG
 
-        if byteorder.value not in ('', '>', '<', '=', '@', '!'):
-            raise TypeError(f'invalid byte order: {byteorder!r}')
+        assert byteorder.value in ('', '>', '<', '=', '@', '!')
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
 

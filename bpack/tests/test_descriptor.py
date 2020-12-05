@@ -550,6 +550,19 @@ class TestUtils:
         assert bpack.byteorder(Record) is None
         assert bpack.byteorder(Record()) is None
 
+        @dataclasses.dataclass()
+        class Dummy:
+            x: int = 0
+
+        with pytest.raises(TypeError):
+            bpack.byteorder(Dummy)
+
+        class Dummy:
+            pass
+
+        with pytest.raises(TypeError):
+            bpack.byteorder(Dummy)
+
 
 class TestFieldDescriptor:
     @staticmethod

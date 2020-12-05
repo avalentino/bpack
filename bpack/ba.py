@@ -1,6 +1,5 @@
 """Bitarray based codec for binary data structures."""
 
-import sys
 import struct
 
 import bitarray
@@ -13,9 +12,11 @@ from .utils import classdecorator
 from .descriptors import field_descriptors
 
 
-__all__ = ['Decoder', 'decoder']
+__all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
 
 
+BACKEND_NAME = 'bitarray'
+BACKEND_TYPE = bpack.EBaseUnits.BITS
 ba2int = bitarray.util.ba2int
 
 
@@ -38,12 +39,12 @@ def ba_to_float_factory(size, byteorder: str = '>'):
     return func
 
 
-def converter_factory(type_, size=None, signed=False, order='>'):
+def converter_factory(type_, size=None, signed=False, byteorder='>'):
     if type_ is int:
         def func(ba):
             return ba2int(ba, signed)
     elif type_ is float:
-        func = ba_to_float_factory(size, order)
+        func = ba_to_float_factory(size, byteorder)
     elif type_ is bytes:
         def func(ba):
             return ba.tobytes()
@@ -55,20 +56,20 @@ def converter_factory(type_, size=None, signed=False, order='>'):
             return bool(bitarray.util.ba2int(ba))
     else:
         raise TypeError(
-            f'type "{type_}" is not supported by the bpack.ba backend '
-            f'(bitarray)')
+            f'type "{type_}" is not supported by the {__name__} backend'
+            f'({BACKEND_NAME})')
 
     return func
 
 
-def _byteorder_to_str(byteorder: bpack.EEndian) -> str:
-    if byteorder is bpack.EEndian.NATIVE:
-        endian = sys.byteorder
-    elif byteorder in {bpack.EEndian.BIG, bpack.EEndian.DEFAULT}:
-        endian = 'big'
-    else:
-        endian = 'little'
-    return endian
+# def _bitorder_to_baorder(bitorder: bpack.EBitOrder) -> str:
+#     if bitorder is bpack.EBitOrder.NATIVE:
+#         s = sys.byteorder
+#     elif bitorder in {bpack.EBitOrder.BIG, bpack.EBitOrder.DEFAULT}:
+#         s = 'big'
+#     else:
+#         s = 'little'
+#     return s
 
 
 class Decoder:
@@ -87,6 +88,11 @@ class Decoder:
         if byteorder is None:
             byteorder = bpack.EEndian.BIG
 
+        if byteorder not in {bpack.EEndian.BIG, bpack.EEndian.NATIVE}:
+            raise NotImplementedError(
+                f'byte order "{byteorder}" is not supported by the {__name__} '
+                f'backend ({BACKEND_NAME})')
+
         if callable(converters):
             conv_factory = converters
             converters = [
@@ -103,7 +109,7 @@ class Decoder:
                     f'the number of converters ({len(converters)}) does not '
                     f'match the number of fields ({n_fields})')
 
-        self._endian = _byteorder_to_str(byteorder)
+        self._bitorder = 'big'  # _bitorder_to_baorder(byteorder)
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [
@@ -113,7 +119,7 @@ class Decoder:
 
     def decode(self, data: bytes):
         """Decode binary data and return a record object."""
-        ba = bitarray.bitarray(endian=self._endian)
+        ba = bitarray.bitarray(endian=self._bitorder)
         ba.frombytes(data)
         values = [ba[slice_] for slice_ in self._slices]
 

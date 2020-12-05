@@ -12,7 +12,11 @@ from .utils import classdecorator
 from .descriptors import field_descriptors
 
 
-__all__ = ['Decoder', 'decoder']
+__all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
+
+
+BACKEND_NAME = 'bitstruct'
+BACKEND_TYPE = bpack.EBaseUnits.BITS
 
 
 _TYPE_TO_STR = {
@@ -30,14 +34,11 @@ _TYPE_TO_STR = {
 def _to_fmt(type_, size: int, bitorder: str = '',
             signed: Optional[bool] = None,
             repeat: Optional[int] = None) -> str:
-    if size <= 0:
-        raise TypeError(f'invalid size: {size:r}')
-    if bitorder not in ('', '>', '<'):
-        raise TypeError(f'invalid order: {bitorder:r}')
+    assert size > 0, f'invalid size: {size:r}'
+    assert bitorder in ('', '>', '<'), f'invalid order: {bitorder:r}'
     if repeat is None:
         repeat = 1
-    elif repeat <= 0:
-        raise TypeError(f'invalid repeat: {repeat:r}')
+    assert repeat > 0, f'invalid repeat: {repeat:r}'
 
     key = (type_, signed) if type_ is int and signed is not None else type_
     try:
@@ -72,11 +73,10 @@ class Decoder:
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
         byteorder = _endianess_to_str(byteorder)
+        bitorder = '>'      # TODO: get from descriptor
 
-        # NOTE: bit order is not specified hence the default bitstruct order
-        #       (MSB) is assumed
         fmt = ''.join(
-            _to_fmt(field_descr.type, size=field_descr.size, bitorder='',
+            _to_fmt(field_descr.type, size=field_descr.size, bitorder=bitorder,
                     signed=field_descr.signed)  # field_descr.repeat
             for field_descr in field_descriptors(descriptor, pad=True)
         )
