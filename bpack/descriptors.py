@@ -209,8 +209,7 @@ def descriptor(cls, *, size: Optional[int] = None,
         assert isinstance(field_, Field)
 
         # NOTE: this is ensured by dataclasses but not by attr
-        if field_.type is None:
-            raise TypeError(f'type not specified for field: "{field_.name}"')
+        assert field_.type is not None
 
         try:
             field_descr = get_field_descriptor(field_, validate=False)
