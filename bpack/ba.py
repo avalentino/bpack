@@ -5,7 +5,7 @@ import struct
 from typing import Any, Callable, Optional
 
 import bitarray
-from bitarray.util import ba2int
+from bitarray.util import ba2int, make_endian
 
 import bpack
 
@@ -27,8 +27,6 @@ FactoryType = Callable[[bitarray.bitarray], Any]
 def ba_to_float_factory(size, byteorder: str = '>',
                         bitorder: str = 'big') -> FactoryType:
     """Convert a bitarray into a float."""
-    assert bitorder == 'big'
-
     if size == 16:
         fmt = f'{byteorder}e'
     elif size == 32:
@@ -40,8 +38,16 @@ def ba_to_float_factory(size, byteorder: str = '>',
 
     codec = struct.Struct(fmt)
 
-    def func(ba):
-        return codec.unpack(ba.tobytes())[0]
+    if bitorder != 'big':
+        assert byteorder == '>' and bitorder == 'little'
+        codec = struct.Struct(f'<{fmt[-1]}')  # hack
+
+        def func(ba, bitorder=bitorder, make_endian=make_endian):
+            ba = make_endian(ba, bitorder)
+            return codec.unpack(ba.tobytes())[0]
+    else:
+        def func(ba):
+            return codec.unpack(ba.tobytes())[0]
 
     return func
 
@@ -50,16 +56,31 @@ def converter_factory(type_, size: Optional[int] = None, signed: bool = False,
                       byteorder: str = '>',
                       bitorder: str = 'big') -> FactoryType:
     if type_ is int:
-        def func(ba):
-            return ba2int(ba, signed)
+        if bitorder != 'big':
+            def func(ba, bitorder=bitorder, make_endian=make_endian):
+                ba = make_endian(ba, bitorder)
+                return ba2int(ba, signed)
+        else:
+            def func(ba):
+                return ba2int(ba, signed)
     elif type_ is float:
         func = ba_to_float_factory(size, byteorder, bitorder)
     elif type_ is bytes:
-        def func(ba):
-            return ba.tobytes()
+        if bitorder != 'big':
+            def func(ba, bitorder=bitorder, make_endian=make_endian):
+                ba = make_endian(ba, bitorder)
+                return ba.tobytes()[::-1]
+        else:
+            def func(ba):
+                return ba.tobytes()
     elif type_ is str:
-        def func(ba):
-            return ba.tobytes().decode('ascii')
+        if bitorder != 'big':
+            def func(ba, bitorder=bitorder, make_endian=make_endian):
+                ba = make_endian(ba, bitorder)
+                return ba.tobytes().decode('ascii')[::-1]
+        else:
+            def func(ba):
+                return ba.tobytes().decode('ascii')
     elif type_ is bool:
         def func(ba):
             return bool(bitarray.util.ba2int(ba))
@@ -84,7 +105,7 @@ def _bitorder_to_baorder(bitorder: bpack.EBitOrder) -> str:
 class Decoder:
     """Bitarray based data decoder.
 
-    Only supports "big endian" byte-order and MSB bit-order.
+    Only supports "big endian" byte-order.
     """
 
     def __init__(self, descriptor, converters=converter_factory):
@@ -103,17 +124,13 @@ class Decoder:
                 f'backend ({BACKEND_NAME})')
 
         bitorder = _bitorder_to_baorder(bpack.bitorder(descriptor))
-        if bitorder != 'big':
-            raise NotImplementedError(
-                f'bit order "{bitorder}" is not supported by the {__name__} '
-                f'backend ({BACKEND_NAME})')
 
         if callable(converters):
             conv_factory = converters
             byteorder_str = byteorder.value if byteorder.value else '>'
             converters = [
                 conv_factory(field_descr.type, field_descr.size,
-                             field_descr.signed, byteorder_str)
+                             field_descr.signed, byteorder_str, bitorder)
                 for field_descr in field_descriptors(descriptor)
             ]
 
@@ -125,6 +142,7 @@ class Decoder:
                     f'the number of converters ({len(converters)}) does not '
                     f'match the number of fields ({n_fields})')
 
+        self._bitorder = bitorder
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [

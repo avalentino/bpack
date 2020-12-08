@@ -47,15 +47,3 @@ def test_bit_decoder_little_endian_ba():
         @dataclasses.dataclass(frozen=True)
         class Record:
             field_1: int = bpack.field(size=8, default=1)
-
-
-def test_bit_decoder_lsb_ba():
-    backend = bpack.ba
-
-    with pytest.raises(NotImplementedError):
-        @backend.decoder
-        @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                          bitorder=bpack.EBitOrder.LSB)
-        @dataclasses.dataclass(frozen=True)
-        class Record:
-            field_1: int = bpack.field(size=8, default=1)

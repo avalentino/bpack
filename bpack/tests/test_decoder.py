@@ -387,10 +387,11 @@ BYTE_ENCODED_DATA_LE = bytes([
      (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
      (bpack.bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb()),
      (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb()),
-     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())],
+     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
+     (bpack.ba, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb())],
     ids=['st BE', 'st LE',
          'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB',
-         'ba BE MSB'])
+         'ba BE MSB', 'ba BE LSB'])
 def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
     decoder = backend.Decoder(Record)
     record = decoder.decode(encoded_data)
@@ -405,10 +406,11 @@ def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
      (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
      (bpack.bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb()),
      (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb()),
-     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())],
+     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
+     (bpack.ba, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb())],
     ids=['st BE', 'st LE',
          'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB',
-         'ba BE MSB'])
+         'ba BE MSB', 'ba BE LSB'])
 def test_decoder_func(backend, Record, encoded_data, decoded_data):  # noqa
     record_type = backend.decoder(Record)
     record = record_type.from_bytes(encoded_data)
