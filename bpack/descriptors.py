@@ -14,7 +14,7 @@ from .utils import classdecorator
 
 __all__ = [
     'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
-    'EEndian', 'EBaseUnits', 'byteorder', 'baseunits',
+    'EByteOrder', 'EBaseUnits', 'byteorder', 'baseunits',
     'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
     'BASEUNITS_ATTR_NAME', 'METADATA_KEY',
@@ -33,7 +33,7 @@ class EBaseUnits(enum.Enum):
     BYTES = 'bytes'
 
 
-class EEndian(enum.Enum):
+class EByteOrder(enum.Enum):
     """Enumeration for byte order (endianess)."""
 
     BIG = '>'
@@ -187,7 +187,7 @@ class DescriptorConsistencyError(ValueError):
 # TODO: order for byte/bit order
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
-               byteorder: Optional[Union[str, EEndian]] = None,
+               byteorder: Optional[Union[str, EByteOrder]] = None,
                baseunits: EBaseUnits = EBaseUnits.BYTES):
     """Class decorator to define descriptors for binary records.
 
@@ -260,7 +260,7 @@ def descriptor(cls, *, size: Optional[int] = None,
 
     setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
     setattr(cls, BYTEORDER_ATTR_NAME,
-            EEndian(byteorder) if byteorder is not None else None)
+            EByteOrder(byteorder) if byteorder is not None else None)
 
     get_len_func = utils.create_fn(
         name='__len__',
@@ -306,7 +306,7 @@ def baseunits(obj) -> EBaseUnits:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def byteorder(obj) -> EEndian:
+def byteorder(obj) -> EByteOrder:
     """Return the byte order of a binary record descriptor (endianess)."""
     try:
         return getattr(obj, BYTEORDER_ATTR_NAME)

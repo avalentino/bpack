@@ -90,7 +90,7 @@ class Decoder:
 
         byteorder = bpack.byteorder(descriptor)
         if byteorder is None:
-            byteorder = bpack.EEndian.BIG
+            byteorder = bpack.EByteOrder.BIG
 
         assert byteorder.value in ('', '>', '<', '=', '@', '!')
 

@@ -32,5 +32,5 @@ __version__ = '0.1.0.dev0'
 
 from .descriptors import (                                          # noqa
     descriptor, field, fields, is_descriptor, calcsize, byteorder, baseunits,
-    EBaseUnits, EEndian
+    EBaseUnits, EByteOrder,
 )

@@ -86,9 +86,9 @@ class Decoder:
 
         byteorder = bpack.byteorder(descriptor)
         if byteorder is None:
-            byteorder = bpack.EEndian.BIG
+            byteorder = bpack.EByteOrder.BIG
 
-        if byteorder not in {bpack.EEndian.BIG, bpack.EEndian.NATIVE}:
+        if byteorder not in {bpack.EByteOrder.BIG, bpack.EByteOrder.NATIVE}:
             raise NotImplementedError(
                 f'byte order "{byteorder}" is not supported by the {__name__} '
                 f'backend ({BACKEND_NAME})')

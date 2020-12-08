@@ -7,7 +7,7 @@ import pytest
 
 import bpack
 import bpack.descriptors
-from bpack import EBaseUnits, EEndian
+from bpack import EBaseUnits, EByteOrder
 from bpack.descriptors import get_field_descriptor, is_field
 from bpack.descriptors import BinFieldDescriptor, METADATA_KEY
 from bpack.descriptors import Field as BPackField
@@ -146,8 +146,8 @@ class TestRecord:
 
     @staticmethod
     @pytest.mark.parametrize(argnames='order',
-                             argvalues=[EEndian.LITTLE, EEndian.BIG,
-                                        EEndian.NATIVE, EEndian.DEFAULT,
+                             argvalues=[EByteOrder.LITTLE, EByteOrder.BIG,
+                                        EByteOrder.NATIVE, EByteOrder.DEFAULT,
                                         '<', '>', '=', '', None])
     def test_order(order):
         @bpack.descriptor(byteorder=order)
@@ -157,8 +157,8 @@ class TestRecord:
             field_2: float = bpack.field(size=8, default=1/3)
 
         if isinstance(order, str):
-            assert bpack.byteorder(Record) is EEndian(order)
-            assert bpack.byteorder(Record()) is EEndian(order)
+            assert bpack.byteorder(Record) is EByteOrder(order)
+            assert bpack.byteorder(Record()) is EByteOrder(order)
         else:
             assert bpack.byteorder(Record) is order
             assert bpack.byteorder(Record()) is order

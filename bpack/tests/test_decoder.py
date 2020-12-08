@@ -20,7 +20,7 @@ def test_backend(backend):
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EEndian.BIG)
+                  byteorder=bpack.EByteOrder.BIG)
 @dataclasses.dataclass(frozen=True)
 class BitRecordBeMsb:
     # default (unsigned)
@@ -73,7 +73,7 @@ BIT_ENCODED_DATA_BE_MSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EEndian.LITTLE)
+                  byteorder=bpack.EByteOrder.LITTLE)
 @dataclasses.dataclass(frozen=True)
 class BitRecordLeMsb:
     # default (unsigned)
@@ -126,7 +126,7 @@ BIT_ENCODED_DATA_LE_MSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EEndian.BIG)
+                  byteorder=bpack.EByteOrder.BIG)
 @dataclasses.dataclass(frozen=True)
 class ByteRecordBe:
     field_01: bool = bpack.field(size=1, default=False)
@@ -198,7 +198,7 @@ BYTE_ENCODED_DATA_BE = bytes([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EEndian.LITTLE)
+                  byteorder=bpack.EByteOrder.LITTLE)
 @dataclasses.dataclass(frozen=True)
 class ByteRecordLe:
     field_01: bool = bpack.field(size=1, default=False)
@@ -365,7 +365,7 @@ def test_unsupported_type(backend, baseunits):
 @pytest.mark.parametrize('backend', [bpack.st], ids=['st'])
 def test_byte_decoder_native_byteorder(backend):
     @backend.decoder
-    @bpack.descriptor(byteorder=bpack.EEndian.NATIVE)
+    @bpack.descriptor(byteorder=bpack.EByteOrder.NATIVE)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=4, default=1)
@@ -375,7 +375,7 @@ def test_byte_decoder_native_byteorder(backend):
 def test_bit_decoder_native_byteorder(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                      byteorder=bpack.EEndian.NATIVE)
+                      byteorder=bpack.EByteOrder.NATIVE)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=8, default=1)
@@ -387,7 +387,7 @@ def test_bit_decoder_little_endian_ba():
     with pytest.raises(NotImplementedError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                          byteorder=bpack.EEndian.LITTLE)
+                          byteorder=bpack.EByteOrder.LITTLE)
         @dataclasses.dataclass(frozen=True)
         class Record:
             field_1: int = bpack.field(size=8, default=1)

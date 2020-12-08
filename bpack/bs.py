@@ -49,8 +49,8 @@ def _to_fmt(type_, size: int, bitorder: str = '',
     return fmt
 
 
-def _endianess_to_str(order: bpack.EEndian) -> str:
-    if order is bpack.EEndian.NATIVE:
+def _endianess_to_str(order: bpack.EByteOrder) -> str:
+    if order is bpack.EByteOrder.NATIVE:
         return '<' if sys.byteorder == 'little' else '>'
     return order.value
 
@@ -69,7 +69,7 @@ class Decoder:
 
         byteorder = bpack.byteorder(descriptor)
         if byteorder is None:
-            byteorder = bpack.EEndian.BIG
+            byteorder = bpack.EByteOrder.BIG
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
         byteorder = _endianess_to_str(byteorder)
