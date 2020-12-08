@@ -5,7 +5,6 @@ import math
 import types
 import warnings
 import dataclasses
-import collections.abc
 from typing import Optional, Iterable, Type, Union
 
 from . import utils
@@ -272,7 +271,6 @@ def descriptor(cls, *, size: Optional[int] = None,
     get_len_func.__doc__ = "Return the record size in bytes"
     assert not hasattr(cls, '__len__')
     utils.set_new_attribute(cls, '__len__', get_len_func)
-    collections.abc.Sized.register(cls)
 
     return cls
 
