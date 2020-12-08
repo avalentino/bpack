@@ -73,7 +73,7 @@ class Decoder:
 
         # assert all(descr.order for descr in field_descriptors(descriptor))
         byteorder = _endianess_to_str(byteorder)
-        bitorder = '>'      # TODO: get from descriptor
+        bitorder = bpack.bitorder(descriptor).value
 
         fmt = ''.join(
             _to_fmt(field_descr.type, size=field_descr.size, bitorder=bitorder,

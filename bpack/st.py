@@ -88,6 +88,8 @@ class Decoder:
                 'struct decoder only accepts descriptors with '
                 'base units "bytes"')
 
+        assert bpack.bitorder(descriptor) is None
+
         byteorder = bpack.byteorder(descriptor)
         if byteorder is None:
             byteorder = bpack.EByteOrder.BIG

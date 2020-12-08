@@ -13,15 +13,18 @@ from .utils import classdecorator
 
 __all__ = [
     'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
-    'EByteOrder', 'EBaseUnits', 'byteorder', 'baseunits',
+    'EByteOrder', 'EBitOrder', 'EBaseUnits',
+    'baseunits', 'byteorder', 'bitorder',
     'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
-    'BASEUNITS_ATTR_NAME', 'METADATA_KEY',
+    'BASEUNITS_ATTR_NAME', 'BYTEORDER_ATTR_NAME', 'BITORDER_ATTR_NAME',
+    'METADATA_KEY',
 ]
 
 
 BASEUNITS_ATTR_NAME = '__bpack_baseunits__'
 BYTEORDER_ATTR_NAME = '__bpack_byteorder__'
+BITORDER_ATTR_NAME = '__bpack_bitorder__'
 METADATA_KEY = '__bpack_metadata__'
 
 
@@ -38,6 +41,14 @@ class EByteOrder(enum.Enum):
     BIG = '>'
     LITTLE = '<'
     NATIVE = '='
+    DEFAULT = ''
+
+
+class EBitOrder(enum.Enum):
+    """Enumeration for bit order."""
+
+    MSB = '>'
+    LSB = '<'
     DEFAULT = ''
 
 
@@ -187,6 +198,7 @@ class DescriptorConsistencyError(ValueError):
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
                byteorder: Optional[Union[str, EByteOrder]] = None,
+               bitorder: Optional[Union[str, EBitOrder]] = None,
                baseunits: EBaseUnits = EBaseUnits.BYTES):
     """Class decorator to define descriptors for binary records.
 
@@ -261,6 +273,16 @@ def descriptor(cls, *, size: Optional[int] = None,
     setattr(cls, BYTEORDER_ATTR_NAME,
             EByteOrder(byteorder) if byteorder is not None else None)
 
+    if baseunits is not EBaseUnits.BITS and bitorder is not None:
+        raise ValueError(
+            'it is not possible to specify the "bitorder" '
+            'if "baseunits" is not "BITS"')
+    elif baseunits is EBaseUnits.BITS and bitorder is None:
+        bitorder = EBitOrder.DEFAULT
+
+    setattr(cls, BITORDER_ATTR_NAME,
+            EBitOrder(bitorder) if bitorder is not None else None)
+
     get_len_func = utils.create_fn(
         name='__len__',
         args=tuple(),
@@ -308,6 +330,14 @@ def byteorder(obj) -> EByteOrder:
     """Return the byte order of a binary record descriptor (endianess)."""
     try:
         return getattr(obj, BYTEORDER_ATTR_NAME)
+    except AttributeError:
+        raise TypeError(f'"{obj}" is not a descriptor')
+
+
+def bitorder(obj) -> Union[EBitOrder, None]:
+    """Return the bit order of a binary record descriptor."""
+    try:
+        return getattr(obj, BITORDER_ATTR_NAME)
     except AttributeError:
         raise TypeError(f'"{obj}" is not a descriptor')
 

@@ -62,14 +62,14 @@ def converter_factory(type_, size=None, signed=False, byteorder='>'):
     return func
 
 
-# def _bitorder_to_baorder(bitorder: bpack.EBitOrder) -> str:
-#     if bitorder is bpack.EBitOrder.NATIVE:
-#         s = sys.byteorder
-#     elif bitorder in {bpack.EBitOrder.BIG, bpack.EBitOrder.DEFAULT}:
-#         s = 'big'
-#     else:
-#         s = 'little'
-#     return s
+def _bitorder_to_baorder(bitorder: bpack.EBitOrder) -> str:
+    if bitorder in {bpack.EBitOrder.MSB, bpack.EBitOrder.DEFAULT}:
+        s = 'big'
+    elif bitorder is bpack.EBitOrder.LSB:
+        s = 'little'
+    else:
+        raise ValueError(f'invalid bit order: "{bitorder}"')
+    return s
 
 
 class Decoder:
@@ -83,6 +83,8 @@ class Decoder:
             raise ValueError(
                 'bitarray decoder only accepts descriptors with '
                 'base units "bits"')
+
+        assert bpack.bitorder(descriptor) is not None
 
         byteorder = bpack.byteorder(descriptor)
         if byteorder is None:
@@ -109,7 +111,13 @@ class Decoder:
                     f'the number of converters ({len(converters)}) does not '
                     f'match the number of fields ({n_fields})')
 
-        self._bitorder = 'big'  # _bitorder_to_baorder(byteorder)
+        bitorder: bpack.EBitOrder = bpack.bitorder(descriptor)
+        self._bitorder = _bitorder_to_baorder(bitorder)
+        if self._bitorder != 'big':
+            raise NotImplementedError(
+                f'bit order "{bitorder}" is not supported by the {__name__} '
+                f'backend ({BACKEND_NAME})')
+
         self._descriptor = descriptor
         self._converters = converters
         self._slices = [

@@ -20,7 +20,8 @@ def test_backend(backend):
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.BIG)
+                  byteorder=bpack.EByteOrder.BIG,
+                  bitorder=bpack.EBitOrder.MSB)
 @dataclasses.dataclass(frozen=True)
 class BitRecordBeMsb:
     # default (unsigned)
@@ -30,7 +31,7 @@ class BitRecordBeMsb:
     field_04: float = bpack.field(size=32, default=1.)
     field_05: bytes = bpack.field(size=24, default=b'abc')
     field_06: str = bpack.field(size=24, default='ABC')
-    # 4 padding bits ([96:100])  0b1111
+    # 4 padding bits ([96:100])
     field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
     # signed
@@ -73,7 +74,8 @@ BIT_ENCODED_DATA_BE_MSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.LITTLE)
+                  byteorder=bpack.EByteOrder.LITTLE,
+                  bitorder=bpack.EBitOrder.MSB)
 @dataclasses.dataclass(frozen=True)
 class BitRecordLeMsb:
     # default (unsigned)
@@ -83,7 +85,7 @@ class BitRecordLeMsb:
     field_04: float = bpack.field(size=32, default=1.)
     field_05: bytes = bpack.field(size=24, default=b'abc')
     field_06: str = bpack.field(size=24, default='ABC')
-    # 4 padding bits ([96:100])  0b1111
+    # 4 padding bits ([96:100])
     field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
     # signed
@@ -121,6 +123,114 @@ BIT_ENCODED_DATA_LE_MSB = b''.join([
     bytes([
         0b11000000, 0b10000000,                             # fields 21 to 23
         0b00000000, 0b00000000, 0b00000000, 0b10000000,     # field_28 (uint32)
+    ]),
+])
+
+
+@bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
+                  byteorder=bpack.EByteOrder.BIG,
+                  bitorder=bpack.EBitOrder.LSB)
+@dataclasses.dataclass(frozen=True)
+class BitRecordBeLsb:
+    # default (unsigned)
+    field_01: bool = bpack.field(size=1, default=True)
+    field_02: int = bpack.field(size=3, default=4)
+    field_03: int = bpack.field(size=12, default=2048)
+    field_04: float = bpack.field(size=32, default=1.)
+    field_05: bytes = bpack.field(size=24, default=b'abc')
+    field_06: str = bpack.field(size=24, default='ABC')
+    # 4 padding bits ([96:100])
+    field_08: int = bpack.field(size=28, default=134217727, offset=100)
+
+    # signed
+    field_11: bool = bpack.field(size=1, default=False)
+    field_12: int = bpack.field(size=3, default=-4, signed=True)
+    field_13: int = bpack.field(size=12, default=-2048, signed=True)
+    field_18: int = bpack.field(size=32, default=-2**31, signed=True)
+
+    # unsigned
+    field_21: bool = bpack.field(size=1, default=True)
+    field_22: int = bpack.field(size=3, default=4, signed=False)
+    field_23: int = bpack.field(size=12, default=2048, signed=False)
+    field_28: int = bpack.field(size=32, default=2**31, signed=False)
+
+
+BIT_ENCODED_DATA_BE_LSB = b''.join([
+    # default (unsigned)
+    bytes([
+        0b10010000, 0b00000001,                             # fields 1 to 3
+        0b00000000, 0b00000000, 0b00000001, 0b11111100,     # field_4 (float32)
+    ]),
+    bytes([0b11000110, 0b01000110, 0b10000110]),    # field_5 (bytes) - b'abc'
+    bytes([0b11000010, 0b01000010, 0b10000010]),    # field_6 (str)   - 'ABC'
+    bytes([                                         # 4 padding bits + field_8
+        0b00001111, 0b11111111, 0b11111111, 0b11111110,
+    ]),
+
+    # signed
+    bytes([
+        0b00010000, 0b00000001,                             # fields 11 to 13
+        0b00000000, 0b00000000, 0b00000000, 0b00000001,     # field_18 (uint32)
+    ]),
+
+    # unsigned
+    bytes([
+        0b10010000, 0b00000001,                             # fields 21 to 23
+        0b00000000, 0b00000000, 0b00000000, 0b00000001,     # field_28 (sint32)
+    ]),
+])
+
+
+@bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
+                  byteorder=bpack.EByteOrder.LITTLE,
+                  bitorder=bpack.EBitOrder.LSB)
+@dataclasses.dataclass(frozen=True)
+class BitRecordLeLsb:
+    # default (unsigned)
+    field_01: bool = bpack.field(size=1, default=True)
+    field_02: int = bpack.field(size=3, default=4)
+    field_03: int = bpack.field(size=12, default=2048)
+    field_04: float = bpack.field(size=32, default=1.)
+    field_05: bytes = bpack.field(size=24, default=b'abc')
+    field_06: str = bpack.field(size=24, default='ABC')
+    # 4 padding bits ([96:100])
+    field_08: int = bpack.field(size=28, default=134217727, offset=100)
+
+    # signed
+    field_11: bool = bpack.field(size=1, default=False)
+    field_12: int = bpack.field(size=3, default=-4, signed=True)
+    field_13: int = bpack.field(size=12, default=-2048, signed=True)
+    field_18: int = bpack.field(size=32, default=-2**31, signed=True)
+
+    # unsigned
+    field_21: bool = bpack.field(size=1, default=True)
+    field_22: int = bpack.field(size=3, default=4, signed=False)
+    field_23: int = bpack.field(size=12, default=2048, signed=False)
+    field_28: int = bpack.field(size=32, default=2**31, signed=False)
+
+
+BIT_ENCODED_DATA_LE_LSB = b''.join([
+    # default (unsigned)
+    bytes([
+        0b10010001, 0b00000000,                             # fields 1 to 3
+        0b11111100, 0b00000001, 0b00000000, 0b00000000,     # field_4 (float32)
+    ]),
+    bytes([0b11000110, 0b01000110, 0b10000110]),    # field_5 (bytes) - b'abc'
+    bytes([0b11000010, 0b01000010, 0b10000010]),    # field_6 (str)   - 'ABC'
+    bytes([                                         # 4 padding bits + field_8
+        0b00001110, 0b11111111, 0b11111111, 0b11111111,
+    ]),
+
+    # signed
+    bytes([
+        0b00010001, 0b00000000,                             # fields 11 to 13
+        0b00000001, 0b00000000, 0b00000000, 0b00000000,     # field_18 (sint32)
+    ]),
+
+    # unsigned
+    bytes([
+        0b10010001, 0b00000000,                             # fields 21 to 23
+        0b00000001, 0b00000000, 0b00000000, 0b00000000,     # field_28 (uint32)
     ]),
 ])
 
@@ -271,13 +381,16 @@ BYTE_ENCODED_DATA_LE = bytes([
 
 @pytest.mark.parametrize(
     'backend, Record, encoded_data, decoded_data',
-    [(bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
-     (bpack.bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
-     (bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, ByteRecordBe()),
-     (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
+    [(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, ByteRecordBe()),
      (bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, ByteRecordLe()),
-     ],
-    ids=['ba BE', 'bs BE', 'st BE', 'bs LE', 'st LE'])
+     (bpack.bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
+     (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
+     (bpack.bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb()),
+     (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb()),
+     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())],
+    ids=['st BE', 'st LE',
+         'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB',
+         'ba BE MSB'])
 def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
     decoder = backend.Decoder(Record)
     record = decoder.decode(encoded_data)
@@ -286,13 +399,16 @@ def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
 
 @pytest.mark.parametrize(
     'backend, Record, encoded_data, decoded_data',
-    [(bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
-     (bpack.bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
-     (bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, ByteRecordBe()),
-     (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
+    [(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, ByteRecordBe()),
      (bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, ByteRecordLe()),
-     ],
-    ids=['ba BE', 'bs BE', 'st BE', 'bs LE', 'st LE'])
+     (bpack.bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
+     (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
+     (bpack.bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb()),
+     (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb()),
+     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())],
+    ids=['st BE', 'st LE',
+         'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB',
+         'ba BE MSB'])
 def test_decoder_func(backend, Record, encoded_data, decoded_data):  # noqa
     record_type = backend.decoder(Record)
     record = record_type.from_bytes(encoded_data)
