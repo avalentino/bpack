@@ -75,7 +75,7 @@ def _bitorder_to_baorder(bitorder: bpack.EBitOrder) -> str:
 class Decoder:
     """Bitarray based data decoder.
 
-    Default bit-order: MSB.
+    Only supports "big endian" byte-order nad MSB bit-order.
     """
 
     def __init__(self, descriptor, converters=converter_factory):
