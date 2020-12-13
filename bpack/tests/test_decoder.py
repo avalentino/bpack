@@ -415,7 +415,7 @@ def test_decoder_func(backend, Record, encoded_data, decoded_data):  # noqa
     assert record == decoded_data
 
 
-@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs])
+@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
 def test_bit_decoder_decorator(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
@@ -446,7 +446,8 @@ def test_bit_decoder_decorator(backend):
 @pytest.mark.parametrize('backend', [bpack.st], ids=['st'])
 def test_byte_decoder_decorator(backend):
     @backend.decoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
+    @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
+                      byteorder=bpack.EByteOrder.BIG)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=1, default=1)
@@ -487,11 +488,21 @@ def test_byte_decoder_native_byteorder(backend):
         field_1: int = bpack.field(size=4, default=1)
 
 
-@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
+@pytest.mark.parametrize('backend', [bpack.bs], ids=['bs'])
 def test_bit_decoder_native_byteorder(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                       byteorder=bpack.EByteOrder.NATIVE)
+    @dataclasses.dataclass(frozen=True)
+    class Record:
+        field_1: int = bpack.field(size=8, default=1)
+
+
+@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
+def test_bit_decoder_default_byteorder(backend):
+    @backend.decoder
+    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
+                      byteorder=bpack.EByteOrder.DEFAULT)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=8, default=1)

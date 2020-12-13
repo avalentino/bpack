@@ -156,7 +156,7 @@ class TestRecord:
     @pytest.mark.parametrize(argnames='order',
                              argvalues=[EByteOrder.LITTLE, EByteOrder.BIG,
                                         EByteOrder.NATIVE, EByteOrder.DEFAULT,
-                                        '<', '>', '=', '', None])
+                                        '<', '>', '=', ''])
     def test_byteorder(order):
         @bpack.descriptor(byteorder=order)
         @dataclasses.dataclass
@@ -172,9 +172,10 @@ class TestRecord:
             assert bpack.byteorder(Record()) is order
 
     @staticmethod
-    def test_invalid_byteorder():
+    @pytest.mark.parametrize(argnames='order', argvalues=['invalid', None])
+    def test_invalid_byteorder(order):
         with pytest.raises(ValueError):
-            @bpack.descriptor(byteorder='invalid')
+            @bpack.descriptor(byteorder=order)
             @dataclasses.dataclass
             class Record:
                 field_1: int = bpack.field(size=8, default=0)
@@ -223,8 +224,8 @@ class TestRecord:
         class Record:
             field_1: int = bpack.field(size=8, default=0)
 
-        assert bpack.byteorder(Record) is None
-        assert bpack.byteorder(Record()) is None
+        assert bpack.byteorder(Record) is EByteOrder.DEFAULT
+        assert bpack.byteorder(Record()) is EByteOrder.DEFAULT
 
         with pytest.raises(ValueError):
             @bpack.descriptor(bitorder=EBitOrder.DEFAULT,
@@ -618,8 +619,8 @@ class TestUtils:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert bpack.byteorder(Record) is None
-        assert bpack.byteorder(Record()) is None
+        assert bpack.byteorder(Record) is EByteOrder.DEFAULT
+        assert bpack.byteorder(Record()) is EByteOrder.DEFAULT
 
         @dataclasses.dataclass()
         class Dummy:

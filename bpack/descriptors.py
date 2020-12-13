@@ -36,7 +36,15 @@ class EBaseUnits(enum.Enum):
 
 
 class EByteOrder(enum.Enum):
-    """Enumeration for byte order (endianess)."""
+    """Enumeration for byte order (endianess).
+
+    .. note::
+
+        the :data:`EByteOrder.DEFAULT` is equivalent to
+        :data:`EByteOrder.LITTLE` for binary structures having
+        :data:`EBaseUnits.BYTE` base units, and :data:`EByteOrder.BIG`
+        for binary structures having :data:`EBaseUnits.BYTE` base units.
+    """
 
     BIG = '>'
     LITTLE = '<'
@@ -197,7 +205,7 @@ class DescriptorConsistencyError(ValueError):
 # TODO: order for byte/bit order
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
-               byteorder: Optional[Union[str, EByteOrder]] = None,
+               byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,
                bitorder: Optional[Union[str, EBitOrder]] = None,
                baseunits: EBaseUnits = EBaseUnits.BYTES):
     """Class decorator to define descriptors for binary records.
@@ -270,8 +278,7 @@ def descriptor(cls, *, size: Optional[int] = None,
         size = math.ceil(size / 8)
 
     setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
-    setattr(cls, BYTEORDER_ATTR_NAME,
-            EByteOrder(byteorder) if byteorder is not None else None)
+    setattr(cls, BYTEORDER_ATTR_NAME, EByteOrder(byteorder))
 
     if baseunits is not EBaseUnits.BITS and bitorder is not None:
         raise ValueError(

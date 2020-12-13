@@ -68,10 +68,6 @@ class Decoder:
                 'base units "bits"')
 
         byteorder = bpack.byteorder(descriptor)
-        if byteorder is None:
-            byteorder = bpack.EByteOrder.BIG
-
-        # assert all(descr.order for descr in field_descriptors(descriptor))
         byteorder = _endianess_to_str(byteorder)
         bitorder = bpack.bitorder(descriptor).value
 

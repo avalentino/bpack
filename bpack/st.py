@@ -91,13 +91,7 @@ class Decoder:
         assert bpack.bitorder(descriptor) is None
 
         byteorder = bpack.byteorder(descriptor)
-        if byteorder is None:
-            byteorder = bpack.EByteOrder.BIG
-
-        assert byteorder.value in ('', '>', '<', '=', '@', '!')
-
         # assert all(descr.order for descr in field_descriptors(descriptor))
-
         byteorder = byteorder.value
 
         # NOTE: struct expects that the byteorder specifier is used only

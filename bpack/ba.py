@@ -87,19 +87,18 @@ class Decoder:
         assert bpack.bitorder(descriptor) is not None
 
         byteorder = bpack.byteorder(descriptor)
-        if byteorder is None:
-            byteorder = bpack.EByteOrder.BIG
 
-        if byteorder not in {bpack.EByteOrder.BIG, bpack.EByteOrder.NATIVE}:
+        if byteorder in {bpack.EByteOrder.LITTLE, bpack.EByteOrder.NATIVE}:
             raise NotImplementedError(
                 f'byte order "{byteorder}" is not supported by the {__name__} '
                 f'backend ({BACKEND_NAME})')
 
         if callable(converters):
             conv_factory = converters
+            byteorder_str = byteorder.value if byteorder.value else '>'
             converters = [
                 conv_factory(field_descr.type, field_descr.size,
-                             field_descr.signed, str(byteorder.value))
+                             field_descr.signed, byteorder_str)
                 for field_descr in field_descriptors(descriptor)
             ]
 
