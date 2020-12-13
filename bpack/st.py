@@ -5,8 +5,8 @@ import struct
 from typing import Optional
 
 import bpack
+import bpack.utils
 
-from . import utils
 from .utils import classdecorator
 from .descriptors import field_descriptors
 
@@ -137,13 +137,13 @@ def decoder(cls):
     """
     decoder_ = Decoder(descriptor=cls)
 
-    decode_func = utils.create_fn(
+    decode_func = bpack.utils.create_fn(
         name='decode',
         args=('data',),
         body=['return decoder.decode(data)'],
         locals={'decoder': decoder_},
     )
     decode_func = staticmethod(decode_func)
-    utils.set_new_attribute(cls, 'from_bytes', decode_func)
+    bpack.utils.set_new_attribute(cls, 'from_bytes', decode_func)
 
     return cls

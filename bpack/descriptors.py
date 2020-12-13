@@ -7,7 +7,7 @@ import warnings
 import dataclasses
 from typing import Optional, Iterable, Type, Union
 
-from . import utils
+import bpack.utils
 from .utils import classdecorator
 
 
@@ -290,7 +290,7 @@ def descriptor(cls, *, size: Optional[int] = None,
     setattr(cls, BITORDER_ATTR_NAME,
             EBitOrder(bitorder) if bitorder is not None else None)
 
-    get_len_func = utils.create_fn(
+    get_len_func = bpack.utils.create_fn(
         name='__len__',
         args=tuple(),
         body=['return size'],
@@ -299,7 +299,7 @@ def descriptor(cls, *, size: Optional[int] = None,
     get_len_func = staticmethod(get_len_func)
     get_len_func.__doc__ = "Return the record size in bytes"
     assert not hasattr(cls, '__len__')
-    utils.set_new_attribute(cls, '__len__', get_len_func)
+    bpack.utils.set_new_attribute(cls, '__len__', get_len_func)
 
     return cls
 
