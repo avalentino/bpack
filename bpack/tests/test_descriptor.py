@@ -227,7 +227,7 @@ class TestRecord:
         assert bpack.byteorder(Record()) is None
 
         with pytest.raises(ValueError):
-            @bpack.descriptor(byteorder=EBitOrder.DEFAULT,
+            @bpack.descriptor(bitorder=EBitOrder.DEFAULT,
                               baseunits=EBaseUnits.BYTES)
             @dataclasses.dataclass
             class Record:
@@ -760,7 +760,8 @@ class TestFieldDescriptor:
                              [(None, TypeError),
                               (0, ValueError),
                               (-1, ValueError),
-                              (1.1, TypeError)])
+                              (1.1, TypeError)],
+                             ids=['None', 'zero', 'negative', 'float'])
     def test_post_validation_error_on_size(size, error_type):
         descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2)
         descr.validate()
@@ -771,7 +772,8 @@ class TestFieldDescriptor:
     @staticmethod
     @pytest.mark.parametrize('offset, error_type',
                              [(-1, ValueError),
-                              (1.1, TypeError)])
+                              (1.1, TypeError)],
+                             ids=['negative', 'float'])
     def test_post_validation_error_on_offset(offset, error_type):
         descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2)
         descr.validate()
