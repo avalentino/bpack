@@ -104,6 +104,11 @@ class BinFieldDescriptor:
                 f'invalid "signed" parameter: {self.signed!r} '
                 f'(must be a bool or None)')
 
+    def _validate_enum(self):
+        assert issubclass(self.type, enum.Enum)
+        # perform checks on supported enum.Enum types
+        bpack.utils.enum_item_type(self.type)
+
     def __post_init__(self):
         """Finalize BinFieldDescriptor instance initialization."""
         if self.offset is not None:
@@ -117,8 +122,7 @@ class BinFieldDescriptor:
 
     @staticmethod
     def _is_int(type_):
-        # TODO: improve integer type detection
-        return type_ is int
+        return issubclass(type_, int)
 
     def validate(self):
         """Perform validity check on the BinFieldDescriptor instance."""
@@ -132,6 +136,8 @@ class BinFieldDescriptor:
                 warnings.warn(
                     f'the "signed" parameter will be ignored for non-integer '
                     f'type: "{self.type}"')
+        if issubclass(self.type, enum.Enum):
+            self._validate_enum()
 
 
 Field = dataclasses.Field
@@ -202,7 +208,6 @@ class DescriptorConsistencyError(ValueError):
     pass
 
 
-# TODO: order for byte/bit order
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
                byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,

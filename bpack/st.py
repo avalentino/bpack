@@ -1,5 +1,6 @@
 """Struct based codec for binary data structures."""
 
+import enum
 import struct
 
 from typing import Optional
@@ -60,20 +61,32 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     assert order in ('', '>', '<', '=', '@', '!'), f'invalid order: {order!r}'
     assert signed in (True, False, None)
 
+    etype = bpack.utils.effective_type(type_)
+
     try:
-        if type_ in (str, bytes, None):  # none is for padding bytes
+        if etype in (str, bytes, None):  # none is for padding bytes
             repeat = 1 if repeat is None else repeat
-            key = (type_, signed, None)
+            key = (etype, signed, None)
             return f'{order}{size}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}' * repeat
         else:
             repeat_str = '' if repeat is None else str(repeat)
-            key = (type_, signed, size)
+            key = (etype, signed, size)
             return f'{order}{repeat_str}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}'
     except KeyError:
         raise TypeError(
             f'unable to generate format string for '
             f'type="{type_}", size="{size}", order="{order}", '
             f'signed="{signed}", repeat="{repeat}"')
+
+
+def _enum_converter_factory(type_, converters=None):
+    converters = converters if converters is not None else dict()
+    enum_item_type = bpack.utils.enum_item_type(type_)
+    if enum_item_type in converters:
+        base_converter = converters[enum_item_type]
+        return lambda x: type_(base_converter(x))
+    else:
+        return type_
 
 
 class Decoder:
@@ -101,22 +114,21 @@ class Decoder:
             for field_descr in field_descriptors(descriptor, pad=True)
         )
 
-        self._codec = struct.Struct(fmt)
-        self._descriptor = descriptor
-        converters = {
+        converters_map = {
             str: lambda s: s.decode('ascii'),
             bool: bool,
-            # Enums
         }
-        # TODO: enum support
-        # converters.update(
-        #     (field_.type, field_.type)
-        #     for field_ in dataclasses.fields(self._descriptor)
-        #     if issubclass(field_.type, enum.Enum))
+        converters_map.update(
+            (field.type, _enum_converter_factory(field.type, converters_map))
+            for field in bpack.fields(descriptor)
+            if issubclass(field.type, enum.Enum))
+
+        self._codec = struct.Struct(fmt)
+        self._descriptor = descriptor
         self._converters = [
-            (idx, converters[field_.type])
+            (idx, converters_map[field_.type])
             for idx, field_ in enumerate(bpack.fields(self._descriptor))
-            if field_.type in converters
+            if field_.type in converters_map
         ]
 
     def decode(self, data: bytes):

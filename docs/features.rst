@@ -32,7 +32,6 @@ Possible additional features still not implemented
 
 * support for list fields (including list length specification)
 * record nesting (the field of a descriptor cna be another descriptor)
-* support for enums
 * numpy based backend
 * automatic size determination for data type
 * user defined converters

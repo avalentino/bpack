@@ -1,5 +1,6 @@
 """Test bpack field descriptors."""
 
+import enum
 import dataclasses
 
 import pytest
@@ -66,7 +67,7 @@ class TestFieldFactory:
 
 class TestFields:
     @staticmethod
-    def test_field_size_01():
+    def test_field_properties_01():
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
@@ -90,7 +91,7 @@ class TestFields:
             assert field_descr.signed == signed
 
     @staticmethod
-    def test_field_size_02():
+    def test_field_properties_02():
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
@@ -115,7 +116,7 @@ class TestFields:
             assert field_descr.signed == signed
 
     @staticmethod
-    def test_field_size_03():
+    def test_field_properties_03():
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
@@ -137,6 +138,95 @@ class TestFields:
             assert field_descr.size == size
             assert field_descr.offset == offset
             assert field_descr.signed == signed
+
+
+class TestEnumFields:
+    @staticmethod
+    def test_enum():
+        class EEnumType(enum.Enum):
+            A = 'a'
+            B = 'b'
+            C = 'c'
+
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: EEnumType = bpack.field(size=1, default=EEnumType.A)
+
+        field_2 = bpack.fields(Record)[1]
+        assert field_2.name == 'field_2'
+        assert field_2.type is EEnumType
+        assert field_2.default is EEnumType.A
+        assert isinstance(Record().field_2, EEnumType)
+
+    @staticmethod
+    def test_int_enum():
+        class EEnumType(enum.IntEnum):
+            A = 1
+            B = 2
+            C = 4
+
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: EEnumType = bpack.field(size=1, signed=True,
+                                             default=EEnumType.A)
+
+        field_2 = bpack.fields(Record)[1]
+        assert field_2.name == 'field_2'
+        assert field_2.type is EEnumType
+        assert field_2.default is EEnumType.A
+        assert isinstance(Record().field_2, EEnumType)
+
+    @staticmethod
+    def test_intflag_enum():
+        class EEnumType(enum.IntFlag):
+            A = 1
+            B = 2
+            C = 4
+
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: EEnumType = bpack.field(size=1, default=EEnumType.A)
+
+        field_2 = bpack.fields(Record)[1]
+        assert field_2.name == 'field_2'
+        assert field_2.type is EEnumType
+        assert field_2.default is EEnumType.A
+        assert isinstance(Record().field_2, EEnumType)
+
+    @staticmethod
+    def test_invalid_enum():
+        class EEnumType(enum.Enum):
+            A = 1
+            B = 'b'
+            C = 4
+
+        with pytest.raises(TypeError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: int = bpack.field(size=4, default=0)
+                field_2: EEnumType = bpack.field(size=1, default=EEnumType.A)
+
+    @staticmethod
+    def test_invalid_signed_qualifier():
+        class EEnumType(enum.Enum):
+            A = 'a'
+            B = 'b'
+            C = 'c'
+
+        with pytest.warns(UserWarning):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: int = bpack.field(size=4, default=0)
+                field_2: EEnumType = bpack.field(size=1, signed=True,
+                                                 default=EEnumType.A)
 
 
 class TestFieldDescriptor:

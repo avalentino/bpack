@@ -1,5 +1,6 @@
 """Test bpack decoders."""
 
+import enum
 import dataclasses
 
 import pytest
@@ -8,9 +9,6 @@ import bpack
 import bpack.ba
 import bpack.bs
 import bpack.st
-
-
-# TODO: add support for enums
 
 
 @pytest.mark.parametrize('backend', [bpack.ba, bpack.bs, bpack.st])
@@ -526,3 +524,59 @@ def test_wrong_baseunits_byte(backend):
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=8, default=1)
+
+
+@pytest.mark.parametrize('backend, baseunits',
+                         [(bpack.st, bpack.EBaseUnits.BYTES),
+                          (bpack.ba, bpack.EBaseUnits.BITS),
+                          (bpack.bs, bpack.EBaseUnits.BITS)],
+                         ids=['st', 'ba', 'bs'])
+def test_enum_decoding_bytes(backend, baseunits):
+    class EStrEnumType(enum.Enum):
+        A = 'a'
+        B = 'b'
+
+    class EBytesEnumType(enum.Enum):
+        A = b'a'
+        B = b'b'
+
+    class EIntEnumType(enum.Enum):
+        A = 1
+        B = 2
+
+    class EFlagEnumType(enum.Enum):
+        A = 1
+        B = 2
+
+    if baseunits is bpack.EBaseUnits.BYTES:
+        bitorder = None
+        ssize = 1
+        isize = 1
+        encoded_data = b''.join([
+            EStrEnumType.A.value.encode('ascii'),
+            EBytesEnumType.A.value,
+            EIntEnumType.A.value.to_bytes(1, 'little', signed=False),
+            EFlagEnumType.A.value.to_bytes(1, 'little', signed=False),
+        ])
+    else:
+        bitorder = bpack.EBitOrder.MSB
+        ssize = 8
+        isize = 4
+        encoded_data = b''.join([
+            EStrEnumType.A.value.encode('ascii'),
+            EBytesEnumType.A.value,
+            bytes([0b00010001])
+        ])
+
+    @backend.decoder
+    @bpack.descriptor(baseunits=baseunits, bitorder=bitorder)
+    @dataclasses.dataclass
+    class Record:
+        field_1: EStrEnumType = bpack.field(size=ssize, default=EStrEnumType.A)
+        field_2: EBytesEnumType = bpack.field(size=ssize,
+                                              default=EBytesEnumType.A)
+        field_3: EIntEnumType = bpack.field(size=isize, default=EIntEnumType.A)
+        field_4: EFlagEnumType = bpack.field(size=isize, default=EFlagEnumType.A)
+
+    record = Record.from_bytes(encoded_data)
+    assert record == Record()

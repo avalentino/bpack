@@ -49,18 +49,19 @@ def ba_to_float_factory(size, byteorder: str = '>',
 def converter_factory(type_, size: Optional[int] = None, signed: bool = False,
                       byteorder: str = '>',
                       bitorder: str = 'big') -> FactoryType:
-    if type_ is int:
+    etype = bpack.utils.effective_type(type_)
+    if etype is int:
         def func(ba):
             return ba2int(ba, signed)
-    elif type_ is float:
+    elif etype is float:
         func = ba_to_float_factory(size, byteorder, bitorder)
-    elif type_ is bytes:
+    elif etype is bytes:
         def func(ba):
             return ba.tobytes()
-    elif type_ is str:
+    elif etype is str:
         def func(ba):
             return ba.tobytes().decode('ascii')
-    elif type_ is bool:
+    elif etype is bool:
         def func(ba):
             return bool(bitarray.util.ba2int(ba))
     else:
@@ -68,7 +69,12 @@ def converter_factory(type_, size: Optional[int] = None, signed: bool = False,
             f'type "{type_}" is not supported by the {__name__} backend'
             f'({BACKEND_NAME})')
 
-    return func
+    if etype is not type_:
+        def converter(x, func=func):
+            return type_(func(x))
+    else:
+        converter = func
+    return converter
 
 
 def _bitorder_to_baorder(bitorder: bpack.EBitOrder) -> str:

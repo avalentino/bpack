@@ -1,6 +1,7 @@
 """Bitstruct based codec for binary data structures."""
 
 import sys
+import enum
 from typing import Optional
 
 import bitstruct
@@ -40,11 +41,13 @@ def _to_fmt(type_, size: int, bitorder: str = '',
         repeat = 1
     assert repeat > 0, f'invalid repeat: {repeat:r}'
 
-    key = (type_, signed) if type_ is int and signed is not None else type_
+    etype = bpack.utils.effective_type(type_)
+    key = (etype, signed) if etype is int and signed is not None else etype
+
     try:
         fmt = f'{bitorder}{_TYPE_TO_STR[key]}{size}' * repeat
     except KeyError:
-        raise TypeError(f'unsupported type: {type_:!r}')
+        raise TypeError(f'unsupported type: {etype:!r}')
 
     return fmt
 
@@ -80,10 +83,19 @@ class Decoder:
 
         self._codec = bitstruct.compile(fmt)
         self._descriptor = descriptor
+        self._converters = [
+            (idx, field.type)
+            for idx, field in enumerate(bpack.fields(descriptor))
+            if issubclass(field.type, enum.Enum)
+        ]
 
     def decode(self, data: bytes):
         """Decode binary data and return a record object."""
         values = self._codec.unpack(data)
+        if self._converters:
+            values = list(values)
+            for idx, func in self._converters:
+                values[idx] = func(values[idx])
         return self._descriptor(*values)
 
 
