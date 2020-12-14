@@ -68,4 +68,5 @@ def effective_type(type_):
         etype = enum_item_type(type_)
     else:
         etype = type_
+
     return etype

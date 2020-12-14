@@ -576,7 +576,8 @@ def test_enum_decoding_bytes(backend, baseunits):
         field_2: EBytesEnumType = bpack.field(size=ssize,
                                               default=EBytesEnumType.A)
         field_3: EIntEnumType = bpack.field(size=isize, default=EIntEnumType.A)
-        field_4: EFlagEnumType = bpack.field(size=isize, default=EFlagEnumType.A)
+        field_4: EFlagEnumType = bpack.field(size=isize,
+                                             default=EFlagEnumType.A)
 
     record = Record.from_bytes(encoded_data)
     assert record == Record()
