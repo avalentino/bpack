@@ -3,13 +3,17 @@ Features
 
 * declarative data description for binary data structures
 * description of binary data structures at *bit* level
-* data decoding (byte and bit based structures)
+* data decoding (of byte and bit based structures)
 * backend:
 
   - **st** backend based on the standard Python library :mod:`struct` module
-  - **ba** backend based on bitarray_
+  - **ba** backend based on bitarray_ (only included for benchmarking purposes)
   - **bs** backend based on bitstruct_
 
+* support for signed integer types
+* support for :class:`enum.Enum` types
+* both bit and byte order can be specified by the user
+* comprehensive test suite
 
 .. _bitstruct: https://github.com/eerimoq/bitstruct
 .. _bitarray: https://github.com/ilanschnell/bitarray
