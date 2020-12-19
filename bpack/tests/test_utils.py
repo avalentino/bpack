@@ -101,21 +101,21 @@ def test_effective_type():
 
 def test_get_sequence_type():
     type_ = typing.List[int]
-    assert bpack.utils.get_sequence_type(type_) is list
+    assert bpack.utils.sequence_type(type_) is list
 
     type_ = typing.Sequence[int]
-    assert bpack.utils.get_sequence_type(type_) is tuple
+    assert bpack.utils.sequence_type(type_) is tuple
 
     type_ = typing.Tuple[int, int]
-    assert bpack.utils.get_sequence_type(type_) is None
+    assert bpack.utils.sequence_type(type_) is None
     with pytest.raises(TypeError):
-        bpack.utils.get_sequence_type(type_, error=True)
+        bpack.utils.sequence_type(type_, error=True)
 
-    assert bpack.utils.get_sequence_type(list) is None
-    assert bpack.utils.get_sequence_type(typing.List) is None
-    assert bpack.utils.get_sequence_type(typing.Sequence) is None
-    assert bpack.utils.get_sequence_type(typing.Tuple) is None
-    assert bpack.utils.get_sequence_type(typing.Type[typing.Any]) is None
+    assert bpack.utils.sequence_type(list) is None
+    assert bpack.utils.sequence_type(typing.List) is None
+    assert bpack.utils.sequence_type(typing.Sequence) is None
+    assert bpack.utils.sequence_type(typing.Tuple) is None
+    assert bpack.utils.sequence_type(typing.Type[typing.Any]) is None
 
 
 def test_is_sequence_type():

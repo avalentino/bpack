@@ -19,8 +19,8 @@ def get_sequence_groups(descriptor):
     offset = 0
     for descr in field_descriptors(descriptor):
         if descr.repeat is not None:
-            sequence_type = bpack.utils.get_sequence_type(descr.type,
-                                                          error=True)
+            sequence_type = bpack.utils.sequence_type(descr.type,
+                                                      error=True)
             slice_ = slice(offset, offset + descr.repeat)
             groups.append((sequence_type, slice_))
             offset += descr.repeat

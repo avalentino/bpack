@@ -40,7 +40,7 @@ def set_new_attribute(cls, name, value):
     return dataclasses._set_new_attribute(cls, name, value)
 
 
-def get_sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
+def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
     """Return the sequence type associated to a typed sequence.
 
     The function return :class:`list` or :class:`tuple` if the input is
@@ -77,7 +77,7 @@ def is_sequence_type(type_: Type, error: bool = False) -> bool:
     Please ot that :class:`typing.Tuple`s are not considered homogeneous
     sequences even if all items are specified to have the same type.
     """
-    seq_type = get_sequence_type(type_, error=error)
+    seq_type = sequence_type(type_, error=error)
     return seq_type is not None
 
 
