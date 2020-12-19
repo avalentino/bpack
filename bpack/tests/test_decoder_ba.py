@@ -16,7 +16,7 @@ import bpack.ba
      (64, bytes([0b00111111, 0b11110000, 0b00000000, 0b00000000,
                  0b00000000, 0b00000000, 0b00000000, 0b00000000]))],
     ids=['float16', 'float32', 'float64'])
-def test_ba_decoder_float(size, data):
+def test_float(size, data):
     backend = bpack.ba
 
     @backend.decoder
@@ -29,7 +29,7 @@ def test_ba_decoder_float(size, data):
     assert record.field_1 == 1.
 
 
-def test_ba_decoder_invalid_float_size():
+def test_invalid_float_size():
     backend = bpack.ba
 
     with pytest.raises(ValueError):
@@ -40,7 +40,7 @@ def test_ba_decoder_invalid_float_size():
             field_1: float = bpack.field(size=80)
 
 
-def test_bit_decoder_little_endian_ba():
+def test_little_endian():
     backend = bpack.ba
 
     with pytest.raises(NotImplementedError):
@@ -52,7 +52,7 @@ def test_bit_decoder_little_endian_ba():
             field_1: int = bpack.field(size=8, default=1)
 
 
-def test_bit_decoder_lsb_ba():
+def test_invalid_bitorder():
     backend = bpack.ba
 
     with pytest.raises(NotImplementedError):
