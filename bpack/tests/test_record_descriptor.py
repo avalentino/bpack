@@ -11,242 +11,242 @@ from bpack import EBaseUnits, EByteOrder, EBitOrder
 from bpack.descriptors import Field as BPackField
 
 
-class TestRecord:
-    @staticmethod
-    def test_base():
+def test_base():
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=4, default=0)
+        field_2: float = bpack.field(size=8, default=1/3)
+
+    assert dataclasses.is_dataclass(Record)
+    assert len(bpack.fields(Record)) == 2
+    assert bpack.baseunits(Record) is EBaseUnits.BYTES  # default
+    assert all(isinstance(f, BPackField) for f in bpack.fields(Record))
+
+
+def test_frozen():
+    @bpack.descriptor
+    @dataclasses.dataclass(frozen=True)
+    class Record:
+        field_1: int = bpack.field(size=4, default=0)
+        field_2: float = bpack.field(size=8, default=1/3)
+
+    assert dataclasses.is_dataclass(Record)
+    assert len(bpack.fields(Record)) == 2
+    assert bpack.baseunits(Record) is EBaseUnits.BYTES  # default
+    assert all(isinstance(f, BPackField) for f in bpack.fields(Record))
+
+
+def test_no_dataclass():
+    error_msg = 'must be called with a dataclass type or instance'
+    with pytest.raises(TypeError, match=error_msg):
         @bpack.descriptor
-        @dataclasses.dataclass
-        class Record:
-            field_1: int = bpack.field(size=4, default=0)
-            field_2: float = bpack.field(size=8, default=1/3)
-
-        assert dataclasses.is_dataclass(Record)
-        assert len(bpack.fields(Record)) == 2
-        assert bpack.baseunits(Record) is EBaseUnits.BYTES  # default
-        assert all(isinstance(f, BPackField) for f in bpack.fields(Record))
-
-    @staticmethod
-    def test_frozen():
-        @bpack.descriptor
-        @dataclasses.dataclass(frozen=True)
-        class Record:
-            field_1: int = bpack.field(size=4, default=0)
-            field_2: float = bpack.field(size=8, default=1/3)
-
-        assert dataclasses.is_dataclass(Record)
-        assert len(bpack.fields(Record)) == 2
-        assert bpack.baseunits(Record) is EBaseUnits.BYTES  # default
-        assert all(isinstance(f, BPackField) for f in bpack.fields(Record))
-
-    @staticmethod
-    def test_no_dataclass():
-        error_msg = 'must be called with a dataclass type or instance'
-        with pytest.raises(TypeError, match=error_msg):
-            @bpack.descriptor
-            class Record:
-                field_1: int = bpack.field(size=8, default=0)
-                field_2: float = bpack.field(size=8, default=1/3)
-
-    @staticmethod
-    @pytest.mark.parametrize(argnames='baseunits',
-                             argvalues=[EBaseUnits.BYTES, EBaseUnits.BITS,
-                                        'bits', 'bytes'])
-    def test_base_units(baseunits):
-        @bpack.descriptor(baseunits=baseunits)
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=8, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert bpack.baseunits(Record) is EBaseUnits(baseunits)
-        assert bpack.baseunits(Record()) is EBaseUnits(baseunits)
 
-    @staticmethod
-    def test_byte_alignment_warning():
-        with pytest.warns(UserWarning,
-                          match='bit struct not aligned to bytes'):
-            @bpack.descriptor(baseunits=EBaseUnits.BITS)
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=4, default=0)
-                field_2: float = bpack.field(size=8, default=1/3)
+@pytest.mark.parametrize(argnames='baseunits',
+                         argvalues=[EBaseUnits.BYTES, EBaseUnits.BITS,
+                                    'bits', 'bytes'])
+def test_base_units(baseunits):
+    @bpack.descriptor(baseunits=baseunits)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=8, default=0)
+        field_2: float = bpack.field(size=8, default=1/3)
 
-    @staticmethod
-    def test_baseunits_attrs():
-        @bpack.descriptor
+    assert bpack.baseunits(Record) is EBaseUnits(baseunits)
+    assert bpack.baseunits(Record()) is EBaseUnits(baseunits)
+
+
+def test_byte_alignment_warning():
+    with pytest.warns(UserWarning,
+                      match='bit struct not aligned to bytes'):
+        @bpack.descriptor(baseunits=EBaseUnits.BITS)
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert hasattr(Record, bpack.descriptors.BASEUNITS_ATTR_NAME)
-        assert hasattr(Record, bpack.descriptors.BYTEORDER_ATTR_NAME)
-        assert hasattr(Record, bpack.descriptors.BITORDER_ATTR_NAME)
 
-    @staticmethod
-    @pytest.mark.parametrize(argnames='baseunits', argvalues=[None, 8, 'x'])
-    def test_invalid_baseunits(baseunits):
-        with pytest.raises(ValueError):
-            @bpack.descriptor(baseunits=baseunits)
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=4, default=0)
-                field_2: float = bpack.field(size=8, default=1/3)
+def test_baseunits_attrs():
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=4, default=0)
+        field_2: float = bpack.field(size=8, default=1/3)
 
-    @staticmethod
-    @pytest.mark.parametrize(argnames='order',
-                             argvalues=[EByteOrder.LITTLE, EByteOrder.BIG,
-                                        EByteOrder.NATIVE, EByteOrder.DEFAULT,
-                                        '<', '>', '=', ''])
-    def test_byteorder(order):
+    assert hasattr(Record, bpack.descriptors.BASEUNITS_ATTR_NAME)
+    assert hasattr(Record, bpack.descriptors.BYTEORDER_ATTR_NAME)
+    assert hasattr(Record, bpack.descriptors.BITORDER_ATTR_NAME)
+
+
+@pytest.mark.parametrize(argnames='baseunits', argvalues=[None, 8, 'x'])
+def test_invalid_baseunits(baseunits):
+    with pytest.raises(ValueError):
+        @bpack.descriptor(baseunits=baseunits)
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: float = bpack.field(size=8, default=1/3)
+
+
+@pytest.mark.parametrize(argnames='order',
+                         argvalues=[EByteOrder.LITTLE, EByteOrder.BIG,
+                                    EByteOrder.NATIVE, EByteOrder.DEFAULT,
+                                    '<', '>', '=', ''])
+def test_byteorder(order):
+    @bpack.descriptor(byteorder=order)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=8, default=0)
+        field_2: float = bpack.field(size=8, default=1/3)
+
+    if isinstance(order, str):
+        assert bpack.byteorder(Record) is EByteOrder(order)
+        assert bpack.byteorder(Record()) is EByteOrder(order)
+    else:
+        assert bpack.byteorder(Record) is order
+        assert bpack.byteorder(Record()) is order
+
+
+@pytest.mark.parametrize(argnames='order', argvalues=['invalid', None])
+def test_invalid_byteorder(order):
+    with pytest.raises(ValueError):
         @bpack.descriptor(byteorder=order)
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=8, default=0)
-            field_2: float = bpack.field(size=8, default=1/3)
 
-        if isinstance(order, str):
-            assert bpack.byteorder(Record) is EByteOrder(order)
-            assert bpack.byteorder(Record()) is EByteOrder(order)
-        else:
-            assert bpack.byteorder(Record) is order
-            assert bpack.byteorder(Record()) is order
 
-    @staticmethod
-    @pytest.mark.parametrize(argnames='order', argvalues=['invalid', None])
-    def test_invalid_byteorder(order):
-        with pytest.raises(ValueError):
-            @bpack.descriptor(byteorder=order)
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=8, default=0)
+@pytest.mark.parametrize(argnames='order',
+                         argvalues=[EBitOrder.LSB, EBitOrder.MSB,
+                                    EBitOrder.DEFAULT, '<', '>', ''])
+def test_bitorder(order):
+    @bpack.descriptor(bitorder=order, baseunits=EBaseUnits.BITS)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=8, default=0)
+        field_2: float = bpack.field(size=8, default=1/3)
 
-    @staticmethod
-    @pytest.mark.parametrize(argnames='order',
-                             argvalues=[EBitOrder.LSB, EBitOrder.MSB,
-                                        EBitOrder.DEFAULT, '<', '>', ''])
-    def test_bitorder(order):
-        @bpack.descriptor(bitorder=order, baseunits=EBaseUnits.BITS)
-        @dataclasses.dataclass
-        class Record:
-            field_1: int = bpack.field(size=8, default=0)
-            field_2: float = bpack.field(size=8, default=1/3)
+    if isinstance(order, str):
+        assert bpack.bitorder(Record) is EBitOrder(order)
+        assert bpack.bitorder(Record()) is EBitOrder(order)
+    else:
+        assert bpack.bitorder(Record) is order
+        assert bpack.bitorder(Record()) is order
 
-        if isinstance(order, str):
-            assert bpack.bitorder(Record) is EBitOrder(order)
-            assert bpack.bitorder(Record()) is EBitOrder(order)
-        else:
-            assert bpack.bitorder(Record) is order
-            assert bpack.bitorder(Record()) is order
 
-    @staticmethod
-    def test_default_bitorder():
-        @bpack.descriptor(baseunits=EBaseUnits.BITS)
-        @dataclasses.dataclass
-        class Record:
-            field_1: int = bpack.field(size=8, default=0)
-            field_2: float = bpack.field(size=8, default=1 / 3)
+def test_default_bitorder():
+    @bpack.descriptor(baseunits=EBaseUnits.BITS)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=8, default=0)
+        field_2: float = bpack.field(size=8, default=1 / 3)
 
-        assert bpack.bitorder(Record) is EBitOrder.DEFAULT
-        assert bpack.bitorder(Record()) is EBitOrder.DEFAULT
+    assert bpack.bitorder(Record) is EBitOrder.DEFAULT
+    assert bpack.bitorder(Record()) is EBitOrder.DEFAULT
 
-    @staticmethod
-    def test_invalid_bitorder():
-        with pytest.raises(ValueError):
-            @bpack.descriptor(byteorder='invalid', baseunits=EBaseUnits.BITS)
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=8, default=0)
 
-    @staticmethod
-    def test_bitorder_in_byte_descriptors():
-        @bpack.descriptor(baseunits=EBaseUnits.BYTES)
+def test_invalid_bitorder():
+    with pytest.raises(ValueError):
+        @bpack.descriptor(byteorder='invalid', baseunits=EBaseUnits.BITS)
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=8, default=0)
 
-        assert bpack.byteorder(Record) is EByteOrder.DEFAULT
-        assert bpack.byteorder(Record()) is EByteOrder.DEFAULT
 
-        with pytest.raises(ValueError):
-            @bpack.descriptor(bitorder=EBitOrder.DEFAULT,
-                              baseunits=EBaseUnits.BYTES)
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=8, default=0)
+def test_bitorder_in_byte_descriptors():
+    @bpack.descriptor(baseunits=EBaseUnits.BYTES)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=8, default=0)
 
-    @staticmethod
-    def test_invalid_field_class():
-        with pytest.raises(TypeError, match='size not specified'):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = 0
-                field_2: float = 1/3
+    assert bpack.byteorder(Record) is EByteOrder.DEFAULT
+    assert bpack.byteorder(Record()) is EByteOrder.DEFAULT
 
-    @staticmethod
-    def test_no_field_type():
-        with pytest.raises(TypeError):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1 = bpack.field(size=4, default=0)
+    with pytest.raises(ValueError):
+        @bpack.descriptor(bitorder=EBitOrder.DEFAULT,
+                          baseunits=EBaseUnits.BYTES)
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=8, default=0)
 
-    @staticmethod
-    def test_invalid_field_size_type():
-        with pytest.raises(TypeError):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=4, default=0)
-                field_2: float = bpack.field(size=None, default=1/3)
 
-    @staticmethod
-    def test_inconsistent_field_offset_and_size():
-        with pytest.raises(ValueError):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=4, default=0)
-                field_2: float = bpack.field(size=8, offset=1, default=1/3)
-
-    @staticmethod
-    def test_inconsistent_field_type_and_signed():
-        with pytest.warns(UserWarning, match='ignore'):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=4, default=0)
-                field_2: float = bpack.field(size=8, default=1/3, signed=True)
-
-    @staticmethod
-    def test_repeat():
+def test_invalid_field_class():
+    with pytest.raises(TypeError, match='size not specified'):
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
-            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
-            field_2: float = bpack.field(size=8, default=1/3)
+            field_1: int = 0
+            field_2: float = 1/3
 
-        assert len(Record()) == 16
 
-    @staticmethod
-    def test_no_repeat():
-        with pytest.raises(TypeError):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: List[int] = bpack.field(size=4, default=0)
-                field_2: float = bpack.field(size=8, default=1 / 3)
+def test_no_field_type():
+    with pytest.raises(TypeError):
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1 = bpack.field(size=4, default=0)
 
-    @staticmethod
-    def test_inconsistent_field_type_and_repeat():
-        with pytest.raises(TypeError):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: int = bpack.field(size=4, default=0, repeat=2)
-                field_2: float = bpack.field(size=8, default=1/3, signed=True)
 
+def test_invalid_field_size_type():
+    with pytest.raises(TypeError):
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: float = bpack.field(size=None, default=1/3)
+
+
+def test_inconsistent_field_offset_and_size():
+    with pytest.raises(ValueError):
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: float = bpack.field(size=8, offset=1, default=1/3)
+
+
+def test_inconsistent_field_type_and_signed():
+    with pytest.warns(UserWarning, match='ignore'):
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: float = bpack.field(size=8, default=1/3, signed=True)
+
+
+def test_repeat():
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class Record:
+        field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+        field_2: float = bpack.field(size=8, default=1/3)
+
+    assert len(Record()) == 16
+
+
+def test_no_repeat():
+    with pytest.raises(TypeError):
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=4, default=0)
+            field_2: float = bpack.field(size=8, default=1 / 3)
+
+
+def test_inconsistent_field_type_and_repeat():
+    with pytest.raises(TypeError):
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=0, repeat=2)
+            field_2: float = bpack.field(size=8, default=1/3, signed=True)
+
+
+class TestExplicitSize:
     @staticmethod
     def test_explicit_size():
         size = 16
@@ -307,6 +307,8 @@ class TestRecord:
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: float = bpack.field(size=8, default=1/3)
 
+
+class TestLen:
     @staticmethod
     def test_len():
         @bpack.descriptor
@@ -412,32 +414,32 @@ class TestRecord:
                 field_2: List[float] = bpack.field(size=8, default=1/3,
                                                    repeat=2, offset=6)
 
-    @staticmethod
-    def test_sequence_type():
+
+def test_sequence_type():
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class Record:
+        field_1: List[int] = bpack.field(size=1, repeat=4)
+
+    field_1 = bpack.fields(Record)[0]
+    assert field_1.type is List[int]
+
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class Record:
+        field_1: Sequence[int] = bpack.field(size=1, repeat=4)
+
+    field_1 = bpack.fields(Record)[0]
+    assert field_1.type is Sequence[int]
+
+    with pytest.raises(TypeError):
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
-            field_1: List[int] = bpack.field(size=1, repeat=4)
+            field_1: Tuple[int, int] = bpack.field(size=1, repeat=2)
 
-        field_1 = bpack.fields(Record)[0]
-        assert field_1.type is List[int]
-
+    with pytest.raises(TypeError):
         @bpack.descriptor
         @dataclasses.dataclass
         class Record:
-            field_1: Sequence[int] = bpack.field(size=1, repeat=4)
-
-        field_1 = bpack.fields(Record)[0]
-        assert field_1.type is Sequence[int]
-
-        with pytest.raises(TypeError):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: Tuple[int, int] = bpack.field(size=1, repeat=2)
-
-        with pytest.raises(TypeError):
-            @bpack.descriptor
-            @dataclasses.dataclass
-            class Record:
-                field_1: Sequence = bpack.field(size=1, repeat=2)
+            field_1: Sequence = bpack.field(size=1, repeat=2)

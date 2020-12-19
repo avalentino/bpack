@@ -78,7 +78,7 @@ class TestFieldFactory:
         assert bpack.descriptors.METADATA_KEY in field_.metadata
 
 
-class TestFields:
+class TestRecordFields:
     @staticmethod
     def test_field_properties_01():
         @bpack.descriptor
