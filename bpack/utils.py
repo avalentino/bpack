@@ -131,3 +131,12 @@ def effective_type(type_: Type) -> Type:
         assert len(args) == 1
         etype = args[0]
     return etype
+
+
+def is_int_type(type_: Type) -> bool:
+    """Return true if the effective type is an integer."""
+    if is_sequence_type(type_):
+        etype = effective_type(type_)
+        return issubclass(etype, int)
+    else:
+        return issubclass(type_, int)

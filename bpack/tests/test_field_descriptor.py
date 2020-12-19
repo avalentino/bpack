@@ -406,3 +406,55 @@ class TestFieldDescriptor:
         descr.repeat = 0
         with pytest.raises(ValueError):
             descr.validate()
+
+    def test_methods(self):
+        descr = bpack.descriptors.BinFieldDescriptor(int, 1)
+        descr.validate()
+        assert descr.is_int_type()
+        assert not descr.is_sequence_type()
+        assert not descr.is_enum_type()
+
+        descr = bpack.descriptors.BinFieldDescriptor(float, 1)
+        descr.validate()
+        assert not descr.is_int_type()
+        assert not descr.is_sequence_type()
+        assert not descr.is_enum_type()
+
+        descr = bpack.descriptors.BinFieldDescriptor(List[int], 1, repeat=10)
+        descr.validate()
+        assert descr.is_int_type()
+        assert descr.is_sequence_type()
+        assert not descr.is_enum_type()
+
+        descr = bpack.descriptors.BinFieldDescriptor(List[float], 1, repeat=10)
+        descr.validate()
+        assert not descr.is_int_type()
+        assert descr.is_sequence_type()
+        assert not descr.is_enum_type()
+
+        class EEnumType(enum.Enum):
+            A = 'a'
+
+        descr = bpack.descriptors.BinFieldDescriptor(EEnumType, 1)
+        descr.validate()
+        assert not descr.is_int_type()
+        assert not descr.is_sequence_type()
+        assert descr.is_enum_type()
+
+        class EEnumType(enum.IntEnum):
+            A = 1
+
+        descr = bpack.descriptors.BinFieldDescriptor(EEnumType, 1)
+        descr.validate()
+        assert descr.is_int_type()
+        assert not descr.is_sequence_type()
+        assert descr.is_enum_type()
+
+        class EEnumType(enum.IntFlag):
+            A = 1
+
+        descr = bpack.descriptors.BinFieldDescriptor(EEnumType, 1)
+        descr.validate()
+        assert descr.is_int_type()
+        assert not descr.is_sequence_type()
+        assert descr.is_enum_type()

@@ -3,7 +3,6 @@
 import enum
 import math
 import types
-import typing
 import warnings
 import dataclasses
 from typing import Optional, Iterable, Type, Union
@@ -123,18 +122,6 @@ class BinFieldDescriptor:
         if self.repeat is not None:
             self._validate_repeat()
 
-    @classmethod
-    def _is_int(cls, type_):
-        if cls._is_sequence(type_):
-            etype = typing.get_args(type_)[0]
-            return issubclass(etype, int)
-        else:
-            return issubclass(type_, int)
-
-    @staticmethod
-    def _is_sequence(type_):
-        return bpack.utils.is_sequence_type(type_, error=True)
-
     def validate(self):
         """Perform validity check on the BinFieldDescriptor instance."""
         self._validate_type()
@@ -143,32 +130,31 @@ class BinFieldDescriptor:
             self._validate_offset()
         if self.signed is not None:
             self._validate_signed()
-            if not self._is_int(self.type):
+            if not self.is_int_type():
                 warnings.warn(
                     f'the "signed" parameter will be ignored for non-integer '
                     f'type: "{self.type}"')
         if self.repeat is not None:
             self._validate_repeat()
-            if not self._is_sequence(self.type) and self.repeat is not None:
+            if not self.is_sequence_type() and self.repeat is not None:
                 raise TypeError(
                     f'repeat parameter specified for non-sequence type: '
                     f'{self.type}')
         if bpack.utils.is_enum_type(self.type):
             self._validate_enum_type()
-        elif self._is_sequence(self.type) and self.repeat is None:
+        elif self.is_sequence_type() and self.repeat is None:
             raise TypeError(
                 f'no "repeat" parameter specified for sequence type '
                 f'{self.type}')
 
-    # TODO: TBD
-    # def is_int(self):
-    #     return self._is_int(self.type)
-    #
-    # def is_sequence(self):
-    #     return self._is_sequence(self.type)
-    #
-    # def is_enum(self):
-    #     return self._is_enum_type(self.type)
+    def is_int_type(self) -> bool:
+        return bpack.utils.is_int_type(self.type)
+
+    def is_sequence_type(self) -> bool:
+        return bpack.utils.is_sequence_type(self.type, error=True)
+
+    def is_enum_type(self) -> bool:
+        return bpack.utils.is_enum_type(self.type)
 
     @property
     def total_size(self):
