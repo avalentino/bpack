@@ -1,5 +1,6 @@
 """Test bpack decoders."""
 
+import sys
 import enum
 import dataclasses
 
@@ -481,15 +482,24 @@ def test_unsupported_type(backend, baseunits):
 
 @pytest.mark.parametrize('backend', [bpack.st], ids=['st'])
 def test_byte_decoder_native_byteorder(backend):
+    size = 4
+    value = 1
+
     @backend.decoder
     @bpack.descriptor(byteorder=bpack.EByteOrder.NATIVE)
     @dataclasses.dataclass(frozen=True)
     class Record:
-        field_1: int = bpack.field(size=4, default=1)
+        field_1: int = bpack.field(size=size, default=value)
+
+    data = value.to_bytes(size, sys.byteorder)
+    assert Record.from_bytes(data) == Record()
 
 
 @pytest.mark.parametrize('backend', [bpack.bs], ids=['bs'])
 def test_bit_decoder_native_byteorder(backend):
+    size = 8
+    value = 1
+
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                       byteorder=bpack.EByteOrder.NATIVE)
@@ -497,15 +507,25 @@ def test_bit_decoder_native_byteorder(backend):
     class Record:
         field_1: int = bpack.field(size=8, default=1)
 
+    data = value.to_bytes(size, sys.byteorder)
+    assert Record.from_bytes(data) == Record()
+
 
 @pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
 def test_bit_decoder_default_byteorder(backend):
+    size = 8
+    value = 1
+
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                       byteorder=bpack.EByteOrder.DEFAULT)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=8, default=1)
+
+    # default byte order is big for bit descriptors
+    data = value.to_bytes(size // 8, 'big')
+    assert Record.from_bytes(data) == Record()
 
 
 @pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
