@@ -232,6 +232,55 @@ class DescriptorConsistencyError(ValueError):
     pass
 
 
+_DEFAULT_SIZE_MAP = {
+    EBaseUnits.BYTES: {
+        bool: 1,
+        # int: 4,
+        # float: 4,
+    },
+    EBaseUnits.BITS: {
+        bool: 1,
+        # int: 32,
+        # float: 32,
+    },
+}
+
+
+def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
+    # bytes_to_baseunits = 1 if baseunits is EBaseUnits.BYTES else 8
+    #
+    # if is_descriptor(type_):
+    #     return calcsize(type_) // bytes_to_baseunits
+
+    etype = bpack.utils.effective_type(type_)
+
+    # if bpack.utils.is_enum_type(type_):
+    #     if bpack.utils.is_int_type(type_):
+    #         signbit = 1 if any(item.value < 0 for item in type_) else 0
+    #         bits = signbit + max(item.value.bit_lenght() for item in type_)
+    #         if baseunits is EBaseUnits.BITS:
+    #             if bits <= 8:
+    #                 return 1
+    #             elif bits <= 16:
+    #                 return 2
+    #             elif bits <= 32:
+    #                 return 4
+    #             else:
+    #                 return 8
+    #         else:
+    #             return bits
+    #     elif issubclass(etype, str):
+    #         length = max(len(item.value.encode('utf-8')) for item in type_)
+    #         return length * bytes_to_baseunits
+    #     elif issubclass(etype, bytes):
+    #         length = max(len(item.value) for item in type_)
+    #         return length * bytes_to_baseunits
+    #     else:
+    #         return None
+
+    return _DEFAULT_SIZE_MAP[baseunits].get(etype)
+
+
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
                byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,
@@ -247,6 +296,7 @@ def descriptor(cls, *, size: Optional[int] = None,
     * the ``__len__`` special method is added (returning always the
       record size in bytes).
     """
+    baseunits = EBaseUnits(baseunits)
     fields_ = dataclasses.fields(cls)
 
     # Initialize to a dummy value with initial offset + size = 0
@@ -263,16 +313,21 @@ def descriptor(cls, *, size: Optional[int] = None,
             field_descr = get_field_descriptor(field_, validate=False)
         except TypeError:
             field_descr = BinFieldDescriptor()
+            if isinstance(field_, Field):
+                field_descr.type = field_.type
 
-        # TODO: auto-size
-        # if field_descr.size is None:
-        #     assert field.type is not None  # TODO: check in get_size_for_type
-        #     auto_size = get_size_for_type(field.type)
-        #     assert auto_size is not None
-        #     field_descr.size = auto_size
+        if field_descr.size is None:
+            field_descr.size = _get_default_size(field_descr.type, baseunits)
 
         if field_descr.size is None:
             raise TypeError(f'size not specified for field: "{field_.name}"')
+
+        # if (is_descriptor(field_descr.type) and
+        #         calcsize(field_descr.type) != field_descr.size):
+        #     raise DescriptorConsistencyError(
+        #         f'mismatch between field.size ({field.size}) and '
+        #         f'size of field.type ({calcsize(field_descr.type)}) '
+        #         f'in field "{field_.name}"')
 
         auto_offset = prev_field_descr.offset + prev_field_descr.total_size
 
@@ -300,7 +355,6 @@ def descriptor(cls, *, size: Optional[int] = None,
             f'the specified size ({size}) is smaller than total size of '
             f'fields ({auto_size})')
 
-    baseunits = EBaseUnits(baseunits)
     if baseunits is EBaseUnits.BITS:
         if size % 8 != 0:
             warnings.warn('bit struct not aligned to bytes')

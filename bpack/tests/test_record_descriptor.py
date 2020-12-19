@@ -443,3 +443,20 @@ def test_sequence_type():
         @dataclasses.dataclass
         class Record:
             field_1: Sequence = bpack.field(size=1, repeat=2)
+
+
+def test_field_auto_size():
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class Record:
+        field_1: bool
+
+    assert bpack.calcsize(Record) == 1
+
+    with pytest.warns(UserWarning):
+        @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
+        @dataclasses.dataclass
+        class Record:
+            field_1: bool
+
+    assert bpack.calcsize(Record) == 1

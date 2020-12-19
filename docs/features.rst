@@ -15,6 +15,7 @@ Features
 * support for (mutable/immutable) sequence types, i.e. fields with
   multiple (homogeneous) items
 * both bit and byte order can be specified by the user
+* automatic size determination for some data types
 * comprehensive test suite
 
 .. _bitstruct: https://github.com/eerimoq/bitstruct
@@ -36,9 +37,8 @@ Limitations
 Possible additional features still not implemented
 --------------------------------------------------
 
-* record nesting (the field of a descriptor cna be another descriptor)
+* record nesting (the field in a record descriptor can be another record)
 * numpy based backend
-* automatic size determination for data type
 * user defined converters
 * possibility to specify data types using string specifiers with
   the native backend syntax (struct, bitstruct, numpy, ...)
