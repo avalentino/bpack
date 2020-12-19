@@ -3,6 +3,8 @@
 import enum
 import dataclasses
 
+from typing import List
+
 import pytest
 
 import bpack
@@ -12,10 +14,10 @@ from bpack.descriptors import get_field_descriptor
 class TestFieldFactory:
     @staticmethod
     def test_base():
-        bpack.field(size=1, offset=0, signed=False, default=0)
+        bpack.field(size=1, offset=0, signed=False, default=0, repeat=1)
 
     @staticmethod
-    def test_field():
+    def test_empty_field():
         with pytest.raises(TypeError):
             bpack.field()
 
@@ -60,6 +62,17 @@ class TestFieldFactory:
             bpack.field(size=8, default=1, signed=value)
 
     @staticmethod
+    @pytest.mark.parametrize(argnames='repeat', argvalues=[1.3, 'x'])
+    def test_invalid_repeat_type(repeat):
+        with pytest.raises(TypeError):
+            bpack.field(size=8, default=1/3, repeat=repeat)
+
+    @staticmethod
+    def test_invalid_repeat():
+        with pytest.raises(ValueError):
+            bpack.field(size=8, default=1/3, repeat=0)
+
+    @staticmethod
     def test_metadata_key():
         field_ = bpack.field(size=1)
         assert bpack.descriptors.METADATA_KEY in field_.metadata
@@ -73,15 +86,17 @@ class TestFields:
         class Record:
             field_1: int = bpack.field(size=4, default=0, signed=True)
             field_2: float = bpack.field(size=8, default=1/3)
+            field_3: List[int] = bpack.field(size=1, default=1, repeat=1)
 
-        # name, type, size, offset
+        # name, type, size, offset, repeat
         field_data = [
-            ('field_1', int, 4, 0, True),
-            ('field_2', float, 8, 4, None),
+            ('field_1', int, 4, 0, True, None),
+            ('field_2', float, 8, 4, None, None),
+            ('field_3', List[int], 1, 12, None, 1),
         ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
-            name, type_, size, offset, signed = data
+            name, type_, size, offset, signed, repeat = data
             assert field_.name == name
             assert field_.type == type_
             field_descr = get_field_descriptor(field_)
@@ -89,6 +104,7 @@ class TestFields:
             assert field_descr.size == size
             assert field_descr.offset == offset
             assert field_descr.signed == signed
+            assert field_descr.repeat == repeat
 
     @staticmethod
     def test_field_properties_02():
@@ -98,15 +114,17 @@ class TestFields:
             field_1: int = bpack.field(size=4, offset=1, default=0,
                                        signed=False)
             field_2: float = bpack.field(size=8, default=1/3)
+            field_3: List[int] = bpack.field(size=1, default=1, repeat=1)
 
-        # name, type, size, offset
+        # name, type, size, offset, repeat
         field_data = [
-            ('field_1', int, 4, 1, False),
-            ('field_2', float, 8, 5, None),
+            ('field_1', int, 4, 1, False, None),
+            ('field_2', float, 8, 5, None, None),
+            ('field_3', List[int], 1, 13, None, 1),
         ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
-            name, type_, size, offset, signed = data
+            name, type_, size, offset, signed, repeat = data
             assert field_.name == name
             assert field_.type == type_
             field_descr = get_field_descriptor(field_)
@@ -114,6 +132,7 @@ class TestFields:
             assert field_descr.size == size
             assert field_descr.offset == offset
             assert field_descr.signed == signed
+            assert field_descr.repeat == repeat
 
     @staticmethod
     def test_field_properties_03():
@@ -123,14 +142,14 @@ class TestFields:
             field_1: int = bpack.field(size=4, offset=1, default=0)
             field_2: float = bpack.field(size=8, offset=6, default=1/3)
 
-        # name, type, size, offset
+        # name, type, size, offset, repeat
         field_data = [
-            ('field_1', int, 4, 1, None),
-            ('field_2', float, 8, 6, None),
+            ('field_1', int, 4, 1, None, None),
+            ('field_2', float, 8, 6, None, None),
         ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
-            name, type_, size, offset, signed = data
+            name, type_, size, offset, signed, repeat = data
             assert field_.name == name
             assert field_.type == type_
             field_descr = get_field_descriptor(field_)
@@ -138,6 +157,7 @@ class TestFields:
             assert field_descr.size == size
             assert field_descr.offset == offset
             assert field_descr.signed == signed
+            assert field_descr.repeat == repeat
 
 
 class TestEnumFields:
@@ -237,26 +257,30 @@ class TestFieldDescriptor:
         assert descr.size is None
         assert descr.offset is None
         assert descr.signed is None
-        assert len(vars(descr)) == 4
+        assert descr.repeat is None
+        assert len(vars(descr)) == 5
 
     @staticmethod
     def test_init():
-        descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, True)
+        descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, True, 1)
         assert descr.type is int
         assert descr.size == 1
         assert descr.offset == 2
         assert descr.signed is True
-        assert len(vars(descr)) == 4
+        assert descr.repeat == 1
+        assert len(vars(descr)) == 5
 
     @staticmethod
     def test_init_kw():
         descr = bpack.descriptors.BinFieldDescriptor(type=int, size=1,
-                                                     offset=2, signed=True)
+                                                     offset=2, signed=True,
+                                                     repeat=1)
         assert descr.type is int
         assert descr.size == 1
         assert descr.offset == 2
         assert descr.signed is True
-        assert len(vars(descr)) == 4
+        assert descr.repeat == 1
+        assert len(vars(descr)) == 5
 
     @staticmethod
     def test_init_invalid_type():
@@ -269,6 +293,9 @@ class TestFieldDescriptor:
         with pytest.raises(TypeError):
             bpack.descriptors.BinFieldDescriptor(signed=complex(3.1, 0))
 
+        with pytest.raises(TypeError):
+            bpack.descriptors.BinFieldDescriptor(repeat=1.1)
+
     @staticmethod
     def test_init_invalid_value():
         with pytest.raises(ValueError):
@@ -280,6 +307,9 @@ class TestFieldDescriptor:
         with pytest.raises(ValueError):
             bpack.descriptors.BinFieldDescriptor(offset=-1)
 
+        with pytest.raises(ValueError):
+            bpack.descriptors.BinFieldDescriptor(repeat=0)
+
     @staticmethod
     def test_validate():
         descr = bpack.descriptors.BinFieldDescriptor(int, 1)
@@ -289,6 +319,9 @@ class TestFieldDescriptor:
         descr.validate()
 
         descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, True)
+        descr.validate()
+
+        descr = bpack.descriptors.BinFieldDescriptor(List[int], 1, 2, True, 1)
         descr.validate()
 
     @staticmethod
@@ -309,6 +342,11 @@ class TestFieldDescriptor:
             descr.validate()
 
         descr = bpack.descriptors.BinFieldDescriptor(size=1)
+        with pytest.raises(TypeError):
+            descr.validate()
+
+        descr = bpack.descriptors.BinFieldDescriptor(type=int, size=1,
+                                                     repeat=2)
         with pytest.raises(TypeError):
             descr.validate()
 
@@ -352,4 +390,19 @@ class TestFieldDescriptor:
         descr.validate()
         descr.type = float
         with pytest.warns(UserWarning, match='ignore'):
+            descr.validate()
+
+    @staticmethod
+    def test_post_validation_error_on_repeat():
+        descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, signed=True)
+        descr.validate()
+        descr.repeat = 2
+        with pytest.raises(TypeError):
+            descr.validate()
+
+        descr = bpack.descriptors.BinFieldDescriptor(List[int], 1, 2,
+                                                     signed=True, repeat=2)
+        descr.validate()
+        descr.repeat = 0
+        with pytest.raises(ValueError):
             descr.validate()

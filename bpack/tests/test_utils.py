@@ -1,6 +1,7 @@
 """Test bpack.utils."""
 
 import enum
+import typing
 
 import pytest
 
@@ -69,6 +70,10 @@ def test_effective_type():
     assert bpack.utils.effective_type(bytes) is bytes
     assert bpack.utils.effective_type(float) is float
 
+    for type_ in (typing.Type[typing.Any], typing.Tuple[int, float],
+                  typing.Tuple[int]):
+        assert bpack.utils.effective_type(type_) == type_
+
     class EStrEnumType(enum.Enum):
         A = 'a'
         B = 'b'
@@ -92,3 +97,40 @@ def test_effective_type():
         B = 2
 
     assert bpack.utils.effective_type(EFlagEnumType) is int
+
+
+def test_get_sequence_type():
+    type_ = typing.List[int]
+    assert bpack.utils.get_sequence_type(type_) is list
+
+    type_ = typing.Sequence[int]
+    assert bpack.utils.get_sequence_type(type_) is tuple
+
+    type_ = typing.Tuple[int, int]
+    assert bpack.utils.get_sequence_type(type_) is None
+    with pytest.raises(TypeError):
+        bpack.utils.get_sequence_type(type_, error=True)
+
+    assert bpack.utils.get_sequence_type(list) is None
+    assert bpack.utils.get_sequence_type(typing.List) is None
+    assert bpack.utils.get_sequence_type(typing.Sequence) is None
+    assert bpack.utils.get_sequence_type(typing.Tuple) is None
+    assert bpack.utils.get_sequence_type(typing.Type[typing.Any]) is None
+
+
+def test_is_sequence_type():
+    type_ = typing.List[int]
+    assert bpack.utils.is_sequence_type(type_)
+
+    type_ = typing.Sequence[int]
+    assert bpack.utils.is_sequence_type(type_)
+
+    type_ = typing.Tuple[int, int]
+    assert not bpack.utils.is_sequence_type(type_)
+    with pytest.raises(TypeError):
+        bpack.utils.is_sequence_type(type_, error=True)
+
+    assert not bpack.utils.is_sequence_type(list)
+    assert not bpack.utils.is_sequence_type(typing.List)
+    assert not bpack.utils.is_sequence_type(typing.Sequence)
+    assert not bpack.utils.is_sequence_type(typing.Tuple)

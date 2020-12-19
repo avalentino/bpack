@@ -1,6 +1,5 @@
 """Struct based codec for binary data structures."""
 
-import enum
 import struct
 
 from typing import Optional
@@ -9,6 +8,7 @@ import bpack
 import bpack.utils
 
 from .utils import classdecorator
+from .codec_utils import get_sequence_groups
 from .descriptors import field_descriptors
 
 
@@ -62,16 +62,15 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     assert signed in (True, False, None)
 
     etype = bpack.utils.effective_type(type_)
-
+    repeat = 1 if repeat is None else repeat
     try:
         if etype in (str, bytes, None):  # none is for padding bytes
-            repeat = 1 if repeat is None else repeat
+
             key = (etype, signed, None)
             return f'{order}{size}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}' * repeat
         else:
-            repeat_str = '' if repeat is None else str(repeat)
             key = (etype, signed, size)
-            return f'{order}{repeat_str}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}'
+            return f'{order}{repeat}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}'
     except KeyError:
         raise TypeError(
             f'unable to generate format string for '
@@ -96,6 +95,10 @@ class Decoder:
     """
 
     def __init__(self, descriptor):
+        """Initializer.
+
+        The *descriptor* parameter* is a bpack record descriptor.
+        """
         if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BYTES:
             raise ValueError(
                 'struct decoder only accepts descriptors with '
@@ -110,7 +113,8 @@ class Decoder:
         # NOTE: struct expects that the byteorder specifier is used only
         #       once at the beginning of the format string
         fmt = byteorder + ''.join(
-            _to_fmt(field_descr.type, field_descr.size, order='')
+            _to_fmt(field_descr.type, field_descr.size, order='',
+                    repeat=field_descr.repeat)
             for field_descr in field_descriptors(descriptor, pad=True)
         )
 
@@ -121,7 +125,8 @@ class Decoder:
         converters_map.update(
             (field.type, _enum_converter_factory(field.type, converters_map))
             for field in bpack.fields(descriptor)
-            if issubclass(field.type, enum.Enum))
+            if bpack.utils.is_enum_type(field.type)
+        )
 
         self._codec = struct.Struct(fmt)
         self._descriptor = descriptor
@@ -130,12 +135,20 @@ class Decoder:
             for idx, field_ in enumerate(bpack.fields(self._descriptor))
             if field_.type in converters_map
         ]
+        self._groups = get_sequence_groups(descriptor)
 
     def decode(self, data: bytes):
         """Decode binary data and return a record object."""
         values = list(self._codec.unpack(data))
+
         for idx, func in self._converters:
             values[idx] = func(values[idx])
+
+        for type_, slice_ in self._groups[::-1]:
+            sub_sequence = type_(values[slice_])
+            del values[slice_]
+            values.insert(slice_.start, sub_sequence)
+
         return self._descriptor(*values)
 
 

@@ -1,7 +1,6 @@
 """Bitstruct based codec for binary data structures."""
 
 import sys
-import enum
 from typing import Optional
 
 import bitstruct
@@ -10,6 +9,7 @@ import bpack
 import bpack.utils
 
 from .utils import classdecorator
+from .codec_utils import get_sequence_groups
 from .descriptors import field_descriptors
 
 
@@ -65,6 +65,10 @@ class Decoder:
     """
 
     def __init__(self, descriptor):
+        """Initializer.
+
+        The *descriptor* parameter* is a bpack record descriptor.
+        """
         if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BITS:
             raise ValueError(
                 'bitsruct decoder only accepts descriptors with '
@@ -76,7 +80,7 @@ class Decoder:
 
         fmt = ''.join(
             _to_fmt(field_descr.type, size=field_descr.size, bitorder=bitorder,
-                    signed=field_descr.signed)  # field_descr.repeat
+                    signed=field_descr.signed, repeat=field_descr.repeat)
             for field_descr in field_descriptors(descriptor, pad=True)
         )
         fmt = fmt + byteorder  # byte order
@@ -86,16 +90,22 @@ class Decoder:
         self._converters = [
             (idx, field.type)
             for idx, field in enumerate(bpack.fields(descriptor))
-            if issubclass(field.type, enum.Enum)
+            if bpack.utils.is_enum_type(field.type)
         ]
+        self._groups = get_sequence_groups(descriptor)
 
     def decode(self, data: bytes):
         """Decode binary data and return a record object."""
-        values = self._codec.unpack(data)
-        if self._converters:
-            values = list(values)
-            for idx, func in self._converters:
-                values[idx] = func(values[idx])
+        values = list(self._codec.unpack(data))
+
+        for idx, func in self._converters:
+            values[idx] = func(values[idx])
+
+        for type_, slice_ in self._groups[::-1]:
+            sub_sequence = type_(values[slice_])
+            del values[slice_]
+            values.insert(slice_.start, sub_sequence)
+
         return self._descriptor(*values)
 
 

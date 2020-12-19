@@ -3,6 +3,8 @@
 import enum
 import dataclasses
 
+from typing import List, Sequence
+
 import pytest
 
 import bpack
@@ -581,3 +583,38 @@ def test_enum_decoding_bytes(backend, baseunits):
 
     record = Record.from_bytes(encoded_data)
     assert record == Record()
+
+
+@pytest.mark.parametrize('backend, baseunits',
+                         [(bpack.st, bpack.EBaseUnits.BYTES),
+                          (bpack.bs, bpack.EBaseUnits.BITS)],
+                         ids=['st', 'bs'])
+def test_sequence(backend, baseunits):
+    if baseunits is bpack.EBaseUnits.BYTES:
+        bitorder = None
+        size = 1
+        repeat = 2
+        encoded_data = bytes([3, 3, 4, 4])
+    else:
+        bitorder = bpack.EBitOrder.MSB
+        size = 4
+        repeat = 2
+        encoded_data = bytes([0b00110011, 0b01000100])
+
+    @backend.decoder
+    @bpack.descriptor(baseunits=baseunits, bitorder=bitorder)
+    @dataclasses.dataclass
+    class Record:
+        field_1: List[int] = bpack.field(size=size, repeat=repeat)
+        field_2: Sequence[int] = bpack.field(size=size, repeat=repeat)
+
+    ref_record = Record([3, 3], (4, 4))
+    record = Record.from_bytes(encoded_data)
+    assert record == ref_record
+
+    assert type(record.field_1) is list
+    assert type(record.field_2) is tuple
+
+    for field, sequence_type in zip(bpack.fields(Record),
+                                    (List[int], Sequence[int])):
+        assert field.type == sequence_type

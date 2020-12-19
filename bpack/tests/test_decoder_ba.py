@@ -1,7 +1,10 @@
 """Specific tests for the bitarray based decoder."""
 
 import dataclasses
+from typing import List, Sequence
+
 import pytest
+
 import bpack
 import bpack.ba
 
@@ -59,3 +62,17 @@ def test_bit_decoder_lsb_ba():
         @dataclasses.dataclass(frozen=True)
         class Record:
             field_1: int = bpack.field(size=8, default=1)
+
+
+def test_sequence():
+    backend = bpack.ba
+
+    with pytest.raises(TypeError):
+        @backend.decoder
+        @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=4, signed=False,
+                                             repeat=2, default=3)
+            field_2: Sequence[int] = bpack.field(size=4, signed=False,
+                                                 repeat=2, default=4)

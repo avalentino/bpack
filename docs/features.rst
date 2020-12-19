@@ -10,8 +10,10 @@ Features
   - **ba** backend based on bitarray_ (only included for benchmarking purposes)
   - **bs** backend based on bitstruct_
 
-* support for signed integer types
+* support for signed/unsigned integer types
 * support for :class:`enum.Enum` types
+* support for (mutable/immutable) sequence types, i.e. fields with
+  multiple (homogeneous) items
 * both bit and byte order can be specified by the user
 * comprehensive test suite
 
@@ -34,12 +36,10 @@ Limitations
 Possible additional features still not implemented
 --------------------------------------------------
 
-* support for list fields (including list length specification)
 * record nesting (the field of a descriptor cna be another descriptor)
 * numpy based backend
 * automatic size determination for data type
 * user defined converters
-* extended type specification based typing
 * possibility to specify data types using string specifiers with
   the native backend syntax (struct, bitstruct, numpy, ...)
 * support for data encoding (packing)

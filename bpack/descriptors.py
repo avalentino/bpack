@@ -3,6 +3,7 @@
 import enum
 import math
 import types
+import typing
 import warnings
 import dataclasses
 from typing import Optional, Iterable, Type, Union
@@ -60,18 +61,16 @@ class EBitOrder(enum.Enum):
     DEFAULT = ''
 
 
-# TODO: repeat attribute
 # TODO: converters (TBD, or in decoder)
 @dataclasses.dataclass
 class BinFieldDescriptor:
     """Descriptor for bpack fields."""
 
     type: Optional[Type] = None
-    size: Optional[int] = None
+    size: Optional[int] = None          # item size
     offset: Optional[int] = None
     signed: Optional[bool] = None
-    # repeat: Optional[int] = None
-    # order: Optional[EOrder] = None
+    repeat: Optional[int] = None        # number of items
     # converter: Optional[Callable] = None
 
     def _validate_type(self):
@@ -79,24 +78,18 @@ class BinFieldDescriptor:
             raise TypeError(f'invalid type "{self.type}"')
 
     def _validate_size(self):
+        msg = f'invalid size: {self.size!r} (must be a positive integer)'
         if not isinstance(self.size, int):
-            raise TypeError(
-                f'invalid size: {self.size!r} '
-                f'(must be a positive integer)')
+            raise TypeError(msg)
         if self.size <= 0:
-            raise ValueError(
-                f'invalid size: {self.size!r} '
-                f'(must be a positive integer)')
+            raise ValueError(msg)
 
     def _validate_offset(self):
+        msg = f'invalid offset: {self.offset!r} (must be an integer >= 0)'
         if not isinstance(self.offset, int):
-            raise TypeError(
-                f'invalid offset: {self.offset!r} '
-                f'(must be a positive or null integer)')
+            raise TypeError(msg)
         if self.offset < 0:
-            raise ValueError(
-                f'invalid offset: {self.offset!r} '
-                f'(must be a positive or null integer)')
+            raise ValueError(msg)
 
     def _validate_signed(self):
         if not isinstance(self.signed, bool):
@@ -104,7 +97,14 @@ class BinFieldDescriptor:
                 f'invalid "signed" parameter: {self.signed!r} '
                 f'(must be a bool or None)')
 
-    def _validate_enum(self):
+    def _validate_repeat(self):
+        msg = f'invalid repeat: {self.repeat!r} (must be a positive)'
+        if not isinstance(self.repeat, int):
+            raise TypeError(msg)
+        if self.repeat < 1:
+            raise ValueError(msg)
+
+    def _validate_enum_type(self):
         assert issubclass(self.type, enum.Enum)
         # perform checks on supported enum.Enum types
         bpack.utils.enum_item_type(self.type)
@@ -120,9 +120,20 @@ class BinFieldDescriptor:
         if self.signed is not None:
             self._validate_signed()
 
+        if self.repeat is not None:
+            self._validate_repeat()
+
+    @classmethod
+    def _is_int(cls, type_):
+        if cls._is_sequence(type_):
+            etype = typing.get_args(type_)[0]
+            return issubclass(etype, int)
+        else:
+            return issubclass(type_, int)
+
     @staticmethod
-    def _is_int(type_):
-        return issubclass(type_, int)
+    def _is_sequence(type_):
+        return bpack.utils.is_sequence_type(type_, error=True)
 
     def validate(self):
         """Perform validity check on the BinFieldDescriptor instance."""
@@ -136,22 +147,49 @@ class BinFieldDescriptor:
                 warnings.warn(
                     f'the "signed" parameter will be ignored for non-integer '
                     f'type: "{self.type}"')
-        if issubclass(self.type, enum.Enum):
-            self._validate_enum()
+        if self.repeat is not None:
+            self._validate_repeat()
+            if not self._is_sequence(self.type) and self.repeat is not None:
+                raise TypeError(
+                    f'repeat parameter specified for non-sequence type: '
+                    f'{self.type}')
+        if bpack.utils.is_enum_type(self.type):
+            self._validate_enum_type()
+        elif self._is_sequence(self.type) and self.repeat is None:
+            raise TypeError(
+                f'no "repeat" parameter specified for sequence type '
+                f'{self.type}')
+
+    # TODO: TBD
+    # def is_int(self):
+    #     return self._is_int(self.type)
+    #
+    # def is_sequence(self):
+    #     return self._is_sequence(self.type)
+    #
+    # def is_enum(self):
+    #     return self._is_enum_type(self.type)
+
+    @property
+    def total_size(self):
+        """Total size in bytes of the field (considering all item)."""
+        repeat = self.repeat if self.repeat is not None else 1
+        return self.size * repeat
 
 
 Field = dataclasses.Field
 
 
 def field(*, size: int, offset: Optional[int] = None,
-          signed: Optional[bool] = None,  # order: Optional[EOrder] = None,
+          signed: Optional[bool] = None, repeat: Optional[int] = None,
           metadata=None, **kwargs) -> Field:
     """Initialize a field descriptor.
 
     Returned object is a :class:`Field` instance with metadata properly
     initialized to describe the field of a binary record.
     """
-    field_descr = BinFieldDescriptor(size=size, offset=offset, signed=signed)
+    field_descr = BinFieldDescriptor(size=size, offset=offset, signed=signed,
+                                     repeat=repeat)
     metadata = metadata.copy() if metadata is not None else {}
     metadata[METADATA_KEY] = types.MappingProxyType(
         dataclasses.asdict(field_descr))
@@ -250,7 +288,7 @@ def descriptor(cls, *, size: Optional[int] = None,
         if field_descr.size is None:
             raise TypeError(f'size not specified for field: "{field_.name}"')
 
-        auto_offset = prev_field_descr.offset + prev_field_descr.size
+        auto_offset = prev_field_descr.offset + prev_field_descr.total_size
 
         if field_descr.offset is None:
             field_descr.offset = auto_offset
@@ -264,7 +302,7 @@ def descriptor(cls, *, size: Optional[int] = None,
     content_size = sum(
         get_field_descriptor(field_).size for field_ in fields_)
     field_descr = get_field_descriptor(fields_[-1])
-    auto_size = field_descr.offset + field_descr.size
+    auto_size = field_descr.offset + field_descr.total_size
     assert auto_size >= content_size  # this should be already checked above
 
     if size is None:
@@ -378,7 +416,7 @@ def field_descriptors(descriptor, pad=False) -> Iterable[BinFieldDescriptor]:
                                          offset=offset)
                 # offset = field_.offset
             yield field_descr
-            offset = field_descr.offset + field_descr.size
+            offset = field_descr.offset + field_descr.total_size
 
         size = calcsize(descriptor)
         if offset < size:

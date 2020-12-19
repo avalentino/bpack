@@ -1,6 +1,7 @@
 """Test bpack (record) descriptors."""
 
 import dataclasses
+from typing import List, Sequence, Tuple
 
 import pytest
 
@@ -219,6 +220,34 @@ class TestRecord:
                 field_2: float = bpack.field(size=8, default=1/3, signed=True)
 
     @staticmethod
+    def test_repeat():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+            field_2: float = bpack.field(size=8, default=1/3)
+
+        assert len(Record()) == 16
+
+    @staticmethod
+    def test_no_repeat():
+        with pytest.raises(TypeError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: List[int] = bpack.field(size=4, default=0)
+                field_2: float = bpack.field(size=8, default=1 / 3)
+
+    @staticmethod
+    def test_inconsistent_field_type_and_repeat():
+        with pytest.raises(TypeError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: int = bpack.field(size=4, default=0, repeat=2)
+                field_2: float = bpack.field(size=8, default=1/3, signed=True)
+
+    @staticmethod
     def test_explicit_size():
         size = 16
 
@@ -251,6 +280,25 @@ class TestRecord:
                 field_2: float = bpack.field(size=8, default=1/3, offset=12)
 
     @staticmethod
+    def test_inconsistent_explicit_size_and_repeat():
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor(size=12)
+            @dataclasses.dataclass
+            class Record:
+                field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+                field_2: float = bpack.field(size=8, default=1/3)
+
+    @staticmethod
+    def test_inconsistent_explicit_size_offset_and_repeat():
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor(size=20)
+            @dataclasses.dataclass
+            class Record:
+                field_1: int = bpack.field(size=4, default=0)
+                field_2: List[float] = bpack.field(size=8, default=1/3,
+                                                   offset=8, repeat=2)
+
+    @staticmethod
     def test_invalid_explicit_size_type():
         with pytest.raises(TypeError):
             @bpack.descriptor(size=10.5)
@@ -266,8 +314,9 @@ class TestRecord:
         class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
+            field_3: List[int] = bpack.field(size=1, default=0, repeat=4)
 
-        assert len(Record()) == 12
+        assert len(Record()) == 16
 
     @staticmethod
     def test_len_with_offset_01():
@@ -309,4 +358,86 @@ class TestRecord:
             field_1: int = bpack.field(size=4, offset=10, default=0)
             field_2: float = bpack.field(size=8, offset=20, default=1/3)
 
+        assert len(Record()) == size
+
+    @staticmethod
+    def test_len_with_repeat_01():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+            field_2: float = bpack.field(size=8, default=1/3)
+
+        assert len(Record()) == 16
+
+    @staticmethod
+    def test_len_with_repeat_02():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+            field_2: List[float] = bpack.field(size=8, default=1/3, repeat=2)
+
+        assert len(Record()) == 24
+
+    @staticmethod
+    def test_len_with_repeat_and_offset_01():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=4, default=0, repeat=2,
+                                             offset=6)
+            field_2: List[float] = bpack.field(size=8, default=1/3, repeat=2)
+
         assert len(Record()) == 30
+
+    @staticmethod
+    def test_len_with_repeat_and_offset_02():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+            field_2: List[float] = bpack.field(size=8, default=1/3, repeat=2,
+                                               offset=14)
+
+        assert len(Record()) == 30
+
+    @staticmethod
+    def test_len_with_repeat_and_offset_03():
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+                field_2: List[float] = bpack.field(size=8, default=1/3,
+                                                   repeat=2, offset=6)
+
+    @staticmethod
+    def test_sequence_type():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List[int] = bpack.field(size=1, repeat=4)
+
+        field_1 = bpack.fields(Record)[0]
+        assert field_1.type is List[int]
+
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: Sequence[int] = bpack.field(size=1, repeat=4)
+
+        field_1 = bpack.fields(Record)[0]
+        assert field_1.type is Sequence[int]
+
+        with pytest.raises(TypeError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: Tuple[int, int] = bpack.field(size=1, repeat=2)
+
+        with pytest.raises(TypeError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field_1: Sequence = bpack.field(size=1, repeat=2)

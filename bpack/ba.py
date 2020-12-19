@@ -49,6 +49,10 @@ def ba_to_float_factory(size, byteorder: str = '>',
 def converter_factory(type_, size: Optional[int] = None, signed: bool = False,
                       byteorder: str = '>',
                       bitorder: str = 'big') -> FactoryType:
+    if bpack.utils.is_sequence_type(type_, error=True):
+        raise TypeError(
+            f'backend "{BACKEND_NAME}" does not supports sequence types: '
+            f'"{type_}".')
     etype = bpack.utils.effective_type(type_)
     if etype is int:
         def func(ba):
@@ -70,8 +74,8 @@ def converter_factory(type_, size: Optional[int] = None, signed: bool = False,
             f'({BACKEND_NAME})')
 
     if etype is not type_:
-        def converter(x, func=func):
-            return type_(func(x))
+        def converter(x, conv_func=func):
+            return type_(conv_func(x))
     else:
         converter = func
     return converter
@@ -94,6 +98,10 @@ class Decoder:
     """
 
     def __init__(self, descriptor, converters=converter_factory):
+        """Initializer.
+
+        The *descriptor* parameter* is a bpack record descriptor.
+        """
         if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BITS:
             raise ValueError(
                 'bitarray decoder only accepts descriptors with '
