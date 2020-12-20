@@ -8,7 +8,9 @@ import bitstruct
 import bpack
 import bpack.utils
 
-from .codec_utils import get_sequence_groups, make_decoder_decorator
+from .codec_utils import (
+    get_sequence_groups, make_decoder_decorator, is_decoder, get_decoder,
+)
 from .descriptors import field_descriptors
 
 
@@ -39,6 +41,15 @@ def _to_fmt(type_, size: int, bitorder: str = '',
     if repeat is None:
         repeat = 1
     assert repeat > 0, f'invalid repeat: {repeat:r}'
+
+    if is_decoder(type_):
+        decoder = get_decoder(type_)
+        if isinstance(decoder, Decoder):
+            return decoder._codec._fmt
+    elif (bpack.is_descriptor(type_) and
+          bpack.baseunits(type_) is Decoder.baseunits):
+        decoder = Decoder(type_)
+        return decoder._codec._fmt
 
     etype = bpack.utils.effective_type(type_)
     key = (etype, signed) if etype is int and signed is not None else etype
@@ -86,7 +97,10 @@ class Decoder:
         )
         fmt = fmt + byteorder  # byte order
 
-        self._codec = bitstruct.compile(fmt)
+        codec = bitstruct.compile(fmt)
+        codec._fmt = fmt
+
+        self._codec = codec
         self._descriptor = descriptor
         self._converters = [
             (idx, field.type)
@@ -103,9 +117,9 @@ class Decoder:
             values[idx] = func(values[idx])
 
         for type_, slice_ in self._groups[::-1]:
-            sub_sequence = type_(values[slice_])
+            subtype = type_(values[slice_])
             del values[slice_]
-            values.insert(slice_.start, sub_sequence)
+            values.insert(slice_.start, subtype)
 
         return self._descriptor(*values)
 

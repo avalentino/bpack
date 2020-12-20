@@ -248,8 +248,8 @@ _DEFAULT_SIZE_MAP = {
 
 
 def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
-    # if is_descriptor(type_):
-    #     return calcsize(type_, baseunits)
+    if is_descriptor(type_):
+        return calcsize(type_, baseunits)
 
     etype = bpack.utils.effective_type(type_)
 
@@ -321,12 +321,12 @@ def descriptor(cls, *, size: Optional[int] = None,
         if field_descr.size is None:
             raise TypeError(f'size not specified for field: "{field_.name}"')
 
-        # if (is_descriptor(field_descr.type) and
-        #         calcsize(field_descr.type, baseunits) != field_descr.size):
-        #     raise DescriptorConsistencyError(
-        #         f'mismatch between field.size ({field_descr.size}) and size '
-        #         f'of field.type ({calcsize(field_descr.type, baseunits)}) '
-        #         f'in field "{field_.name}"')
+        if (is_descriptor(field_descr.type) and
+                calcsize(field_descr.type, baseunits) != field_descr.size):
+            raise DescriptorConsistencyError(
+                f'mismatch between field.size ({field_descr.size}) and size '
+                f'of field.type ({calcsize(field_descr.type, baseunits)}) '
+                f'in field "{field_.name}"')
 
         auto_offset = prev_field_descr.offset + prev_field_descr.total_size
 

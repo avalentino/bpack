@@ -7,7 +7,9 @@ from typing import Optional
 import bpack
 import bpack.utils
 
-from .codec_utils import get_sequence_groups, make_decoder_decorator
+from .codec_utils import (
+    get_sequence_groups, make_decoder_decorator, is_decoder, get_decoder,
+)
 from .descriptors import field_descriptors
 
 
@@ -60,11 +62,19 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     assert order in ('', '>', '<', '=', '@', '!'), f'invalid order: {order!r}'
     assert signed in (True, False, None)
 
+    if is_decoder(type_):
+        decoder = get_decoder(type_)
+        if isinstance(decoder, Decoder):
+            return decoder._codec.format
+    elif (bpack.is_descriptor(type_) and
+          bpack.baseunits(type_) is Decoder.baseunits):
+        decoder = Decoder(type_)
+        return decoder._codec.format
+
     etype = bpack.utils.effective_type(type_)
     repeat = 1 if repeat is None else repeat
     try:
         if etype in (str, bytes, None):  # none is for padding bytes
-
             key = (etype, signed, None)
             return f'{order}{size}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}' * repeat
         else:
@@ -146,9 +156,9 @@ class Decoder:
             values[idx] = func(values[idx])
 
         for type_, slice_ in self._groups[::-1]:
-            sub_sequence = type_(values[slice_])
+            subtype = type_(values[slice_])
             del values[slice_]
-            values.insert(slice_.start, sub_sequence)
+            values.insert(slice_.start, subtype)
 
         return self._descriptor(*values)
 

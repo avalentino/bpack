@@ -460,3 +460,58 @@ def test_field_auto_size():
             field_1: bool
 
     assert bpack.calcsize(Record) == 1
+
+
+def test_nested_records():
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=4, default=11)
+        field_2: float = bpack.field(size=4, default=22.22)
+
+    @bpack.descriptor
+    @dataclasses.dataclass
+    class NestedRecord:
+        field_1: str = bpack.field(size=10, default='0123456789')
+        field_2: Record = bpack.field(size=bpack.calcsize(Record),
+                                      default=Record())
+        field_3: int = bpack.field(size=4, default=3)
+
+    record = Record()
+    nested_record = NestedRecord()
+
+    assert nested_record.field_1 == '0123456789'
+    assert nested_record.field_2 == record
+    assert nested_record.field_2.field_1 == record.field_1
+    assert nested_record.field_2.field_2 == record.field_2
+    assert nested_record.field_3 == 3
+
+    with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class NestedRecord:
+            field_1: str = bpack.field(size=10, default='0123456789')
+            field_2: Record = bpack.field(size=bpack.calcsize(Record) + 1,
+                                          default=Record())
+            field_3: int = bpack.field(size=4, default=3)
+
+
+@pytest.mark.parametrize('baseunits',
+                         [bpack.EBaseUnits.BYTES, bpack.EBaseUnits.BITS])
+def test_nested_records_autosize(baseunits):
+    @bpack.descriptor(baseunits=baseunits)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=4, default=1)
+        field_2: int = bpack.field(size=4, default=2)
+
+    @bpack.descriptor(baseunits=baseunits)
+    @dataclasses.dataclass
+    class NestedRecord:
+        field_1: int = bpack.field(size=4, default=1)
+        field_2: Record = Record()  # auto-size (bytes)
+        field_3: int = bpack.field(size=4, default=4)
+
+    nested_record_size = bpack.calcsize(NestedRecord, baseunits)
+    record_size = bpack.calcsize(Record, baseunits)
+    assert nested_record_size == 8 + record_size

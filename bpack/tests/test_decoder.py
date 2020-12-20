@@ -640,3 +640,63 @@ def test_sequence(backend, baseunits):
     for field, sequence_type in zip(bpack.fields(Record),
                                     (List[int], Sequence[int])):
         assert field.type == sequence_type
+
+
+@pytest.mark.parametrize('backend, baseunits',
+                         [(bpack.bs, bpack.EBaseUnits.BITS),
+                          (bpack.st, bpack.EBaseUnits.BYTES)],
+                         ids=['bs', 'st'])
+class TestNestedRecord:
+    @staticmethod
+    def get_encoded_data(baseunits):
+        if baseunits is bpack.EBaseUnits.BYTES:
+            encoded_data = bytes([
+                0b00000000, 0b00000000, 0b00000000, 0b00000000,
+                0b00000001, 0b00000000, 0b00000000, 0b00000000,
+                0b00000010, 0b00000000, 0b00000000, 0b00000000,
+                0b00000011, 0b00000000, 0b00000000, 0b00000000,
+            ])
+
+        else:  # baseunits is bpack.EBaseUnits.BITS:
+            encoded_data = bytes([0b00000001, 0b00100011])
+
+        return encoded_data
+
+    def test_nested_record_decoders(self, backend, baseunits):
+        encoded_data = self.get_encoded_data(baseunits)
+
+        @backend.decoder
+        @bpack.descriptor(baseunits=baseunits)
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=1)
+            field_2: int = bpack.field(size=4, default=2)
+
+        @backend.decoder
+        @bpack.descriptor(baseunits=baseunits)
+        @dataclasses.dataclass
+        class NestedRecord:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: Record = Record()
+            field_3: int = bpack.field(size=4, default=3)
+
+        assert NestedRecord.from_bytes(encoded_data) == NestedRecord()
+
+    def test_nested_record(self, backend, baseunits):
+        encoded_data = self.get_encoded_data(baseunits)
+
+        @bpack.descriptor(baseunits=baseunits)
+        @dataclasses.dataclass
+        class Record:
+            field_1: int = bpack.field(size=4, default=1)
+            field_2: int = bpack.field(size=4, default=2)
+
+        @backend.decoder
+        @bpack.descriptor(baseunits=baseunits)
+        @dataclasses.dataclass
+        class NestedRecord:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: Record = Record()
+            field_3: int = bpack.field(size=4, default=3)
+
+        assert NestedRecord.from_bytes(encoded_data) == NestedRecord()

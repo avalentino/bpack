@@ -16,6 +16,7 @@ Features
   multiple (homogeneous) items
 * both bit and byte order can be specified by the user
 * automatic size determination for some data types
+* record nesting (the field in a record descriptor can be another record)
 * comprehensive test suite
 
 .. _bitstruct: https://github.com/eerimoq/bitstruct
@@ -32,12 +33,13 @@ Limitations
 * currently it is assumed that all fields in a binary record share the
   same bit/byte order. The management of different byte order in the same
   binary record is, in principle, possible but not planned at the moment.
+* record nesting is only possible for records having the same base-units,
+  bits or bytes, and compatible decoders.
 
 
 Possible additional features still not implemented
 --------------------------------------------------
 
-* record nesting (the field in a record descriptor can be another record)
 * numpy based backend
 * user defined converters
 * possibility to specify data types using string specifiers with

@@ -47,7 +47,17 @@ def get_sequence_groups(descriptor):
     groups = []
     offset = 0
     for descr in field_descriptors(descriptor):
-        if descr.repeat is not None:
+
+        if bpack.is_descriptor(descr.type):
+            nfields = len(bpack.fields(descr.type))
+            slice_ = slice(offset, offset + nfields)
+
+            def to_record(values, func=descr.type):
+                return func(*values)
+
+            groups.append((to_record, slice_))
+            offset += nfields
+        elif descr.repeat is not None:
             sequence_type = bpack.utils.sequence_type(descr.type,
                                                       error=True)
             slice_ = slice(offset, offset + descr.repeat)
