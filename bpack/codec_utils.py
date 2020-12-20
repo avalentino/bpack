@@ -1,5 +1,7 @@
 """Utility functions for codecs."""
 
+from typing import Type
+
 import bpack.utils
 from bpack.descriptors import field_descriptors, DECODER_ATTR_NAME
 
@@ -54,3 +56,21 @@ def get_sequence_groups(descriptor):
         else:
             offset += 1
     return groups
+
+
+def is_decoder(descriptor) -> bool:
+    """Return True if the input descriptor is also a decoder."""
+    return (hasattr(descriptor, DECODER_ATTR_NAME) and
+            hasattr(descriptor, 'from_bytes'))
+
+
+def get_decoder(descriptor) -> Type:
+    """Return the decoder instance attached to the input descriptor."""
+    return getattr(descriptor, DECODER_ATTR_NAME, None)
+
+
+def get_decoder_type(descriptor) -> Type:
+    """Return the type of the decoder attached to the input descriptor."""
+    decoder_ = getattr(descriptor, DECODER_ATTR_NAME, None)
+    if decoder_ is not None:
+        return type(decoder_)
