@@ -10,7 +10,7 @@ from bitarray.util import ba2int
 import bpack
 import bpack.utils
 
-from .utils import classdecorator
+from .codec_utils import make_decoder_decorator
 from .descriptors import field_descriptors
 
 
@@ -161,23 +161,4 @@ class Decoder:
         return self._descriptor(*values)
 
 
-@classdecorator
-def decoder(cls, *, converters=converter_factory):
-    """Class decorator to add decoding methods to a descriptor classes.
-
-    The decorator automatically generates a :class:`Decoder` object
-    form the input descriptor class and attach a "from_bytes" method
-    using the decoder to the descriptor class itself.
-    """
-    decoder_ = Decoder(descriptor=cls, converters=converters)
-
-    decode_func = bpack.utils.create_fn(
-        name='decode',
-        args=('data',),
-        body=['return decoder.decode(data)'],
-        locals={'decoder': decoder_},
-    )
-    decode_func = staticmethod(decode_func)
-    bpack.utils.set_new_attribute(cls, 'from_bytes', decode_func)
-
-    return cls
+decoder = make_decoder_decorator(Decoder)
