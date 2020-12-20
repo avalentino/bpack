@@ -87,8 +87,24 @@ def test_calcsize():
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
 
+    assert bpack.baseunits(Record) is EBaseUnits.BYTES
     assert bpack.calcsize(Record) == 12
     assert bpack.calcsize(Record()) == 12
+    assert bpack.calcsize(Record, EBaseUnits.BYTES) == 12
+    assert bpack.calcsize(Record, EBaseUnits.BITS) == 12 * 8
+
+    @bpack.descriptor(baseunits=EBaseUnits.BITS)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=4, default=0)
+        field_2: float = bpack.field(size=16, default=1/3)
+        field_3: int = bpack.field(size=4, default=3)
+
+    assert bpack.baseunits(Record) is EBaseUnits.BITS
+    assert bpack.calcsize(Record) == 3
+    assert bpack.calcsize(Record()) == 3
+    assert bpack.calcsize(Record, EBaseUnits.BYTES) == 3
+    assert bpack.calcsize(Record, EBaseUnits.BITS) == 3 * 8
 
     @dataclasses.dataclass
     class Record:

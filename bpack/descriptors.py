@@ -248,10 +248,8 @@ _DEFAULT_SIZE_MAP = {
 
 
 def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
-    # bytes_to_baseunits = 1 if baseunits is EBaseUnits.BYTES else 8
-    #
     # if is_descriptor(type_):
-    #     return calcsize(type_) // bytes_to_baseunits
+    #     return calcsize(type_, baseunits)
 
     etype = bpack.utils.effective_type(type_)
 
@@ -324,10 +322,10 @@ def descriptor(cls, *, size: Optional[int] = None,
             raise TypeError(f'size not specified for field: "{field_.name}"')
 
         # if (is_descriptor(field_descr.type) and
-        #         calcsize(field_descr.type) != field_descr.size):
+        #         calcsize(field_descr.type, baseunits) != field_descr.size):
         #     raise DescriptorConsistencyError(
-        #         f'mismatch between field.size ({field.size}) and '
-        #         f'size of field.type ({calcsize(field_descr.type)}) '
+        #         f'mismatch between field.size ({field_descr.size}) and size '
+        #         f'of field.type ({calcsize(field_descr.type, baseunits)}) '
         #         f'in field "{field_.name}"')
 
         auto_offset = prev_field_descr.offset + prev_field_descr.total_size
@@ -402,11 +400,16 @@ def is_descriptor(obj) -> bool:
         return False
 
 
-def calcsize(obj) -> int:
-    """Return the size in bytes of the ``obj`` record."""
+def calcsize(obj, units: EBaseUnits = EBaseUnits.BYTES) -> int:
+    """Return the size of the ``obj`` record.
+
+    By default the returned size is expressed in bytes.
+    """
     if not is_descriptor(obj):
         raise TypeError(f'{obj!r} is not a descriptor')
-    return obj.__len__()
+
+    bytes_to_units = 1 if EBaseUnits(units) is EBaseUnits.BYTES else 8
+    return obj.__len__() * bytes_to_units
 
 
 def baseunits(obj) -> EBaseUnits:
