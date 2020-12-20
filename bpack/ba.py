@@ -97,15 +97,17 @@ class Decoder:
     Only supports "big endian" byte-order and MSB bit-order.
     """
 
+    baseunits = bpack.EBaseUnits.BITS
+
     def __init__(self, descriptor, converters=converter_factory):
         """Initializer.
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BITS:
+        if bpack.baseunits(descriptor) is not self.baseunits:
             raise ValueError(
-                'bitarray decoder only accepts descriptors with '
-                'base units "bits"')
+                f'bitarray decoder only accepts descriptors with '
+                f'base units "{self.baseunits}"')
 
         assert bpack.bitorder(descriptor) is not None
 

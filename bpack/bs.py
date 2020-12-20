@@ -63,15 +63,17 @@ class Decoder:
     Default bit-order: MSB.
     """
 
+    baseunits = bpack.EBaseUnits.BITS
+
     def __init__(self, descriptor):
         """Initializer.
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BITS:
+        if bpack.baseunits(descriptor) is not self.baseunits:
             raise ValueError(
-                'bitsruct decoder only accepts descriptors with '
-                'base units "bits"')
+                f'bitsruct decoder only accepts descriptors with '
+                f'base units "{self.baseunits.value}"')
 
         byteorder = bpack.byteorder(descriptor)
         byteorder = _endianess_to_str(byteorder)

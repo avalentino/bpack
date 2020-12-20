@@ -93,15 +93,17 @@ class Decoder:
     Default byte-order: MSB.
     """
 
+    baseunits = bpack.EBaseUnits.BYTES
+
     def __init__(self, descriptor):
         """Initializer.
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        if bpack.baseunits(descriptor) is not bpack.EBaseUnits.BYTES:
+        if bpack.baseunits(descriptor) is not self.baseunits:
             raise ValueError(
-                'struct decoder only accepts descriptors with '
-                'base units "bytes"')
+                f'struct decoder only accepts descriptors with '
+                f'base units "{self.baseunits}"')
 
         assert bpack.bitorder(descriptor) is None
 

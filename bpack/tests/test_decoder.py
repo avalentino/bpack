@@ -394,6 +394,8 @@ BYTE_ENCODED_DATA_LE = bytes([
          'ba BE MSB'])
 def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
     decoder = backend.Decoder(Record)
+    assert hasattr(decoder, 'baseunits')
+    assert decoder.baseunits is bpack.baseunits(Record)
     record = decoder.decode(encoded_data)
     assert record == decoded_data
 
