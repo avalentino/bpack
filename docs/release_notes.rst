@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.1.0 (UNRELEASED)
+bpack v0.5.0 (UNRELEASED)
 -------------------------
 
 * Initial release

@@ -6,7 +6,7 @@ Binary data structures (un-)packing library
 :Author:    Antonio Valentino
 :Contact:   antonio.valentino@tiscali.it
 :Copyright: 2020, Antonio Valentino <antonio.valentino@tiscali.it>
-:Version:   0.1.0
+:Version:   0.5.0
 
 .. description
 
