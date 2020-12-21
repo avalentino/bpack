@@ -7,6 +7,11 @@ import dataclasses
 import collections.abc
 
 from typing import Union, Type
+try:
+    from typing import get_origin, get_args
+except ImportError:
+    # COMPATIBILITY
+    from typing_extensions import get_origin, get_args
 
 
 def classdecorator(func):
@@ -49,12 +54,12 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
     Please ot that :class:`typing.Tuple`s are not considered homogeneous
     sequences even if all items are specified to have the same type.
     """
-    sequence_type = typing.get_origin(type_)
+    sequence_type = get_origin(type_)
     if sequence_type is None:
         return None
     if not issubclass(sequence_type, typing.Sequence):
         return None
-    args = typing.get_args(type_)
+    args = get_args(type_)
     if len(args) < 1:
         return None
     if len(args) > 1:
@@ -62,6 +67,10 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
             raise TypeError(f'{type_} is not supported')
         else:
             return None
+    if not isinstance(args[0], type):
+        # COMPATIBILITY: with typing_extensions and Python v3.7
+        # need to be a concrete type
+        return None
 
     if not issubclass(sequence_type, collections.abc.MutableSequence):
         sequence_type = tuple
@@ -83,8 +92,7 @@ def is_sequence_type(type_: Type, error: bool = False) -> bool:
 
 def is_enum_type(type_: Type) -> bool:
     """Return True if the input is and :class:`enum.Enum`."""
-    return (typing.get_origin(type_) is None and
-            issubclass(type_, enum.Enum))
+    return get_origin(type_) is None and issubclass(type_, enum.Enum)
 
 
 def enum_item_type(enum_cls: Type[enum.Enum]) -> Type:
@@ -116,7 +124,7 @@ def effective_type(type_: Type) -> Type:
 
     In case of enums or sequences return the item type.
     """
-    origin = typing.get_origin(type_)
+    origin = get_origin(type_)
     if origin is None:
         if type_ is not None and issubclass(type_, enum.Enum):
             etype = enum_item_type(type_)
@@ -127,7 +135,7 @@ def effective_type(type_: Type) -> Type:
     elif issubclass(origin, typing.Tuple):
         etype = type_
     else:
-        args = typing.get_args(type_)
+        args = get_args(type_)
         assert len(args) == 1
         etype = args[0]
     return etype
