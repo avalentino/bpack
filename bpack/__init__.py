@@ -28,7 +28,7 @@ Encoders/decoders rely on well known Python packages like:
 Currently only fixed size records are supported.
 """
 
-__version__ = '0.1.0.dev1'
+__version__ = '0.5.0.dev1'
 
 from .descriptors import (                                          # noqa
     descriptor, field, fields, is_descriptor, is_field,
