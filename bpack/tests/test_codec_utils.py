@@ -2,6 +2,8 @@
 
 import dataclasses
 
+import pytest
+
 import bpack
 import bpack.bs
 import bpack.st
@@ -9,11 +11,10 @@ import bpack.st
 from bpack.codec_utils import is_decoder, get_decoder, get_decoder_type
 
 
-def test_decoder_helpers():
-    backend = bpack.st
-
+@pytest.mark.parametrize('backend', [bpack.bs, bpack.st], ids=['bs', 'st'])
+def test_decoder_helpers(backend):
     @backend.decoder
-    @bpack.descriptor
+    @bpack.descriptor(baseunits=backend.Decoder.baseunits)
     @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)

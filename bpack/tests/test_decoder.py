@@ -457,18 +457,14 @@ def test_byte_decoder_decorator(backend):
     assert record.field_2 == decoded_data.field_2
 
 
-@pytest.mark.parametrize(
-    'backend, baseunits',
-    [(bpack.bs, bpack.EBaseUnits.BITS),
-     (bpack.st, bpack.EBaseUnits.BYTES)],
-    ids=['bs', 'st'])
-def test_unsupported_type(backend, baseunits):
+@pytest.mark.parametrize('backend', [bpack.bs, bpack.st], ids=['bs', 'st'])
+def test_unsupported_type(backend):
     class CustomType:
         pass
 
     with pytest.raises(TypeError):
         @backend.decoder
-        @bpack.descriptor(baseunits=baseunits)
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         @dataclasses.dataclass(frozen=True)
         class Record:
             field_1: CustomType = bpack.field(size=8)
@@ -542,11 +538,8 @@ def test_wrong_baseunits_byte(backend):
             field_1: int = bpack.field(size=8, default=1)
 
 
-@pytest.mark.parametrize('backend, baseunits',
-                         [(bpack.st, bpack.EBaseUnits.BYTES),
-                          (bpack.bs, bpack.EBaseUnits.BITS)],
-                         ids=['st', 'bs'])
-def test_enum_decoding_bytes(backend, baseunits):
+@pytest.mark.parametrize('backend', [bpack.st, bpack.bs], ids=['st', 'bs'])
+def test_enum_decoding_bytes(backend):
     class EStrEnumType(enum.Enum):
         A = 'a'
         B = 'b'
@@ -563,7 +556,7 @@ def test_enum_decoding_bytes(backend, baseunits):
         A = 1
         B = 2
 
-    if baseunits is bpack.EBaseUnits.BYTES:
+    if backend.Decoder.baseunits is bpack.EBaseUnits.BYTES:
         bitorder = None
         ssize = 1
         isize = 1
@@ -584,7 +577,7 @@ def test_enum_decoding_bytes(backend, baseunits):
         ])
 
     @backend.decoder
-    @bpack.descriptor(baseunits=baseunits, bitorder=bitorder)
+    @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
     @dataclasses.dataclass
     class Record:
         field_1: EStrEnumType = bpack.field(size=ssize, default=EStrEnumType.A)
@@ -598,12 +591,9 @@ def test_enum_decoding_bytes(backend, baseunits):
     assert record == Record()
 
 
-@pytest.mark.parametrize('backend, baseunits',
-                         [(bpack.st, bpack.EBaseUnits.BYTES),
-                          (bpack.bs, bpack.EBaseUnits.BITS)],
-                         ids=['st', 'bs'])
-def test_sequence(backend, baseunits):
-    if baseunits is bpack.EBaseUnits.BYTES:
+@pytest.mark.parametrize('backend', [bpack.st, bpack.bs], ids=['st', 'bs'])
+def test_sequence(backend):
+    if backend.Decoder.baseunits is bpack.EBaseUnits.BYTES:
         bitorder = None
         size = 1
         repeat = 2
@@ -615,7 +605,7 @@ def test_sequence(backend, baseunits):
         encoded_data = bytes([0b00110011, 0b01000100])
 
     @backend.decoder
-    @bpack.descriptor(baseunits=baseunits, bitorder=bitorder)
+    @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
     @dataclasses.dataclass
     class Record:
         field_1: List[int] = bpack.field(size=size, repeat=repeat)
@@ -633,10 +623,7 @@ def test_sequence(backend, baseunits):
         assert field.type == sequence_type
 
 
-@pytest.mark.parametrize('backend, baseunits',
-                         [(bpack.bs, bpack.EBaseUnits.BITS),
-                          (bpack.st, bpack.EBaseUnits.BYTES)],
-                         ids=['bs', 'st'])
+@pytest.mark.parametrize('backend', [bpack.bs, bpack.st], ids=['bs', 'st'])
 class TestNestedRecord:
     @staticmethod
     def get_encoded_data(baseunits):
@@ -653,18 +640,18 @@ class TestNestedRecord:
 
         return encoded_data
 
-    def test_nested_record_decoders(self, backend, baseunits):
-        encoded_data = self.get_encoded_data(baseunits)
+    def test_nested_record_decoders(self, backend):
+        encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
 
         @backend.decoder
-        @bpack.descriptor(baseunits=baseunits)
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=1)
             field_2: int = bpack.field(size=4, default=2)
 
         @backend.decoder
-        @bpack.descriptor(baseunits=baseunits)
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         @dataclasses.dataclass
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
@@ -673,17 +660,17 @@ class TestNestedRecord:
 
         assert NestedRecord.from_bytes(encoded_data) == NestedRecord()
 
-    def test_nested_record(self, backend, baseunits):
-        encoded_data = self.get_encoded_data(baseunits)
+    def test_nested_record(self, backend):
+        encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
 
-        @bpack.descriptor(baseunits=baseunits)
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=1)
             field_2: int = bpack.field(size=4, default=2)
 
         @backend.decoder
-        @bpack.descriptor(baseunits=baseunits)
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         @dataclasses.dataclass
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)

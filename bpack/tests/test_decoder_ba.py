@@ -31,7 +31,7 @@ def test_bit_decoder_decorator_ba():
 
 
 def test_unsupported_type_ba():
-    _test_decoder.test_unsupported_type(bpack_ba, bpack.EBaseUnits.BITS)
+    _test_decoder.test_unsupported_type(backend=bpack_ba)
 
 
 def test_bit_decoder_default_byteorder_ba():
@@ -43,7 +43,7 @@ def test_wrong_baseunits_bit_ba():
 
 
 def test_enum_decoding_bytes_ba():
-    _test_decoder.test_enum_decoding_bytes(bpack_ba, bpack.EBaseUnits.BITS)
+    _test_decoder.test_enum_decoding_bytes(backend=bpack_ba)
 
 
 @pytest.mark.parametrize(
