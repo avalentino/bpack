@@ -1,5 +1,5 @@
 ===========================================
-Binary data structures (un-)packing library
+Binary data structures (un-)Packing library
 ===========================================
 
 :HomePage:  https://github.com/avalentino/bpack
@@ -15,12 +15,7 @@ binary data.
 
 Binary data are assumed to be organised in *records*, each composed by a
 sequence of fields. Fields are characterised by a known size, offset
-(w.r.t. the beginning of the record) and datatype. Records can be nested::
-
-  |------------------------------ Record ------------------------------|
-  |-- Field-1 --|---- Field-2 ----|------- Field-3 (sub-record) -------|
-        (4)             (8)       |-- Field 3.1 --|---- Field-3.2 -----|
-                                        (4)               (12)
+(w.r.t. the beginning of the record) and datatype.
 
 The package provides classes and functions that can be used to:
 
@@ -31,13 +26,13 @@ The package provides classes and functions that can be used to:
 Encoders/decoders rely on well known Python packages like:
 
 * struct_ (form the standard library)
-* numpy_ (optional) - **TODO**
 * bitstruct_ (optional)
 * bitarray_ (optional)
+* numpy_ (optional) - **TODO**
 
 Currently only fixed size records are supported.
 
 .. _struct: https://docs.python.org/3/library/struct.html
-.. _numpy: https://numpy.org
 .. _bitstruct: https://github.com/eerimoq/bitstruct
 .. _bitarray: https://github.com/ilanschnell/bitarray
+.. _numpy: https://numpy.org

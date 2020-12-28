@@ -12,10 +12,9 @@ Documentatiom
 .. toctree::
    :maxdepth: 2
 
-   release_notes
    features
    license
-
+   release_notes
 
 
 Indices and tables
