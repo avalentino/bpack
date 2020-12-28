@@ -5,8 +5,45 @@ from typing import List, Sequence
 
 import pytest
 
+from . import test_decoder as _test_decoder
+from .test_decoder import BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB
+
 import bpack
-import bpack.ba
+bpack_ba = pytest.importorskip('bpack.ba')
+
+
+def test_backend_ba():
+    _test_decoder.test_backend(backend=bpack_ba)
+
+
+def test_decoder_ba():
+    _test_decoder.test_decoder(bpack_ba, BitRecordBeMsb,
+                               BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())
+
+
+def test_decoder_func_ba():
+    _test_decoder.test_decoder_func(bpack_ba, BitRecordBeMsb,
+                                    BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())
+
+
+def test_bit_decoder_decorator_ba():
+    _test_decoder.test_bit_decoder_decorator(backend=bpack_ba)
+
+
+def test_unsupported_type_ba():
+    _test_decoder.test_unsupported_type(bpack_ba, bpack.EBaseUnits.BITS)
+
+
+def test_bit_decoder_default_byteorder_ba():
+    _test_decoder.test_bit_decoder_default_byteorder(backend=bpack_ba)
+
+
+def test_wrong_baseunits_bit_ba():
+    _test_decoder.test_wrong_baseunits_bit(backend=bpack_ba)
+
+
+def test_enum_decoding_bytes_ba():
+    _test_decoder.test_enum_decoding_bytes(bpack_ba, bpack.EBaseUnits.BITS)
 
 
 @pytest.mark.parametrize(
@@ -17,7 +54,7 @@ import bpack.ba
                  0b00000000, 0b00000000, 0b00000000, 0b00000000]))],
     ids=['float16', 'float32', 'float64'])
 def test_float(size, data):
-    backend = bpack.ba
+    backend = bpack_ba
 
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
@@ -30,7 +67,7 @@ def test_float(size, data):
 
 
 def test_invalid_float_size():
-    backend = bpack.ba
+    backend = bpack_ba
 
     with pytest.raises(ValueError):
         @backend.decoder
@@ -41,7 +78,7 @@ def test_invalid_float_size():
 
 
 def test_little_endian():
-    backend = bpack.ba
+    backend = bpack_ba
 
     with pytest.raises(NotImplementedError):
         @backend.decoder
@@ -53,7 +90,7 @@ def test_little_endian():
 
 
 def test_invalid_bitorder():
-    backend = bpack.ba
+    backend = bpack_ba
 
     with pytest.raises(NotImplementedError):
         @backend.decoder
@@ -65,7 +102,7 @@ def test_invalid_bitorder():
 
 
 def test_sequence():
-    backend = bpack.ba
+    backend = bpack_ba
 
     with pytest.raises(TypeError):
         @backend.decoder

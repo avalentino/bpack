@@ -9,12 +9,11 @@ from typing import List, Sequence
 import pytest
 
 import bpack
-import bpack.ba
 import bpack.bs
 import bpack.st
 
 
-@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs, bpack.st])
+@pytest.mark.parametrize('backend', [bpack.bs, bpack.st])
 def test_backend(backend):
     assert hasattr(backend, 'BACKEND_NAME')
     assert hasattr(backend, 'BACKEND_TYPE')
@@ -387,11 +386,8 @@ BYTE_ENCODED_DATA_LE = bytes([
      (bpack.bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
      (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
      (bpack.bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb()),
-     (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb()),
-     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())],
-    ids=['st BE', 'st LE',
-         'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB',
-         'ba BE MSB'])
+     (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb())],
+    ids=['st BE', 'st LE', 'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB'])
 def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
     decoder = backend.Decoder(Record)
     assert hasattr(decoder, 'baseunits')
@@ -407,18 +403,15 @@ def test_decoder(backend, Record, encoded_data, decoded_data):  # noqa
      (bpack.bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb()),
      (bpack.bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, BitRecordLeMsb()),
      (bpack.bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, BitRecordBeLsb()),
-     (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb()),
-     (bpack.ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, BitRecordBeMsb())],
-    ids=['st BE', 'st LE',
-         'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB',
-         'ba BE MSB'])
+     (bpack.bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, BitRecordLeLsb())],
+    ids=['st BE', 'st LE', 'bs BE MSB', 'bs LE MSB', 'bs BE LSB', 'bs LE LSB'])
 def test_decoder_func(backend, Record, encoded_data, decoded_data):  # noqa
     record_type = backend.decoder(Record)
     record = record_type.from_bytes(encoded_data)
     assert record == decoded_data
 
 
-@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
+@pytest.mark.parametrize('backend', [bpack.bs], ids=['bs'])
 def test_bit_decoder_decorator(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
@@ -466,10 +459,9 @@ def test_byte_decoder_decorator(backend):
 
 @pytest.mark.parametrize(
     'backend, baseunits',
-    [(bpack.ba, bpack.EBaseUnits.BITS),
-     (bpack.bs, bpack.EBaseUnits.BITS),
+    [(bpack.bs, bpack.EBaseUnits.BITS),
      (bpack.st, bpack.EBaseUnits.BYTES)],
-    ids=['ba', 'bs', 'st'])
+    ids=['bs', 'st'])
 def test_unsupported_type(backend, baseunits):
     class CustomType:
         pass
@@ -513,7 +505,7 @@ def test_bit_decoder_native_byteorder(backend):
     assert Record.from_bytes(data) == Record()
 
 
-@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
+@pytest.mark.parametrize('backend', [bpack.bs], ids=['bs'])
 def test_bit_decoder_default_byteorder(backend):
     size = 8
     value = 1
@@ -530,7 +522,7 @@ def test_bit_decoder_default_byteorder(backend):
     assert Record.from_bytes(data) == Record()
 
 
-@pytest.mark.parametrize('backend', [bpack.ba, bpack.bs], ids=['ba', 'bs'])
+@pytest.mark.parametrize('backend', [bpack.bs], ids=['bs'])
 def test_wrong_baseunits_bit(backend):
     with pytest.raises(ValueError):
         @backend.decoder
@@ -552,9 +544,8 @@ def test_wrong_baseunits_byte(backend):
 
 @pytest.mark.parametrize('backend, baseunits',
                          [(bpack.st, bpack.EBaseUnits.BYTES),
-                          (bpack.ba, bpack.EBaseUnits.BITS),
                           (bpack.bs, bpack.EBaseUnits.BITS)],
-                         ids=['st', 'ba', 'bs'])
+                         ids=['st', 'bs'])
 def test_enum_decoding_bytes(backend, baseunits):
     class EStrEnumType(enum.Enum):
         A = 'a'
