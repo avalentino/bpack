@@ -12,7 +12,11 @@ Documentatiom
 .. toctree::
    :maxdepth: 2
 
+   installation
    features
+   userguide
+   api/bpack
+   development
    license
    release_notes
 
