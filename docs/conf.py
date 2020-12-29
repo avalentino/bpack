@@ -9,10 +9,12 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
+
+from setup import cfg  # noqa
 
 
 # -- Project information -----------------------------------------------------
@@ -22,7 +24,9 @@ copyright = '2020, Antonio Valentino'
 author = 'Antonio Valentino'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0.dev0'
+release = cfg['version']
+
+master_doc = 'index'
 
 
 # -- General configuration ---------------------------------------------------
@@ -78,6 +82,20 @@ html_context = {
 
 html_last_updated_fmt = ''
 
+
+# -- Options for LaTeX output ------------------------------------------------
+latex_documents = [
+    # (startdocname, targetname, title, author, theme, toctree_only)
+    (project, project + '.tex', 'Binary data structures (un-)Packing library',
+     author, 'manual', False),
+]
+
+latex_domain_indices = False
+
+latex_elements = {
+    # 'papersize': 'a4paper',
+    'pointsize': '12pt',
+}
 
 # -- Extension configuration -------------------------------------------------
 

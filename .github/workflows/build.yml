@@ -34,3 +34,4 @@ jobs:
         mkdir docs/_static
         python3 -m sphinx -W -b html docs docs/_build/html
         python3 -m sphinx -W -b linkcheck docs docs/_build/html
+        python3 -m sphinx -W -b doctest docs docs/_build/doctest

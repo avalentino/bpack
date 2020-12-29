@@ -3,27 +3,31 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. title and metadata
+
+.. include:: bpack.rst
+   :end-before: .. toctree::
+
+.. description
+
 .. include:: ../README.rst
+  :start-after: .. badges
+  :end-before: .. local-definitions
+
+.. |struct| replace:: :mod:`struct`
 
 
-Documentatiom
+Documentation
 =============
 
 .. toctree::
    :maxdepth: 2
 
+   overview
    installation
-   features
    userguide
    api/bpack
    development
    license
    release_notes
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   indices

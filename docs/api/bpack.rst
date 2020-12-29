@@ -6,8 +6,10 @@ bpack package
    :undoc-members:
    :show-inheritance:
 
-Submodules
-----------
+.. only:: html
+
+   Submodules
+   ----------
 
 .. toctree::
    :maxdepth: 4

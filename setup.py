@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
+import os
 import setuptools
+
+
+ROOT = os.path.dirname(__file__)
 
 
 def get_version(filename, strip_extra=False):
@@ -23,7 +27,7 @@ def get_version(filename, strip_extra=False):
 
 
 cfg = dict(
-    version=get_version('bpack/__init__.py')
+    version=get_version(os.path.join(ROOT, 'bpack', '__init__.py')),
 )
 
 

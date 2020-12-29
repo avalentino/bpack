@@ -104,11 +104,29 @@ Build the documentation
   $ make -C docs html
 
 
+Test code snippets in the documentation
+---------------------------------------
+
+.. code-block:: shell
+
+  $ make -C docs doctest
+
+
+Check documentation links
+-------------------------
+
+.. code-block:: shell
+
+  $ make -C docs linkcheck
+
+
 Update the API documentation
 ----------------------------
 
 .. code-block:: shell
 
+  $ rm -rf docs/api
   $ sphinx-apidoc --module-first --separate  --no-toc \
-      --doc-project "bpack API" -o docs/api bpack bpack/tests
-
+      --doc-project "bpack API" -o docs/api \
+      --templatedir docs/_templates/apidoc \
+      bpack bpack/tests

@@ -1,5 +1,18 @@
-Features
+Overview
 ========
+
+What is bpack?
+--------------
+
+.. include:: ../README.rst
+   :start-after: .. description
+   :end-before: .. local-definitions
+
+.. |struct| replace:: :mod:`struct`
+
+
+Features
+--------
 
 * declarative description of binary data structures
 * specification of data structures up to *bit* level
@@ -7,9 +20,11 @@ Features
 * data decoding
 * backend:
 
-  - **st** backend based on the standard Python library :mod:`struct` module
-  - **bs** backend based on bitstruct_
-  - **ba** backend based on bitarray_ (only included for benchmarking purposes)
+  - :mod:`bpack.st` backend based on the :mod:`struct` module of
+    standard Python_ library
+  - :mod:`bpack.bs` backend based on bitstruct_
+  - :mod:`bpack.ba` backend based on bitarray_
+    (only included for benchmarking purposes)
 
 * support for signed/unsigned integer types
 * support for :class:`enum.Enum` types
@@ -19,9 +34,8 @@ Features
 * record nesting (the field in a record descriptor can be another record)
 * comprehensive test suite
 
-.. _bitstruct: https://github.com/eerimoq/bitstruct
-.. _bitarray: https://github.com/ilanschnell/bitarray
 
+.. _limitations-label:
 
 Limitations
 -----------
@@ -42,13 +56,30 @@ Possible additional features still not implemented
 
 * numpy based backend
 * possibility to specify data types using string specifiers with
-  the native backend syntax (struct, bitstruct, numpy, ...)
+  the native backend syntax (:mod:`struct`, bitstruct_, numpy_, ...)
 * data encoding (packing)
 * user defined converters
 
 
-Miscellanea *To Do* list
-------------------------
+.. only:: never
 
-* improve documentation
-* benchmarks
+    Miscellanea *To Do* list
+    ------------------------
+
+    * improve documentation
+    * benchmarks
+    * include :func:`dataclasses.dataclass` generation in
+      :func:`bpack.descriptors.descriptor` (the use should not explicitly use
+      :mod:`dataclasses`)
+    * drop :func:`bpack.descriptors.descriptor` objects ``__len__`` method
+      (always use :func:`bpack.descriptros.calcsize`)
+    * :class:`EBaseUnits` shall become a :class:`IntFlag` to allow the
+      *decoders* to declare baseunits as followd::
+
+        basunits = bpack.EBaseUnits.BITS | bpack.EBaseUnits.BYTES
+
+
+.. _Python: https://www.python.org
+.. _bitstruct: https://github.com/eerimoq/bitstruct
+.. _bitarray: https://github.com/ilanschnell/bitarray
+.. _numpy: https://numpy.org
