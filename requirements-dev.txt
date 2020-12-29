@@ -1,0 +1,9 @@
+# typing-extensions ; python_version < "3.8"
+bitstruct
+bitarray >= 1.5.1
+pytest
+pytest-cov
+tox
+flake8
+sphinx
+sphinx_rtd_theme
