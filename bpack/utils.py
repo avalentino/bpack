@@ -51,7 +51,7 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
     The function return :class:`list` or :class:`tuple` if the input is
     considered a valid typed sequence, ``None`` otherwise.
 
-    Please ot that :class:`typing.Tuple`s are not considered homogeneous
+    Please ot that :class:`typing.Tuple`\ s are not considered homogeneous
     sequences even if all items are specified to have the same type.
     """
     sequence_type = get_origin(type_)
@@ -83,7 +83,7 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
 def is_sequence_type(type_: Type, error: bool = False) -> bool:
     """Return True if the input is an homogeneous typed sequence.
 
-    Please ot that :class:`typing.Tuple`s are not considered homogeneous
+    Please ot that :class:`typing.Tuple`\ s are not considered homogeneous
     sequences even if all items are specified to have the same type.
     """
     seq_type = sequence_type(type_, error=error)
