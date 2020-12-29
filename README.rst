@@ -8,6 +8,18 @@ Binary data structures (un-)Packing library
 :Copyright: 2020, Antonio Valentino <antonio.valentino@tiscali.it>
 :Version:   0.5.0
 
+|PyPI Status| |GHA Status| |Documentation Status|
+
+.. |PyPI Status| image:: https://img.shields.io/pypi/v/bpack.svg
+    :target: https://pypi.org/project/bpack
+    :alt: PyPI Status
+.. |GHA Status| image:: https://github.com/avalentino/bpack/workflows/Build/badge.svg
+    :target: https://github.com/avalentino/bpack/actions
+    :alt: GitHub Actions Status
+.. |Documentation Status| image:: https://readthedocs.org/projects/bpack/badge/?version=latest
+    :target: https://bpack.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 .. description
 
 The *bpack* Python package provides tools to describe and encode/decode
