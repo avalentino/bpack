@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.5.0 (UNRELEASED)
+bpack v0.5.0 (31/12/2020)
 -------------------------
 
 * Initial release.
