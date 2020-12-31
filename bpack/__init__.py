@@ -4,7 +4,7 @@ bpack provides tools to describe, in a *delcarative* way, and
 encode/decode binary data.
 """
 
-__version__ = '0.5.0'
+__version__ = '0.6.0.dev0'
 
 from .descriptors import (                                          # noqa
     descriptor, field, fields, is_descriptor, is_field,
