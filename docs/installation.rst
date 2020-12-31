@@ -14,7 +14,7 @@ Conda
 
 .. code-block:: shell
 
-  $ conda install bpack
+  $ conda install -c conda-forge bpack
 
 
 Testing

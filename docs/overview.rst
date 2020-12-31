@@ -63,8 +63,8 @@ Possible additional features still not implemented
 
 .. only:: never
 
-    Miscellanea *To Do* list
-    ------------------------
+    .. Miscellanea *To Do* list
+    .. ------------------------
 
     * improve documentation
     * benchmarks
@@ -78,6 +78,8 @@ Possible additional features still not implemented
 
         basunits = bpack.EBaseUnits.BITS | bpack.EBaseUnits.BYTES
 
+   * replace :data:`EByteOrder.BIG` and :data:`EByteOrder.LITTLE`
+     with ``BE`` and ``LE``
 
 .. _Python: https://www.python.org
 .. _bitstruct: https://github.com/eerimoq/bitstruct

@@ -7,3 +7,4 @@ tox
 flake8
 sphinx
 sphinx_rtd_theme
+sphinxcontrib-spelling

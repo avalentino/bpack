@@ -37,7 +37,7 @@ Key concepts for definition of binary data structures are
   :func:`bpack.descriptors.descriptor` class decorator.
   It allows to specify the main properties of the data structure.
 * the specification of the characteristics of each field, mainly the data
-  type, the size and (optionally) the offset with respect tp the beginning
+  type, the size and (optionally) the offset with respect to the beginning
   of the record. This can be done using the :func:`bpack.descriptors.field`
   factory function.
 
@@ -226,7 +226,7 @@ Backends provide encoding/decoding capabilities for binary data
 Currently *bpack* provides the:
 
 * :mod:`bpack.st` backend, based on the :mod:`struct` package, and
-* :mod:`bpack.bs` backand, based on the bitstruct_ package to decode
+* :mod:`bpack.bs` backend, based on the bitstruct_ package to decode
   binary data described at bit level, i.e. with fields that can have size
   expressed in terms of number of bits (also smaller that 8).
 

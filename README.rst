@@ -22,8 +22,8 @@ Binary data structures (un-)Packing library
 The *bpack* Python package provides tools to describe and encode/decode
 binary data.
 
-Binary data are assumed to be organised in *records*, each composed by a
-sequence of fields. Fields are characterised by a known size, offset
+Binary data are assumed to be organized in *records*, each composed by a
+sequence of fields. Fields are characterized by a known size, offset
 (w.r.t. the beginning of the record) and datatype.
 
 The package provides classes and functions that can be used to:

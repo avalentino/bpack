@@ -26,7 +26,7 @@ Pip
   $ source .venv/bin/activate
   (venv) $ python3 -m pip install -r requirements-dev-txt
 
-For Pyhton 3.7 it ias also necessary to install *typing-extensions*:
+For Python_ 3.7 it is also necessary to install *typing-extensions*:
 
 .. code-block:: shell
 
@@ -75,9 +75,6 @@ properly.
 .. code-block:: shell
 
   $ tox
-
-
-.. _Tox: https://tox.readthedocs.io
 
 
 Test coverage
@@ -130,3 +127,7 @@ Update the API documentation
       --doc-project "bpack API" -o docs/api \
       --templatedir docs/_templates/apidoc \
       bpack bpack/tests
+
+
+.. _Tox: https://tox.readthedocs.io
+.. _Python: https://www.python.org

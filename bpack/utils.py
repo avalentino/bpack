@@ -41,7 +41,7 @@ def create_fn(name, args, body, *, globals=None, locals=None,
 
 
 def set_new_attribute(cls, name, value):
-    """Programmatically add a new attribute/method ro a class."""
+    """Programmatically add a new attribute/method to a class."""
     return dataclasses._set_new_attribute(cls, name, value)
 
 
@@ -51,7 +51,7 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
     The function return :class:`list` or :class:`tuple` if the input is
     considered a valid typed sequence, ``None`` otherwise.
 
-    Please ot that fields annotated with :class:`typing.Tuple` are not
+    Please note that fields annotated with :class:`typing.Tuple` are not
     considered homogeneous sequences even if all items are specified to
     have the same type.
     """
@@ -84,7 +84,7 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
 def is_sequence_type(type_: Type, error: bool = False) -> bool:
     """Return True if the input is an homogeneous typed sequence.
 
-    Please ot that fields annotated with :class:`typing.Tuple` are not
+    Please note that fields annotated with :class:`typing.Tuple` are not
     considered homogeneous sequences even if all items are specified to
     have the same type.
     """
