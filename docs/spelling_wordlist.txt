@@ -1,6 +1,7 @@
 ba
 backend
 backends
+benchmarking
 bitarray
 bitstruct
 bpack
@@ -13,6 +14,7 @@ endian
 endianess
 enum
 enums
+instantiation
 numpy
 programmatically
 python
