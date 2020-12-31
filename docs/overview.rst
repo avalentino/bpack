@@ -61,26 +61,6 @@ Possible additional features still not implemented
 * user defined converters
 
 
-.. only:: never
-
-    .. Miscellanea *To Do* list
-    .. ------------------------
-
-    * improve documentation
-    * benchmarks
-    * include :func:`dataclasses.dataclass` generation in
-      :func:`bpack.descriptors.descriptor` (the use should not explicitly use
-      :mod:`dataclasses`)
-    * drop :func:`bpack.descriptors.descriptor` objects ``__len__`` method
-      (always use :func:`bpack.descriptros.calcsize`)
-    * :class:`EBaseUnits` shall become a :class:`IntFlag` to allow the
-      *decoders* to declare baseunits as followd::
-
-        basunits = bpack.EBaseUnits.BITS | bpack.EBaseUnits.BYTES
-
-   * replace :data:`EByteOrder.BIG` and :data:`EByteOrder.LITTLE`
-     with ``BE`` and ``LE``
-
 .. _Python: https://www.python.org
 .. _bitstruct: https://github.com/eerimoq/bitstruct
 .. _bitarray: https://github.com/ilanschnell/bitarray
