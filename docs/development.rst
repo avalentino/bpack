@@ -4,14 +4,14 @@ Developers Guide
 Project links
 -------------
 
+:PyPI page:
+    https://pypi.org/project/bpack
 :repository:
     https://github.com/avalentino/bpack
 :issue tracker:
     https://github.com/avalentino/bpack/issues
 :CI:
     https://github.com/avalentino/bpack/actions
-:PyPI page:
-    https://pypi.org/project/bpack
 
 
 Set-up the development environment

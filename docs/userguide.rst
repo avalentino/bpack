@@ -45,7 +45,7 @@ In the above example the ``BinaryRecord`` has been defined to have two fields:
 
 :field_1:
     a 32bit signed integer (``size`` is expressed in bytes in this case)
-:filed_2:
+:field_2:
     a double precision floating point (8 bytes)
 
 The offset of the fields have not been explicitly specified so they are
