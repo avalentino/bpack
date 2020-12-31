@@ -117,6 +117,14 @@ Check documentation links
   $ make -C docs linkcheck
 
 
+Check documentation spelling
+----------------------------
+
+.. code-block:: shell
+
+  $ make -C docs spelling
+
+
 Update the API documentation
 ----------------------------
 
