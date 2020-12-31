@@ -1,2 +1,4 @@
 exclude .gitignore
 prune .github
+
+include docs/spelling_wordlist.txt
