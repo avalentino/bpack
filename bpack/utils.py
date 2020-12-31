@@ -14,6 +14,38 @@ except ImportError:
     from typing_extensions import get_origin, get_args
 
 
+class EBaseUnits(enum.Enum):
+    """Base units used to specify size and offset parameters in descriptors."""
+
+    BITS = 'bits'
+    BYTES = 'bytes'
+
+
+class EByteOrder(enum.Enum):
+    """Enumeration for byte order (endianess).
+
+    .. note::
+
+        the :data:`EByteOrder.DEFAULT` is equivalent to
+        :data:`EByteOrder.NATIVE` for binary structures having
+        :data:`EBaseUnits.BYTE` base units, and :data:`EByteOrder.BIG`
+        for binary structures having :data:`EBaseUnits.BIT` base units.
+    """
+
+    BIG = '>'
+    LITTLE = '<'
+    NATIVE = '='
+    DEFAULT = ''
+
+
+class EBitOrder(enum.Enum):
+    """Enumeration for bit order."""
+
+    MSB = '>'
+    LSB = '<'
+    DEFAULT = ''
+
+
 def classdecorator(func):
     """Class decorator that can be used with or without parameters."""
     @functools.wraps(func)

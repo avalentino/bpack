@@ -8,14 +8,12 @@ import dataclasses
 from typing import Optional, Iterable, Type, Union
 
 import bpack.utils
-from .utils import classdecorator
+from .utils import classdecorator, EBaseUnits, EByteOrder, EBitOrder
 
 
 __all__ = [
     'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
-    'EByteOrder', 'EBitOrder', 'EBaseUnits',
-    'baseunits', 'byteorder', 'bitorder',
-    'field', 'Field', 'is_field',
+    'baseunits', 'byteorder', 'bitorder', 'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
     'BASEUNITS_ATTR_NAME', 'BYTEORDER_ATTR_NAME', 'BITORDER_ATTR_NAME',
     'DECODER_ATTR_NAME', 'METADATA_KEY',
@@ -27,38 +25,6 @@ BYTEORDER_ATTR_NAME = '__bpack_byteorder__'
 BITORDER_ATTR_NAME = '__bpack_bitorder__'
 DECODER_ATTR_NAME = '__bpack_decoder__'
 METADATA_KEY = '__bpack_metadata__'
-
-
-class EBaseUnits(enum.Enum):
-    """Base units used to specify size and offset parameters in descriptors."""
-
-    BITS = 'bits'
-    BYTES = 'bytes'
-
-
-class EByteOrder(enum.Enum):
-    """Enumeration for byte order (endianess).
-
-    .. note::
-
-        the :data:`EByteOrder.DEFAULT` is equivalent to
-        :data:`EByteOrder.LITTLE` for binary structures having
-        :data:`EBaseUnits.BYTE` base units, and :data:`EByteOrder.BIG`
-        for binary structures having :data:`EBaseUnits.BYTE` base units.
-    """
-
-    BIG = '>'
-    LITTLE = '<'
-    NATIVE = '='
-    DEFAULT = ''
-
-
-class EBitOrder(enum.Enum):
-    """Enumeration for bit order."""
-
-    MSB = '>'
-    LSB = '<'
-    DEFAULT = ''
 
 
 # TODO: converters (TBD, or in decoder)

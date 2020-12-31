@@ -148,14 +148,14 @@ could be described using different *baseunits*.
 
 The `baseunits` parameter has been specified for the
 :func:`bpack.descriptors.descriptor` class decorator and its value can be
-one the possible values of the :class:`bpack.descriptors.EBaseUnits`
+one the possible values of the :class:`bpack.utils.EBaseUnits`
 :class:`enum.Enum`:
 
-* :data:`bpack.descriptors.EBaseUnits.BITS`, or
-* :data:`bpack.descriptors.EBaseUnits.BYTES`
+* :data:`bpack.utils.EBaseUnits.BITS`, or
+* :data:`bpack.utils.EBaseUnits.BYTES`
 
 If the ``baseunits`` parameter is not specified than it is assumed to be
-equal to :data:`bpack.descriptors.EBaseUnits.BYTES` by default.
+equal to :data:`bpack.utils.EBaseUnits.BYTES` by default.
 
 Please note that the entire data structure of the above example is only
 8 bits (1 byte) large.
