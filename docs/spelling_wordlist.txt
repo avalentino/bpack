@@ -21,3 +21,4 @@ python
 struct
 utils
 un
+unicode

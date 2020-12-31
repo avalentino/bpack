@@ -1,5 +1,6 @@
 """Utility functions and classes."""
 
+import re
 import sys
 import enum
 import typing
@@ -7,7 +8,7 @@ import functools
 import dataclasses
 import collections.abc
 
-from typing import Union, Type
+from typing import NamedTuple, Optional, Type, Union
 try:
     from typing import get_origin, get_args
 except ImportError:
@@ -190,3 +191,113 @@ def is_int_type(type_: Type) -> bool:
         return issubclass(etype, int)
     else:
         return issubclass(type_, int)
+
+
+_DTYPE_RE = re.compile(
+    r'^(?P<byteorder>[<|>])?'
+    r'(?P<type>[?bBiufcmMUVOSat])'
+    r'(?P<size>\d+)?$')
+
+
+FieldTypes = Type[Union[bool, int, float, complex, bytes, str]]
+
+
+class TypeParams(NamedTuple):
+    byteorder: Optional[EByteOrder]
+    type: FieldTypes
+    size: int
+    signed: Optional[bool]
+
+    def __repr__(self):
+        byteorder = self.byteorder
+        byteorder = repr(byteorder) if byteorder is not None else byteorder
+        size = str(self.size) if self.size is not None else self.size
+        return (
+            f'{self.__class__.__name__}(byteorder={byteorder}, '
+            f'type={self.type.__name__!r}, size={size})'
+        )
+
+
+def str_to_type_params(typestr: str) -> TypeParams:
+    """Convert a string describing a data type into type parameters.
+
+    The ``typestr`` parameter is a string describing a data type.
+
+    The *typestr* string format consists of 3 parts:
+
+    * an (optional) character describing the byte order of the data
+
+      :``<``: little-endian,
+      :``>``: big-endian,
+      :``|``: not-relevant
+
+    * a character code giving the basic type of the array, and
+    * an integer providing the number of bytes the type uses
+
+    The basic type character codes are:
+
+    :``?``: boolean
+    :``b``: bytes
+    :``B``: bytes
+    :``i``: sighed integer
+    :``u``: unsigned integer
+    :``f``: float
+    :``c``: complex
+    :``U``: (unicode) str
+    :``V``: bytes
+
+    Please note that 'b1' is interpreted as bool.
+
+    .. seealso:: https://numpy.org/doc/stable/reference/arrays.dtypes.html
+       and https://numpy.org/doc/stable/reference/arrays.interface.html
+    """
+    mobj = _DTYPE_RE.match(typestr)
+    if mobj is None:
+        raise ValueError(f'invalid data type specifier: "{typestr}"')
+    byteorder = mobj.group('byteorder')
+    stype = mobj.group('type')
+    size = mobj.group('size')
+    signed = None
+
+    if size is not None:
+        size = int(size)
+        if size <= 0:
+            raise ValueError(f'invalid size: "{size}"')
+
+    if byteorder == '|':
+        byteorder = None
+    elif byteorder is not None:
+        byteorder = EByteOrder(byteorder)
+
+    if stype == '?' or (stype == 'b' and size == 1):
+        type_ = bool
+    elif stype in 'bB':
+        type_ = bytes
+    elif stype == 'i':
+        type_ = int
+        signed = True
+    elif stype == 'u':
+        type_ = int
+        signed = False
+    elif stype == 'f':
+        type_ = float
+    elif stype == 'c':
+        type_ = complex
+    # elif stype == 'm':
+    #     type_ = datetime.timedelta
+    # elif stype == 'M':
+    #     type_ = datetime.datetime
+    elif stype == 'U':
+        type_ = str
+    elif stype == 'V':
+        type_ = bytes
+    else:
+        # 't': bitfield
+        # 'O': object
+        # 'S', 'a' : null terminated strings
+        # 'm', 'M': timedelta and datetime
+        raise TypeError(
+            f'type specifier "{stype}" is valid for the "array protocol" but '
+            f'not supported by bpack')
+
+    return TypeParams(byteorder, type_, size, signed)
