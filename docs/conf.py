@@ -20,7 +20,7 @@ from setup import cfg  # noqa
 # -- Project information -----------------------------------------------------
 
 project = 'bpack'
-copyright = '2020, Antonio Valentino'
+copyright = '2020-2021, Antonio Valentino'
 author = 'Antonio Valentino'
 
 # The full version, including alpha/beta/rc tags
