@@ -167,7 +167,7 @@ class BinFieldDescriptor:
 Field = dataclasses.Field
 
 
-def field(*, size: int, offset: Optional[int] = None,
+def field(*, size: Optional[int] = None, offset: Optional[int] = None,
           signed: Optional[bool] = None, repeat: Optional[int] = None,
           metadata=None, **kwargs) -> Field:
     """Initialize a field descriptor.

@@ -17,20 +17,10 @@ class TestFieldFactory:
         bpack.field(size=1, offset=0, signed=False, default=0, repeat=1)
 
     @staticmethod
-    def test_empty_field():
-        with pytest.raises(TypeError):
-            bpack.field()
-
-    @staticmethod
     def test_field_vs_field_class():
         field_ = bpack.field(size=1)
         assert bpack.descriptors.is_field(field_)
         assert isinstance(field_, bpack.descriptors.Field)
-
-    @staticmethod
-    def test_missing_size():
-        with pytest.raises(TypeError):
-            bpack.field(default=1/3)
 
     @staticmethod
     @pytest.mark.parametrize(argnames='size', argvalues=[1.3, 'x'])
