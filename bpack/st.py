@@ -134,17 +134,19 @@ class Decoder:
             bool: bool,
         }
         converters_map.update(
-            (field.type, _enum_converter_factory(field.type, converters_map))
-            for field in bpack.fields(descriptor)
-            if bpack.utils.is_enum_type(field.type)
+            (field_descr.type,
+             _enum_converter_factory(field_descr.type, converters_map))
+            for field_descr in field_descriptors(descriptor)
+            if bpack.utils.is_enum_type(field_descr.type)
         )
 
         self._codec = struct.Struct(fmt)
         self._descriptor = descriptor
         self._converters = [
-            (idx, converters_map[field_.type])
-            for idx, field_ in enumerate(bpack.fields(self._descriptor))
-            if field_.type in converters_map
+            (idx, converters_map[field_descr.type])
+            for idx, field_descr in enumerate(
+                field_descriptors(self._descriptor))
+            if field_descr.type in converters_map
         ]
         self._groups = get_sequence_groups(descriptor)
 

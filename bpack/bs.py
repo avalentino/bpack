@@ -103,9 +103,9 @@ class Decoder:
         self._codec = codec
         self._descriptor = descriptor
         self._converters = [
-            (idx, field.type)
-            for idx, field in enumerate(bpack.fields(descriptor))
-            if bpack.utils.is_enum_type(field.type)
+            (idx, field_descr.type)
+            for idx, field_descr in enumerate(field_descriptors(descriptor))
+            if bpack.utils.is_enum_type(field_descr.type)
         ]
         self._groups = get_sequence_groups(descriptor)
 
