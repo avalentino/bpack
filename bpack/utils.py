@@ -255,26 +255,26 @@ def str_to_type_params(typestr: str) -> TypeParams:
 
     * an (optional) character describing the byte order of the data
 
-      :``<``: little-endian,
-      :``>``: big-endian,
-      :``|``: not-relevant
+      - ``<``: little-endian,
+      - ``>``: big-endian,
+      - ``|``: not-relevant
 
     * a character code giving the basic type of the array, and
     * an integer providing the number of bytes the type uses
 
     The basic type character codes are:
 
-    :``?``: boolean
-    :``b``: bytes
-    :``B``: bytes
-    :``i``: sighed integer
-    :``u``: unsigned integer
-    :``f``: float
-    :``c``: complex
-    :``U``: (unicode) str
-    :``V``: bytes
+    * ``?``: bool
+    * ``b``: bytes
+    * ``B``: bytes
+    * ``i``: sighed integer
+    * ``u``: unsigned integer
+    * ``f``: float
+    * ``c``: complex
+    * ``U``: (unicode) str
+    * ``V``: bytes
 
-    Please note that 'b1' is interpreted as bool.
+    Please note that ``b1`` is interpreted as bool.
 
     .. seealso:: https://numpy.org/doc/stable/reference/arrays.dtypes.html
        and https://numpy.org/doc/stable/reference/arrays.interface.html
