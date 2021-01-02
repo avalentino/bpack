@@ -66,6 +66,7 @@ class TestEnumType:
 
 def test_effective_type():
     assert bpack.utils.effective_type(None) is None
+    assert bpack.utils.effective_type(bool) is bool
     assert bpack.utils.effective_type(int) is int
     assert bpack.utils.effective_type(str) is str
     assert bpack.utils.effective_type(bytes) is bytes
@@ -75,6 +76,8 @@ def test_effective_type():
                   typing.Tuple[int]):
         assert bpack.utils.effective_type(type_) == type_
 
+
+def test_effective_enum():
     class EStrEnumType(enum.Enum):
         A = 'a'
         B = 'b'
@@ -100,6 +103,34 @@ def test_effective_type():
     assert bpack.utils.effective_type(EFlagEnumType) is int
 
 
+def test_effective_type_from_seq():
+    assert bpack.utils.effective_type(typing.List[bool]) is bool
+    assert bpack.utils.effective_type(typing.List[int]) is int
+    assert bpack.utils.effective_type(typing.List[str]) is str
+    assert bpack.utils.effective_type(typing.List[bytes]) is bytes
+    assert bpack.utils.effective_type(typing.List[float]) is float
+
+
+def test_effective_type_from_typestr():
+    assert bpack.utils.effective_type('?') is bool
+    assert bpack.utils.effective_type('b1') is bool
+    assert bpack.utils.effective_type('b') is bytes
+    assert bpack.utils.effective_type('B') is bytes
+    assert bpack.utils.effective_type('V') is bytes
+    assert bpack.utils.effective_type('i') is int
+    assert bpack.utils.effective_type('u') is int
+    assert bpack.utils.effective_type('f') is float
+    assert bpack.utils.effective_type('c') is complex
+    assert bpack.utils.effective_type('U') is str
+
+    for type_ in ('invalid', '>x2'):
+        assert bpack.utils.effective_type(type_) == type_
+
+
+def test_effective_type_keep_typestr():
+    assert bpack.utils.effective_type('i8', keep_typestr=True) == 'i8'
+
+
 def test_get_sequence_type():
     type_ = typing.List[int]
     assert bpack.utils.sequence_type(type_) is list
@@ -119,6 +150,14 @@ def test_get_sequence_type():
     assert bpack.utils.sequence_type(typing.Type[typing.Any]) is None
 
 
+def test_get_sequence_type_from_typestr():
+    type_ = typing.List['i8']  # noqa
+    assert bpack.utils.sequence_type(type_) is list
+
+    type_ = typing.Sequence['i8']  # noqa
+    assert bpack.utils.sequence_type(type_) is tuple
+
+
 def test_is_sequence_type():
     type_ = typing.List[int]
     assert bpack.utils.is_sequence_type(type_)
@@ -135,6 +174,14 @@ def test_is_sequence_type():
     assert not bpack.utils.is_sequence_type(typing.List)
     assert not bpack.utils.is_sequence_type(typing.Sequence)
     assert not bpack.utils.is_sequence_type(typing.Tuple)
+
+
+def test_is_sequence_type_from_typestr():
+    type_ = typing.List['i8']  # noqa
+    assert bpack.utils.is_sequence_type(type_)
+
+    type_ = typing.Sequence['i8']  # noqa
+    assert bpack.utils.is_sequence_type(type_)
 
 
 class TestStrToTypeParams:
