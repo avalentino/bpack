@@ -21,3 +21,4 @@ Miscellanea *To Do* list
 * support for complex data type in all backends
 * new ``nfields(descriptor)`` helper function
 * nested records and repeat
+* improve support for typing -- bpack.T('i4')
