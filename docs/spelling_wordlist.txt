@@ -15,6 +15,7 @@ endianess
 enum
 enums
 instantiation
+miscellanea
 numpy
 programmatically
 python
