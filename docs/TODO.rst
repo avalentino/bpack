@@ -22,3 +22,4 @@ Miscellanea *To Do* list
 * new ``nfields(descriptor)`` helper function
 * nested records and repeat
 * improve support for typing -- bpack.T('i4')
+* decoder attributes (Decoder.descriptor)
