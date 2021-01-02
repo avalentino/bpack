@@ -1,5 +1,6 @@
 """Test bpack field descriptors."""
 
+import sys
 import enum
 import dataclasses
 
@@ -448,3 +449,210 @@ class TestFieldDescriptor:
         assert descr.is_int_type()
         assert not descr.is_sequence_type()
         assert descr.is_enum_type()
+
+
+class TestTypeStr:
+    @staticmethod
+    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''],
+                             ids=['>', '<', '|', 'None'])
+    def test_typestr(byteorder):
+        @bpack.descriptor(byteorder=byteorder if byteorder != '|' else '')
+        @dataclasses.dataclass
+        class Record:
+            field_1: str(f'{byteorder}?4')  # noqa
+            field_2: f'{byteorder}b4'       # noqa
+            field_3: f'{byteorder}B4'       # noqa
+            field_4: f'{byteorder}i4'       # noqa
+            field_5: f'{byteorder}u4'       # noqa
+            field_6: f'{byteorder}f4'       # noqa
+            field_7: f'{byteorder}c4'       # noqa
+            field_8: f'{byteorder}U4'       # noqa
+            field_9: f'{byteorder}V4'       # noqa
+            field_10: f'{byteorder}b1'      # noqa
+
+        fields = dict(
+            (field.name, get_field_descriptor(field))
+            for field in bpack.fields(Record)
+        )
+
+        assert fields['field_1'].type == bool
+        assert fields['field_1'].size == 4
+        assert fields['field_1'].signed is None
+        assert fields['field_1'].repeat is None
+
+        assert fields['field_2'].type == bytes
+        assert fields['field_2'].size == 4
+        assert fields['field_2'].signed is None
+        assert fields['field_2'].repeat is None
+
+        assert fields['field_3'].type == bytes
+        assert fields['field_3'].size == 4
+        assert fields['field_3'].signed is None
+        assert fields['field_3'].repeat is None
+
+        assert fields['field_4'].type == int
+        assert fields['field_4'].size == 4
+        assert fields['field_4'].signed is True
+        assert fields['field_4'].repeat is None
+
+        assert fields['field_5'].type == int
+        assert fields['field_5'].size == 4
+        assert fields['field_5'].signed is False
+        assert fields['field_5'].repeat is None
+
+        assert fields['field_6'].type == float
+        assert fields['field_6'].size == 4
+        assert fields['field_6'].signed is None
+        assert fields['field_6'].repeat is None
+
+        assert fields['field_7'].type == complex
+        assert fields['field_7'].size == 4
+        assert fields['field_7'].signed is None
+        assert fields['field_7'].repeat is None
+
+        assert fields['field_8'].type == str
+        assert fields['field_8'].size == 4
+        assert fields['field_8'].signed is None
+        assert fields['field_8'].repeat is None
+
+        assert fields['field_9'].type == bytes
+        assert fields['field_9'].size == 4
+        assert fields['field_9'].signed is None
+        assert fields['field_9'].repeat is None
+
+        assert fields['field_10'].type == bool
+        assert fields['field_10'].size == 1
+        assert fields['field_10'].signed is None
+        assert fields['field_10'].repeat is None
+
+    @staticmethod
+    def test_typestr_list():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field_1: List['i4'] = bpack.field(repeat=2)  # noqa
+
+        field = bpack.fields(Record)[0]
+        assert field.type == List['i4']  # noqa
+
+        field_descr = get_field_descriptor(field)
+        assert field_descr.type == List[int]
+        assert field_descr.size == 4
+        assert field_descr.signed is True
+        assert field_descr.repeat == 2
+
+    @staticmethod
+    def test_byteorder_consistency():
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor(byteorder=bpack.EByteOrder.LITTLE)
+            @dataclasses.dataclass
+            class Record1:
+                field: str('>i8')  # noqa
+
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)
+            @dataclasses.dataclass
+            class Record2:
+                field: str('<i8')  # noqa
+
+        typestr = '>i8' if sys.byteorder == 'little' else '<i8'
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record3:
+                field: typestr
+
+        typestr = '<i8' if sys.byteorder == 'little' else '>i8'
+
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record4:
+            field: typestr
+
+        @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)
+        @dataclasses.dataclass
+        class Record5:
+            field: str('|i8')  # noqa
+
+    @staticmethod
+    def test_size_consistency():
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field: 'i8' = bpack.field(size=8, signed=True)  # noqa
+
+        descr = get_field_descriptor(bpack.fields(Record)[0])
+        assert descr.type is int
+        assert descr.size == 8
+        assert descr.repeat is None
+        assert descr.signed is True
+
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field: 'u8' = bpack.field(size=8, signed=False)  # noqa
+
+        descr = get_field_descriptor(bpack.fields(Record)[0])
+        assert descr.type is int
+        assert descr.size == 8
+        assert descr.repeat is None
+        assert descr.signed is False
+
+        @bpack.descriptor
+        @dataclasses.dataclass
+        class Record:
+            field: 'f8' = bpack.field(size=8)  # noqa
+
+        descr = get_field_descriptor(bpack.fields(Record)[0])
+        assert descr.type is float
+        assert descr.size == 8
+        assert descr.repeat is None
+        assert descr.signed is None
+
+    @staticmethod
+    def test_size_consistency_error():
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field: 'i8' = bpack.field(size=3)  # noqa
+
+    @staticmethod
+    def test_signed_consistency_error():
+        with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record:
+                field: 'i8' = bpack.field(size=8, signed=False)  # noqa
+
+    @staticmethod
+    def test_invalid_typestr():
+        with pytest.raises(ValueError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record1:
+                field: 'invalid' = bpack.field(size=1)  # noqa
+
+        with pytest.raises(ValueError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record2:
+                field: str('@i8')  # noqa
+
+        with pytest.raises(ValueError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record3:
+                field: str('|x8')  # noqa
+
+        with pytest.raises(ValueError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record4:
+                field: str('|i0')  # noqa
+
+        with pytest.raises(ValueError):
+            @bpack.descriptor
+            @dataclasses.dataclass
+            class Record5:
+                field: str('|ii')  # noqa

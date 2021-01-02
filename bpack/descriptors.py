@@ -1,5 +1,6 @@
 """Descriptors for binary records."""
 
+import copy
 import enum
 import math
 import types
@@ -25,6 +26,26 @@ BYTEORDER_ATTR_NAME = '__bpack_byteorder__'
 BITORDER_ATTR_NAME = '__bpack_bitorder__'
 DECODER_ATTR_NAME = '__bpack_decoder__'
 METADATA_KEY = '__bpack_metadata__'
+
+
+class DescriptorConsistencyError(ValueError):
+    pass
+
+
+class NotFieldDescriptorError(TypeError):
+    pass
+
+
+def _resolve_type(type_):
+    if isinstance(type_, str):
+        rtype = bpack.utils.effective_type(type_)
+    elif bpack.utils.is_sequence_type(type_):
+        etype = bpack.utils.effective_type(type_)
+        rtype = copy.copy(type_)
+        rtype.__args__ = (etype,)
+    else:
+        rtype = type_
+    return rtype
 
 
 # TODO: converters (TBD, or in decoder)
@@ -129,6 +150,47 @@ class BinFieldDescriptor:
         repeat = self.repeat if self.repeat is not None else 1
         return self.size * repeat
 
+    @staticmethod
+    def _is_compatible_param(old, new):
+        if old is not None and new is not None and old != new:
+            return False
+        return True
+
+    def _set_type(self, type_):
+        assert self.type is None
+        if isinstance(type_, bpack.utils.TypeParams):
+            params = type_
+            valid = True
+            if not self._is_compatible_param(self.size, params.size):
+                valid = False
+            if not self._is_compatible_param(self.signed, params.signed):
+                valid = False
+            if not valid:
+                raise DescriptorConsistencyError(
+                    f'type string "{params}" is incompatible with the '
+                    f'field descriptor {self}')
+
+            self.type = params.type
+            if self.signed is None:
+                self.signed = params.signed
+            if self.size is None:
+                self.size = params.size
+        elif isinstance(type_, str):
+            try:
+                params = bpack.utils.str_to_type_params(type_)
+            except (ValueError, TypeError):
+                self.type = type_  # TODO: raise TypeError
+            else:
+                self._set_type(params)
+        elif bpack.utils.is_sequence_type(type_):
+            typestr = bpack.utils.effective_type(type_, keep_typestr=True)
+            self._set_type(typestr)
+            resolved_seq_type = copy.copy(type_)
+            resolved_seq_type.__args__ = (self.type,)
+            self.type = resolved_seq_type
+        else:
+            self.type = type_
+
 
 Field = dataclasses.Field
 
@@ -166,9 +228,9 @@ def get_field_descriptor(field: Field,
                          validate: bool = True) -> BinFieldDescriptor:
     """Return the field descriptor attached to a :class:`Field`."""
     if not is_field(field):
-        raise TypeError(f'not a field descriptor: {field}')
+        raise NotFieldDescriptorError(f'not a field descriptor: {field}')
     field_descr = BinFieldDescriptor(**field.metadata[METADATA_KEY])
-    field_descr.type = field.type
+    field_descr._set_type(field.type)
     if validate:
         field_descr.validate()
     return field_descr
@@ -184,7 +246,12 @@ def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,
         if v is not None
     }
     type_ = field_descr_metadata.pop('type', None)
-    if type_ != field.type:
+    if isinstance(field.type, str):
+        params = bpack.utils.str_to_type_params(field.type)
+        field_type = params.type
+    else:
+        field_type = field.type
+    if type_ != _resolve_type(field_type):
         raise TypeError(
             f'type mismatch between BinFieldDescriptor.type ({type_!r}) and '
             f'filed.type ({field.type!r})')
@@ -193,10 +260,6 @@ def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,
     }
     _update_field_metadata(field, **new_metadata)
     return field
-
-
-class DescriptorConsistencyError(ValueError):
-    pass
 
 
 _DEFAULT_SIZE_MAP = {
@@ -246,6 +309,21 @@ def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
     return _DEFAULT_SIZE_MAP[baseunits].get(etype)
 
 
+def _get_effective_byteorder(byteorder: EByteOrder,
+                             baseunits: EBaseUnits) -> EByteOrder:
+    byteorder = EByteOrder(byteorder)
+    effective_byteorder = byteorder
+    if baseunits is EBaseUnits.BYTES:
+        if byteorder in {EByteOrder.NATIVE, EByteOrder.DEFAULT}:
+            effective_byteorder = EByteOrder.get_native()
+    else:
+        if byteorder is EByteOrder.DEFAULT:
+            effective_byteorder = EByteOrder.BIG
+        elif byteorder in EByteOrder.NATIVE:
+            effective_byteorder = EByteOrder.get_native()
+    return effective_byteorder
+
+
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
                byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,
@@ -262,11 +340,13 @@ def descriptor(cls, *, size: Optional[int] = None,
       record size in bytes).
     """
     baseunits = EBaseUnits(baseunits)
+    byteorder = EByteOrder(byteorder)
     fields_ = dataclasses.fields(cls)
 
     # Initialize to a dummy value with initial offset + size = 0
     prev_field_descr = BinFieldDescriptor(size=None, offset=0)
     prev_field_descr.size = 0  # trick to bypass checks on BinFieldDescriptor
+    content_size = 0
 
     for idx, field_ in enumerate(fields_):
         assert isinstance(field_, Field)
@@ -274,12 +354,24 @@ def descriptor(cls, *, size: Optional[int] = None,
         # NOTE: this is ensured by dataclasses but not by attr
         assert field_.type is not None
 
+        if isinstance(field_.type, str):
+            # check byteorder
+            params = bpack.utils.str_to_type_params(field_.type)
+            if params.byteorder:
+                effective_byteorder = _get_effective_byteorder(byteorder,
+                                                               baseunits)
+                if params.byteorder != effective_byteorder:
+                    raise DescriptorConsistencyError(
+                        f'the byteorder of field {field_.name} '
+                        f'("{params.byteorder}" is not consistent with the '
+                        f'descriptor byteorder ({byteorder}) )')
+
         try:
             field_descr = get_field_descriptor(field_, validate=False)
-        except TypeError:
+        except NotFieldDescriptorError:
             field_descr = BinFieldDescriptor()
             if isinstance(field_, Field):
-                field_descr.type = field_.type
+                field_descr._set_type(field_.type)
 
         if field_descr.size is None:
             field_descr.size = _get_default_size(field_descr.type, baseunits)
@@ -304,9 +396,8 @@ def descriptor(cls, *, size: Optional[int] = None,
 
         set_field_descriptor(field_, field_descr)
         prev_field_descr = field_descr
+        content_size += field_descr.size
 
-    content_size = sum(
-        get_field_descriptor(field_).size for field_ in fields_)
     field_descr = get_field_descriptor(fields_[-1])
     auto_size = field_descr.offset + field_descr.total_size
     assert auto_size >= content_size  # this should be already checked above
@@ -326,7 +417,7 @@ def descriptor(cls, *, size: Optional[int] = None,
         size = math.ceil(size / 8)
 
     setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
-    setattr(cls, BYTEORDER_ATTR_NAME, EByteOrder(byteorder))
+    setattr(cls, BYTEORDER_ATTR_NAME, byteorder)
 
     if baseunits is not EBaseUnits.BITS and bitorder is not None:
         raise ValueError(

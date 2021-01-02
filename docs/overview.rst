@@ -32,6 +32,8 @@ Features
 * both bit and byte order can be specified by the user
 * automatic size determination for some data types
 * record nesting (the field in a record descriptor can be another record)
+* possibility to specify data types using string specifiers compatible with
+  numpy_ "Array Interface" and ``dtype``
 * comprehensive test suite
 
 
@@ -55,8 +57,6 @@ Possible additional features still not implemented
 --------------------------------------------------
 
 * numpy based backend
-* possibility to specify data types using string specifiers with
-  the native backend syntax (:mod:`struct`, bitstruct_, numpy_, ...)
 * data encoding (packing)
 * user defined converters
 
