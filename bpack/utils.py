@@ -1,5 +1,6 @@
 """Utility functions and classes."""
 
+import sys
 import enum
 import typing
 import functools
@@ -36,6 +37,13 @@ class EByteOrder(enum.Enum):
     LITTLE = '<'
     NATIVE = '='
     DEFAULT = ''
+
+    @classmethod
+    def get_native(cls):
+        if sys.byteorder == 'little':
+            return cls.LITTLE
+        else:
+            return cls.BIG
 
 
 class EBitOrder(enum.Enum):
