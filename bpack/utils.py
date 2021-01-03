@@ -264,17 +264,11 @@ def str_to_type_params(typestr: str) -> TypeParams:
 
     The basic type character codes are:
 
-    * ``?``: bool
-    * ``b``: bytes
-    * ``B``: bytes
     * ``i``: sighed integer
     * ``u``: unsigned integer
     * ``f``: float
     * ``c``: complex
-    * ``U``: (unicode) str
-    * ``V``: bytes
-
-    Please note that ``b1`` is interpreted as bool.
+    * ``S``: bytes (string)
 
     .. seealso:: https://numpy.org/doc/stable/reference/arrays.dtypes.html
        and https://numpy.org/doc/stable/reference/arrays.interface.html
@@ -297,11 +291,12 @@ def str_to_type_params(typestr: str) -> TypeParams:
     elif byteorder is not None:
         byteorder = EByteOrder(byteorder)
 
-    if stype == '?' or (stype == 'b' and size == 1):
-        type_ = bool
-    elif stype in 'bB':
-        type_ = bytes
-    elif stype == 'i':
+    # if stype == '?' or (stype == 'b' and size == 1):
+    #     type_ = bool
+    # elif stype in 'bB':
+    #     type_ = bytes
+    # elif stype == 'i':
+    if stype == 'i':
         type_ = int
         signed = True
     elif stype == 'u':
@@ -315,14 +310,20 @@ def str_to_type_params(typestr: str) -> TypeParams:
     #     type_ = datetime.timedelta
     # elif stype == 'M':
     #     type_ = datetime.datetime
-    elif stype == 'U':
-        type_ = str
-    elif stype == 'V':
+    # elif stype == 'U':
+    #     type_ = str
+    elif stype == 'S':
         type_ = bytes
+    # elif stype == 'V':
+    #     type_ = bytes
     else:
+        # '?': bool
+        # 'b': (signed) byte (single item)
+        # 'B': (unsigned) byte (single item)
         # 't': bitfield
         # 'O': object
-        # 'S', 'a' : null terminated strings
+        # 'U': (unicode) str (32bit UCS4 encoding)
+        # 'a' : null terminated strings
         # 'm', 'M': timedelta and datetime
         raise TypeError(
             f'type specifier "{stype}" is valid for the "array protocol" but '

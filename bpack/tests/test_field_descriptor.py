@@ -459,71 +459,41 @@ class TestTypeStr:
         @bpack.descriptor(byteorder=byteorder if byteorder != '|' else '')
         @dataclasses.dataclass
         class Record:
-            field_1: str(f'{byteorder}?4')  # noqa
-            field_2: f'{byteorder}b4'       # noqa
-            field_3: f'{byteorder}B4'       # noqa
-            field_4: f'{byteorder}i4'       # noqa
-            field_5: f'{byteorder}u4'       # noqa
-            field_6: f'{byteorder}f4'       # noqa
-            field_7: f'{byteorder}c4'       # noqa
-            field_8: f'{byteorder}U4'       # noqa
-            field_9: f'{byteorder}V4'       # noqa
-            field_10: f'{byteorder}b1'      # noqa
+            field_1: f'{byteorder}i4'       # noqa
+            field_2: f'{byteorder}u4'       # noqa
+            field_3: f'{byteorder}f4'       # noqa
+            field_4: f'{byteorder}c4'       # noqa
+            field_5: f'{byteorder}S4'       # noqa
 
         fields = dict(
             (field.name, get_field_descriptor(field))
             for field in bpack.fields(Record)
         )
 
-        assert fields['field_1'].type == bool
+        assert fields['field_1'].type == int
         assert fields['field_1'].size == 4
-        assert fields['field_1'].signed is None
+        assert fields['field_1'].signed is True
         assert fields['field_1'].repeat is None
 
-        assert fields['field_2'].type == bytes
+        assert fields['field_2'].type == int
         assert fields['field_2'].size == 4
-        assert fields['field_2'].signed is None
+        assert fields['field_2'].signed is False
         assert fields['field_2'].repeat is None
 
-        assert fields['field_3'].type == bytes
+        assert fields['field_3'].type == float
         assert fields['field_3'].size == 4
         assert fields['field_3'].signed is None
         assert fields['field_3'].repeat is None
 
-        assert fields['field_4'].type == int
+        assert fields['field_4'].type == complex
         assert fields['field_4'].size == 4
-        assert fields['field_4'].signed is True
+        assert fields['field_4'].signed is None
         assert fields['field_4'].repeat is None
 
-        assert fields['field_5'].type == int
+        assert fields['field_5'].type == bytes
         assert fields['field_5'].size == 4
-        assert fields['field_5'].signed is False
+        assert fields['field_5'].signed is None
         assert fields['field_5'].repeat is None
-
-        assert fields['field_6'].type == float
-        assert fields['field_6'].size == 4
-        assert fields['field_6'].signed is None
-        assert fields['field_6'].repeat is None
-
-        assert fields['field_7'].type == complex
-        assert fields['field_7'].size == 4
-        assert fields['field_7'].signed is None
-        assert fields['field_7'].repeat is None
-
-        assert fields['field_8'].type == str
-        assert fields['field_8'].size == 4
-        assert fields['field_8'].signed is None
-        assert fields['field_8'].repeat is None
-
-        assert fields['field_9'].type == bytes
-        assert fields['field_9'].size == 4
-        assert fields['field_9'].signed is None
-        assert fields['field_9'].repeat is None
-
-        assert fields['field_10'].type == bool
-        assert fields['field_10'].size == 1
-        assert fields['field_10'].signed is None
-        assert fields['field_10'].repeat is None
 
     @staticmethod
     def test_typestr_list():

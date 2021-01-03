@@ -112,16 +112,11 @@ def test_effective_type_from_seq():
 
 
 def test_effective_type_from_typestr():
-    assert bpack.utils.effective_type('?') is bool
-    assert bpack.utils.effective_type('b1') is bool
-    assert bpack.utils.effective_type('b') is bytes
-    assert bpack.utils.effective_type('B') is bytes
-    assert bpack.utils.effective_type('V') is bytes
     assert bpack.utils.effective_type('i') is int
     assert bpack.utils.effective_type('u') is int
     assert bpack.utils.effective_type('f') is float
     assert bpack.utils.effective_type('c') is complex
-    assert bpack.utils.effective_type('U') is str
+    assert bpack.utils.effective_type('S') is bytes
 
     for type_ in ('invalid', '>x2'):
         assert bpack.utils.effective_type(type_) == type_
@@ -217,8 +212,8 @@ class TestStrToTypeParams:
         params = bpack.utils.str_to_type_params(s)
         assert params.size is None
 
-    TYPE_CODES = '?bBiufcUV'  # mM
-    UNSUPPORTED_TYPE_CODES = 'OSatmM'
+    TYPE_CODES = 'iufcS'
+    UNSUPPORTED_TYPE_CODES = '?bBOatmMUV'
     INVALID_TYPE_CODES = (
             set(string.printable) - set(TYPE_CODES + UNSUPPORTED_TYPE_CODES)
     )
@@ -239,31 +234,12 @@ class TestStrToTypeParams:
 
     @staticmethod
     @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    @pytest.mark.parametrize('typecode', ['?', 'b1'])
-    def test_bool_typecode(byteorder, typecode):
-        s = f'{byteorder}{typecode}'
-        params = bpack.utils.str_to_type_params(s)
-        assert params.type is bool
-        assert params.signed is None
-
-    @staticmethod
-    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    @pytest.mark.parametrize('typecode', ['b', 'B', 'V'])
+    @pytest.mark.parametrize('typecode', ['S'])
     @pytest.mark.parametrize('size', ['2', '4', '8'])
     def test_bytes_typecode(byteorder, typecode, size):
         s = f'{byteorder}{typecode}{size}'
         params = bpack.utils.str_to_type_params(s)
         assert params.type is bytes
-        assert params.signed is None
-
-    @staticmethod
-    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    @pytest.mark.parametrize('typecode', ['U'])
-    @pytest.mark.parametrize('size', ['2', '4', '8'])
-    def test_str_typecode(byteorder, typecode, size):
-        s = f'{byteorder}{typecode}{size}'
-        params = bpack.utils.str_to_type_params(s)
-        assert params.type is str
         assert params.signed is None
 
     @staticmethod
