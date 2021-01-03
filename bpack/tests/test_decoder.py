@@ -21,6 +21,11 @@ try:
 except ImportError:
     bpack_ba = None
 
+try:
+    import bpack.np as bpack_np
+except ImportError:
+    bpack_np = None
+
 
 skipif = pytest.mark.skipif
 
@@ -30,7 +35,11 @@ BITS_BACKENDS = [
     pytest.param(bpack_ba, id='ba',
                  marks=skipif(not bpack_ba, reason='not available')),
 ]
-BYTES_BACKENDS = [pytest.param(bpack.st, id='st')]
+BYTES_BACKENDS = [
+    pytest.param(bpack.st, id='st'),
+    pytest.param(bpack_np, id='np',
+                 marks=skipif(not bpack_np, reason='not available')),
+]
 ALL_BACKENDS = BITS_BACKENDS + BYTES_BACKENDS
 
 
@@ -405,6 +414,12 @@ BYTE_ENCODED_DATA_LE = bytes([
     [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
      pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
      pytest.param(
+         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
+     pytest.param(
+         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
+     pytest.param(
          bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
          marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
      pytest.param(
@@ -432,6 +447,12 @@ def test_decoder(backend, Record, encoded_data):  # noqa
     'backend, Record, encoded_data',
     [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
      pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
+     pytest.param(
+         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
+     pytest.param(
+         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
      pytest.param(
          bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
          marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
@@ -677,7 +698,9 @@ def test_sequence(backend):
     'backend',
     [pytest.param(bpack.st, id='st'),
      pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available'))])
+                  marks=skipif(not bpack_bs, reason='not available')),
+     pytest.param(bpack_np, id='np',
+                  marks=skipif(not bpack_np, reason='not available'))])
 class TestNestedRecord:
     @staticmethod
     def get_encoded_data(baseunits):

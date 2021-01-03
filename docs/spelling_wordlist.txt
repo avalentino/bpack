@@ -16,6 +16,7 @@ enum
 enums
 instantiation
 miscellanea
+np
 numpy
 programmatically
 python
@@ -23,3 +24,4 @@ struct
 utils
 un
 unicode
+utf

@@ -110,12 +110,15 @@ latex_elements = {
 # autoclass_content = 'both'
 autodoc_member_order = 'groupwise'
 # autodoc_default_options = {}
-autodoc_mock_imports = ['bitarray', 'bitstruct']
+autodoc_mock_imports = ['bitarray', 'bitstruct', 'numpy']
 
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/3/': None}
+intersphinx_mapping = {
+    'https://docs.python.org/3/': None,
+    'https://numpy.org/doc/stable/': None,
+}
 
 # -- Options for todo extension ----------------------------------------------
 

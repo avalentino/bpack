@@ -36,14 +36,14 @@ Encoders/decoders (*backends*) rely on well known Python packages like:
 
 * |struct| (form the standard library)
 * bitstruct_ (optional)
-* bitarray_ (optional)
-* numpy_ (optional) - **TODO**
+* numpy_ (optional)
+* bitarray_ (optional) - partial implementation
 
 
 .. _struct: https://docs.python.org/3/library/struct.html
 .. _bitstruct: https://github.com/eerimoq/bitstruct
-.. _bitarray: https://github.com/ilanschnell/bitarray
 .. _numpy: https://numpy.org
+.. _bitarray: https://github.com/ilanschnell/bitarray
 
 .. local-definitions
 

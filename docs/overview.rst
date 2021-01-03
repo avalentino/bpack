@@ -23,6 +23,7 @@ Features
   - :mod:`bpack.st` backend based on the :mod:`struct` module of
     standard Python_ library
   - :mod:`bpack.bs` backend based on bitstruct_
+  - :mod:`bpack.np` backend based on numpy_
   - :mod:`bpack.ba` backend based on bitarray_
     (only included for benchmarking purposes)
 
@@ -56,12 +57,11 @@ Limitations
 Possible additional features still not implemented
 --------------------------------------------------
 
-* numpy based backend
 * data encoding (packing)
 * user defined converters
 
 
 .. _Python: https://www.python.org
 .. _bitstruct: https://github.com/eerimoq/bitstruct
-.. _bitarray: https://github.com/ilanschnell/bitarray
 .. _numpy: https://numpy.org
+.. _bitarray: https://github.com/ilanschnell/bitarray

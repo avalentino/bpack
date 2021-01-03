@@ -18,5 +18,6 @@ bpack package
    bpack.bs
    bpack.codec_utils
    bpack.descriptors
+   bpack.np
    bpack.st
    bpack.utils

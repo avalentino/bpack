@@ -1,5 +1,6 @@
 # typing-extensions ; python_version < "3.8"
 bitstruct
+numpy
 bitarray >= 1.5.1
 pytest
 pytest-cov
