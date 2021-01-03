@@ -5,13 +5,22 @@ import dataclasses
 import pytest
 
 import bpack
-import bpack.bs
 import bpack.st
 
 from bpack.codec_utils import is_decoder, get_decoder, get_decoder_type
 
+try:
+    import bpack.bs as bpack_bs
+except ImportError:
+    bpack_bs = None
 
-@pytest.mark.parametrize('backend', [bpack.bs, bpack.st], ids=['bs', 'st'])
+
+@pytest.mark.parametrize('backend',
+                         [pytest.param(bpack.st, id='st'),
+                          pytest.param(bpack_bs, id='bs',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_bs,
+                                           reason='not available'))])
 def test_decoder_helpers(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits)
