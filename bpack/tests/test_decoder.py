@@ -22,13 +22,13 @@ except ImportError:
     bpack_ba = None
 
 
+skipif = pytest.mark.skipif
+
 BITS_BACKENDS = [
     pytest.param(bpack_bs, id='bs',
-                 marks=pytest.mark.skipif(not bpack_bs,
-                                          reason='not available')),
+                 marks=skipif(not bpack_bs, reason='not available')),
     pytest.param(bpack_ba, id='ba',
-                 marks=pytest.mark.skipif(not bpack_ba,
-                                          reason='not available')),
+                 marks=skipif(not bpack_ba, reason='not available')),
 ]
 BYTES_BACKENDS = [pytest.param(bpack.st, id='st')]
 ALL_BACKENDS = BITS_BACKENDS + BYTES_BACKENDS
@@ -402,10 +402,8 @@ BYTE_ENCODED_DATA_LE = bytes([
 
 @pytest.mark.parametrize(
     'backend, Record, encoded_data',
-    [pytest.param(
-        bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
-     pytest.param(
-         bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
+    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
+     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
      pytest.param(
          bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
          marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
@@ -432,10 +430,8 @@ def test_decoder(backend, Record, encoded_data):  # noqa
 
 @pytest.mark.parametrize(
     'backend, Record, encoded_data',
-    [pytest.param(
-        bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
-     pytest.param(
-         bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
+    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
+     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
      pytest.param(
          bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
          marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
@@ -532,11 +528,10 @@ def test_byte_decoder_native_byteorder(backend):
     assert Record.from_bytes(data) == Record()
 
 
-@pytest.mark.parametrize('backend',
-                         [pytest.param(bpack_bs, id='bs',
-                                       marks=pytest.mark.skipif(
-                                           not bpack_bs,
-                                           reason='not available'))])
+@pytest.mark.parametrize(
+    'backend',
+    [pytest.param(bpack_bs, id='bs',
+                  marks=skipif(not bpack_bs, reason='not available'))])
 def test_bit_decoder_native_byteorder(backend):
     size = 8
     value = 1
@@ -642,12 +637,11 @@ def test_enum_decoding_bytes(backend):
     assert record == Record()
 
 
-@pytest.mark.parametrize('backend',
-                         [pytest.param(bpack.st, id='st'),
-                          pytest.param(bpack_bs, id='bs',
-                                       marks=pytest.mark.skipif(
-                                           not bpack_bs,
-                                           reason='not available'))])
+@pytest.mark.parametrize(
+    'backend',
+    [pytest.param(bpack.st, id='st'),
+     pytest.param(bpack_bs, id='bs',
+                  marks=skipif(not bpack_bs, reason='not available'))])
 def test_sequence(backend):
     if backend.Decoder.baseunits is bpack.EBaseUnits.BYTES:
         bitorder = None
@@ -679,12 +673,11 @@ def test_sequence(backend):
         assert field.type == sequence_type
 
 
-@pytest.mark.parametrize('backend',
-                         [pytest.param(bpack.st, id='st'),
-                          pytest.param(bpack_bs, id='bs',
-                                       marks=pytest.mark.skipif(
-                                           not bpack_bs,
-                                           reason='not available'))])
+@pytest.mark.parametrize(
+    'backend',
+    [pytest.param(bpack.st, id='st'),
+     pytest.param(bpack_bs, id='bs',
+                  marks=skipif(not bpack_bs, reason='not available'))])
 class TestNestedRecord:
     @staticmethod
     def get_encoded_data(baseunits):
