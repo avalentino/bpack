@@ -49,7 +49,7 @@ def bin_field_descripor_to_dtype(field_descr: BinFieldDescriptor) -> np.dtype:
 def descriptor_to_dtype(descriptor):
     """Convert the descriptor of a binary record into a :class:`numpy.dtype`.
 
-    Please note that (unicode) strings treated as "utf-8" encoded
+    Please note that (unicode) strings are treated as "utf-8" encoded
     byte strings.
     UCS4 encoded strings are not supported.
 
@@ -106,7 +106,7 @@ def _converter_factory(type_):
 class Decoder:
     """Numpy based data decoder.
 
-    (Unicode) strings treated as "utf-8" encoded byte strings.
+    (Unicode) strings are treated as "utf-8" encoded byte strings.
     UCS4 encoded strings are not supported.
     """
 
