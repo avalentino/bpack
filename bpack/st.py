@@ -11,13 +11,14 @@ from .codec_utils import (
     get_sequence_groups, make_decoder_decorator, is_decoder, get_decoder,
 )
 from .descriptors import field_descriptors
+from .enums import EBaseUnits
 
 
 __all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
 
 
 BACKEND_NAME = 'bitstruct'
-BACKEND_TYPE = bpack.EBaseUnits.BYTES
+BACKEND_TYPE = EBaseUnits.BYTES
 
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
@@ -103,7 +104,7 @@ class Decoder:
     Default byte-order: MSB.
     """
 
-    baseunits = bpack.EBaseUnits.BYTES
+    baseunits = EBaseUnits.BYTES
 
     def __init__(self, descriptor):
         """Initializer.

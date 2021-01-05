@@ -9,8 +9,8 @@ import dataclasses
 from typing import Optional, Iterable, Type, Union
 
 import bpack.utils
-from .utils import classdecorator, EBaseUnits, EByteOrder, EBitOrder
-
+from .utils import classdecorator
+from .enums import EBaseUnits, EByteOrder, EBitOrder
 
 __all__ = [
     'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',

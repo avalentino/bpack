@@ -10,6 +10,7 @@ from .codec_utils import make_decoder_decorator
 from .descriptors import (
     field_descriptors, get_field_descriptor, BinFieldDescriptor,
 )
+from bpack.enums import EBaseUnits
 
 
 __all__ = [
@@ -19,7 +20,7 @@ __all__ = [
 
 
 BACKEND_NAME = 'numpy'
-BACKEND_TYPE = bpack.EBaseUnits.BYTES
+BACKEND_TYPE = EBaseUnits.BYTES
 
 
 def bin_field_descripor_to_dtype(field_descr: BinFieldDescriptor) -> np.dtype:
@@ -110,7 +111,7 @@ class Decoder:
     UCS4 encoded strings are not supported.
     """
 
-    baseunits = bpack.EBaseUnits.BYTES
+    baseunits = EBaseUnits.BYTES
 
     def __init__(self, descriptor):
         """Initializer.

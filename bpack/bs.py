@@ -1,6 +1,5 @@
 """Bitstruct based codec for binary data structures."""
 
-import sys
 from typing import Optional
 
 import bitstruct
@@ -12,13 +11,14 @@ from .codec_utils import (
     get_sequence_groups, make_decoder_decorator, is_decoder, get_decoder,
 )
 from .descriptors import field_descriptors
+from bpack.enums import EBaseUnits, EByteOrder
 
 
 __all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
 
 
 BACKEND_NAME = 'bitstruct'
-BACKEND_TYPE = bpack.EBaseUnits.BITS
+BACKEND_TYPE = EBaseUnits.BITS
 
 
 class BitStruct(bitstruct.CompiledFormat):
@@ -72,9 +72,9 @@ def _to_fmt(type_, size: int, bitorder: str = '',
     return fmt
 
 
-def _endianess_to_str(order: bpack.EByteOrder) -> str:
-    if order is bpack.EByteOrder.NATIVE:
-        return '<' if sys.byteorder == 'little' else '>'
+def _endianess_to_str(order: EByteOrder) -> str:
+    if order is EByteOrder.NATIVE:
+        return EByteOrder.get_native().value
     return order.value
 
 
@@ -84,7 +84,7 @@ class Decoder:
     Default bit-order: MSB.
     """
 
-    baseunits = bpack.EBaseUnits.BITS
+    baseunits = EBaseUnits.BITS
 
     def __init__(self, descriptor):
         """Initializer.

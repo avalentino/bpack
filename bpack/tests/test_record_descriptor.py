@@ -454,7 +454,7 @@ def test_field_auto_size():
     assert bpack.calcsize(Record) == 1
 
     with pytest.warns(UserWarning):
-        @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
+        @bpack.descriptor(baseunits=EBaseUnits.BITS)
         @dataclasses.dataclass
         class Record:
             field_1: bool
@@ -497,7 +497,7 @@ def test_nested_records():
 
 
 @pytest.mark.parametrize('baseunits',
-                         [bpack.EBaseUnits.BYTES, bpack.EBaseUnits.BITS])
+                         [EBaseUnits.BYTES, EBaseUnits.BITS])
 def test_nested_records_autosize(baseunits):
     @bpack.descriptor(baseunits=baseunits)
     @dataclasses.dataclass

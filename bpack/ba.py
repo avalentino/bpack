@@ -12,13 +12,14 @@ import bpack.utils
 
 from .codec_utils import make_decoder_decorator
 from .descriptors import field_descriptors
+from .enums import EBaseUnits, EBitOrder, EByteOrder
 
 
 __all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
 
 
 BACKEND_NAME = 'bitarray'
-BACKEND_TYPE = bpack.EBaseUnits.BITS
+BACKEND_TYPE = EBaseUnits.BITS
 
 
 FactoryType = Callable[[bitarray.bitarray], Any]
@@ -81,10 +82,10 @@ def converter_factory(type_, size: Optional[int] = None, signed: bool = False,
     return converter
 
 
-def _bitorder_to_baorder(bitorder: bpack.EBitOrder) -> str:
-    if bitorder in {bpack.EBitOrder.MSB, bpack.EBitOrder.DEFAULT}:
+def _bitorder_to_baorder(bitorder: EBitOrder) -> str:
+    if bitorder in {EBitOrder.MSB, EBitOrder.DEFAULT}:
         s = 'big'
-    elif bitorder is bpack.EBitOrder.LSB:
+    elif bitorder is EBitOrder.LSB:
         s = 'little'
     else:
         raise ValueError(f'invalid bit order: "{bitorder}"')
@@ -97,7 +98,7 @@ class Decoder:
     Only supports "big endian" byte-order and MSB bit-order.
     """
 
-    baseunits = bpack.EBaseUnits.BITS
+    baseunits = EBaseUnits.BITS
 
     def __init__(self, descriptor, converters=converter_factory):
         """Initializer.
@@ -113,7 +114,7 @@ class Decoder:
 
         byteorder = bpack.byteorder(descriptor)
 
-        if byteorder in {bpack.EByteOrder.LITTLE, bpack.EByteOrder.NATIVE}:
+        if byteorder in {EByteOrder.LITTLE, EByteOrder.NATIVE}:
             raise NotImplementedError(
                 f'byte order "{byteorder}" is not supported by the {__name__} '
                 f'backend ({BACKEND_NAME})')

@@ -6,8 +6,8 @@ encode/decode binary data.
 
 __version__ = '0.6.0.dev1'
 
-from .descriptors import (                                          # noqa
+from .descriptors import (                                              # noqa
     descriptor, field, fields, is_descriptor, is_field,
     baseunits, byteorder, bitorder, calcsize,
 )
-from .utils import EBaseUnits, EByteOrder, EBitOrder                # noqa
+from .enums import EBaseUnits, EByteOrder, EBitOrder                    # noqa
