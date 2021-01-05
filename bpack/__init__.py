@@ -9,6 +9,7 @@ from .descriptors import (                                              # noqa
     baseunits, byteorder, bitorder, calcsize,
 )
 from .enums import EBaseUnits, EByteOrder, EBitOrder                    # noqa
+from .typing import T                                                   # noqa
 
 
 __version__ = '0.6.0.dev2'

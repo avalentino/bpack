@@ -38,18 +38,22 @@ class NotFieldDescriptorError(TypeError):
 
 
 def _resolve_type(type_):
-    if isinstance(type_, str):
-        rtype = bpack.utils.effective_type(type_)
-    elif bpack.utils.is_sequence_type(type_):
+    """Remove type annotations.
+
+    Replace :class:`typing.Annotated` types with the corresponding
+    not-annotated ones.
+    """
+    if bpack.utils.is_sequence_type(type_):
         etype = bpack.utils.effective_type(type_)
         rtype = copy.copy(type_)
         rtype.__args__ = (etype,)
+    elif bpack.typing.is_annotated(type_):
+        rtype = bpack.utils.effective_type(type_)
     else:
         rtype = type_
     return rtype
 
 
-# TODO: converters (TBD, or in decoder)
 @dataclasses.dataclass
 class BinFieldDescriptor:
     """Descriptor for bpack fields."""
@@ -159,8 +163,8 @@ class BinFieldDescriptor:
 
     def _set_type(self, type_):
         assert self.type is None
-        if isinstance(type_, bpack.typing.TypeParams):
-            params = type_
+        if bpack.typing.is_annotated(type_):
+            _, params = bpack.typing.get_args(type_)
             valid = True
             if not self._is_compatible_param(self.size, params.size):
                 valid = False
@@ -176,19 +180,10 @@ class BinFieldDescriptor:
                 self.signed = params.signed
             if self.size is None:
                 self.size = params.size
-        elif isinstance(type_, str):
-            try:
-                params = bpack.typing.str_to_type_params(type_)
-            except (ValueError, TypeError):
-                self.type = type_  # TODO: raise TypeError
-            else:
-                self._set_type(params)
         elif bpack.utils.is_sequence_type(type_):
-            typestr = bpack.utils.effective_type(type_, keep_typestr=True)
-            self._set_type(typestr)
-            resolved_seq_type = copy.copy(type_)
-            resolved_seq_type.__args__ = (self.type,)
-            self.type = resolved_seq_type
+            etype = bpack.utils.effective_type(type_, keep_annotations=True)
+            self._set_type(etype)
+            self.type = _resolve_type(type_)
         else:
             self.type = type_
 
@@ -247,9 +242,8 @@ def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,
         if v is not None
     }
     type_ = field_descr_metadata.pop('type', None)
-    if isinstance(field.type, str):
-        params = bpack.typing.str_to_type_params(field.type)
-        field_type = params.type
+    if bpack.typing.is_annotated(field.type):
+        field_type, _ = bpack.typing.get_args(field.type)
     else:
         field_type = field.type
     if type_ != _resolve_type(field_type):
@@ -355,9 +349,9 @@ def descriptor(cls, *, size: Optional[int] = None,
         # NOTE: this is ensured by dataclasses but not by attr
         assert field_.type is not None
 
-        if isinstance(field_.type, str):
+        if bpack.typing.is_annotated(field_.type):
             # check byteorder
-            params = bpack.typing.str_to_type_params(field_.type)
+            _, params = bpack.typing.get_args(field_.type)
             if params.byteorder:
                 effective_byteorder = _get_effective_byteorder(byteorder,
                                                                baseunits)

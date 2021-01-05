@@ -7,7 +7,7 @@ import dataclasses
 import collections.abc
 from typing import Type, Union
 
-from .typing import str_to_type_params
+from .typing import is_annotated
 from .typing import get_origin, get_args, Annotated                     # noqa
 
 
@@ -42,11 +42,6 @@ def set_new_attribute(cls, name, value):
     return dataclasses._set_new_attribute(cls, name, value)
 
 
-def _get_forward_ref(ref):
-    assert isinstance(ref, typing.ForwardRef)
-    return ref.__forward_arg__  # TODO: check
-
-
 def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
     """Return the sequence type associated to a typed sequence.
 
@@ -70,16 +65,7 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
             raise TypeError(f'{type_} is not supported')
         else:
             return None
-    if isinstance(args[0], typing.ForwardRef):
-        typestr = _get_forward_ref(args[0])
-        try:
-            params = str_to_type_params(typestr)
-        except (TypeError, ValueError):
-            return None
-        else:
-            # TODO: drop
-            assert isinstance(params.type, type)
-    elif not isinstance(args[0], type):
+    if not is_annotated(args[0]) and not isinstance(args[0], type):
         # COMPATIBILITY: with typing_extensions and Python v3.7
         # need to be a concrete type
         return None
@@ -132,38 +118,32 @@ def enum_item_type(enum_cls: Type[enum.Enum]) -> Type:
         return type_
 
 
-# TODO: Union[Type, str] -> Union[Type, str]
-def effective_type(type_: Type, keep_typestr: bool = False) -> Type:
+def effective_type(type_: Union[Type, Type[enum.Enum], Type],
+                   keep_annotations: bool = False) -> Type:
     """Return the effective type.
 
     In case of enums or sequences return the item type.
     """
     origin = get_origin(type_)
     if origin is None:
-        if (type_ is not None and not isinstance(type_, str) and
-                issubclass(type_, enum.Enum)):
+        if type_ is not None and issubclass(type_, enum.Enum):
             etype = enum_item_type(type_)
         else:
             etype = type_
+    elif origin is Annotated:  # TODO: check issubclass(origin, Annotated):
+        if keep_annotations:
+            etype = type_
+        else:
+            etype, _ = get_args(type_)
     elif not issubclass(origin, typing.Sequence):
         etype = type_
     elif issubclass(origin, typing.Tuple):
         etype = type_
     else:
+        # is a sequence
         args = get_args(type_)
         assert len(args) == 1
-        etype = args[0]
-
-    if isinstance(etype, typing.ForwardRef):
-        etype = _get_forward_ref(etype)
-
-    if isinstance(etype, str) and not keep_typestr:
-        try:
-            params = str_to_type_params(etype)
-        except (TypeError, ValueError):
-            pass
-        else:
-            etype = params.type
+        etype = effective_type(args[0], keep_annotations=keep_annotations)
 
     return etype
 

@@ -8,12 +8,11 @@ try:
     # @COMPATIBILITY: with Python < 3.9
     from typing_extensions import Annotated
     # @COMPATIBILITY: with Python < 3.7 (and 3.8)
-    from typing_extensions import get_origin, get_args                  # noqa
+    from typing_extensions import get_origin, get_args
 except ImportError:
-    from typing import _AnnotatedAlias as AnnotatedAlias                # noqa
     from typing import _tp_cache                                        # noqa
     from typing import Annotated
-    from typing import get_origin, get_args                             # noqa
+    from typing import get_origin, get_args
 
 from .enums import EByteOrder
 
@@ -25,6 +24,7 @@ _DTYPE_RE = re.compile(
     r'^(?P<byteorder>[<|>])?'
     r'(?P<type>[?bBiufcmMUVOSat])'
     r'(?P<size>\d+)?$')
+
 
 FieldTypes = Type[Union[bool, int, float, complex, bytes, str]]
 
