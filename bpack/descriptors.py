@@ -8,6 +8,7 @@ import warnings
 import dataclasses
 from typing import Optional, Iterable, Type, Union
 
+import bpack.typing
 import bpack.utils
 from .utils import classdecorator
 from .enums import EBaseUnits, EByteOrder, EBitOrder
@@ -158,7 +159,7 @@ class BinFieldDescriptor:
 
     def _set_type(self, type_):
         assert self.type is None
-        if isinstance(type_, bpack.utils.TypeParams):
+        if isinstance(type_, bpack.typing.TypeParams):
             params = type_
             valid = True
             if not self._is_compatible_param(self.size, params.size):
@@ -177,7 +178,7 @@ class BinFieldDescriptor:
                 self.size = params.size
         elif isinstance(type_, str):
             try:
-                params = bpack.utils.str_to_type_params(type_)
+                params = bpack.typing.str_to_type_params(type_)
             except (ValueError, TypeError):
                 self.type = type_  # TODO: raise TypeError
             else:
@@ -247,7 +248,7 @@ def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,
     }
     type_ = field_descr_metadata.pop('type', None)
     if isinstance(field.type, str):
-        params = bpack.utils.str_to_type_params(field.type)
+        params = bpack.typing.str_to_type_params(field.type)
         field_type = params.type
     else:
         field_type = field.type
@@ -356,7 +357,7 @@ def descriptor(cls, *, size: Optional[int] = None,
 
         if isinstance(field_.type, str):
             # check byteorder
-            params = bpack.utils.str_to_type_params(field_.type)
+            params = bpack.typing.str_to_type_params(field_.type)
             if params.byteorder:
                 effective_byteorder = _get_effective_byteorder(byteorder,
                                                                baseunits)

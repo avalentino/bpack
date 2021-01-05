@@ -26,12 +26,6 @@ Pip
   $ source .venv/bin/activate
   (venv) $ python3 -m pip install -r requirements-dev-txt
 
-For Python_ 3.7 it is also necessary to install *typing-extensions*:
-
-.. code-block:: shell
-
-  $ python3 -m pip install typing-extensions
-
 
 Conda
 ~~~~~

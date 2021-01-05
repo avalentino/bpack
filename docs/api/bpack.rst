@@ -21,4 +21,5 @@ bpack package
    bpack.enums
    bpack.np
    bpack.st
+   bpack.typing
    bpack.utils

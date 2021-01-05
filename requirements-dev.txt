@@ -1,4 +1,4 @@
-# typing-extensions ; python_version < "3.8"
+typing-extensions # ; python_version < "3.9"
 bitstruct
 numpy
 bitarray >= 1.5.1

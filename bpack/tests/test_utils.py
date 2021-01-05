@@ -1,7 +1,6 @@
 """Test bpack.utils."""
 
 import enum
-import string
 import typing
 
 import pytest
@@ -177,98 +176,3 @@ def test_is_sequence_type_from_typestr():
 
     type_ = typing.Sequence['i8']  # noqa
     assert bpack.utils.is_sequence_type(type_)
-
-
-class TestStrToTypeParams:
-    @staticmethod
-    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    def test_byteorder(byteorder):
-        s = f'{byteorder}i4'
-        if byteorder in ('', '|'):
-            byteorder = None
-        else:
-            byteorder = bpack.EByteOrder(byteorder if byteorder != '|' else '')
-        params = bpack.utils.str_to_type_params(s)
-        assert params.byteorder is byteorder
-
-    @staticmethod
-    @pytest.mark.parametrize('size', [1, 2, 4, 8, 3, 120])
-    def test_size(size):
-        s = f'i{size}'
-        params = bpack.utils.str_to_type_params(s)
-        assert params.size == size
-        assert isinstance(params.size, int)
-
-    @staticmethod
-    @pytest.mark.parametrize('size', [0, -1])
-    def test_invalid_size(size):
-        s = f'i{size}'
-        with pytest.raises(ValueError):
-            bpack.utils.str_to_type_params(s)
-
-    @staticmethod
-    def test_no_size():
-        s = 'i'
-        params = bpack.utils.str_to_type_params(s)
-        assert params.size is None
-
-    TYPE_CODES = 'iufcS'
-    UNSUPPORTED_TYPE_CODES = '?bBOatmMUV'
-    INVALID_TYPE_CODES = (
-            set(string.printable) - set(TYPE_CODES + UNSUPPORTED_TYPE_CODES)
-    )
-
-    @staticmethod
-    @pytest.mark.parametrize('typecode', INVALID_TYPE_CODES)
-    def test_invalid_typecode(typecode):
-        s = f'{typecode}4'
-        with pytest.raises(ValueError, match='invalid'):
-            bpack.utils.str_to_type_params(s)
-
-    @staticmethod
-    @pytest.mark.parametrize('typecode', UNSUPPORTED_TYPE_CODES)
-    def test_unsupported_typecode(typecode):
-        s = f'{typecode}4'
-        with pytest.raises(TypeError, match='not supported'):
-            bpack.utils.str_to_type_params(s)
-
-    @staticmethod
-    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    @pytest.mark.parametrize('typecode', ['S'])
-    @pytest.mark.parametrize('size', ['2', '4', '8'])
-    def test_bytes_typecode(byteorder, typecode, size):
-        s = f'{byteorder}{typecode}{size}'
-        params = bpack.utils.str_to_type_params(s)
-        assert params.type is bytes
-        assert params.signed is None
-
-    @staticmethod
-    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    @pytest.mark.parametrize('typecode', ['f'])
-    @pytest.mark.parametrize('size', ['2', '4', '8'])
-    def test_float_typecode(byteorder, typecode, size):
-        s = f'{byteorder}{typecode}{size}'
-        params = bpack.utils.str_to_type_params(s)
-        assert params.type is float
-        assert params.signed is None
-
-    @staticmethod
-    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    @pytest.mark.parametrize('typecode', ['c'])
-    @pytest.mark.parametrize('size', ['4', '8', '16'])
-    def test_complex_typecode(byteorder, typecode, size):
-        s = f'{byteorder}{typecode}{size}'
-        params = bpack.utils.str_to_type_params(s)
-        assert params.type is complex
-        assert params.signed is None
-
-    @staticmethod
-    @pytest.mark.parametrize('byteorder', ['>', '<', '|', ''])
-    @pytest.mark.parametrize('typecode', ['i', 'u'])
-    @pytest.mark.parametrize('size', ['2', '4', '8'])
-    def test_int_typecode(byteorder, typecode, size):
-        s = f'{byteorder}{typecode}{size}'
-        signed = bool(typecode == 'i')
-        params = bpack.utils.str_to_type_params(s)
-        assert params.type is int
-        assert params.signed == signed
