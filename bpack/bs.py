@@ -21,6 +21,16 @@ BACKEND_NAME = 'bitstruct'
 BACKEND_TYPE = bpack.EBaseUnits.BITS
 
 
+class BitStruct(bitstruct.CompiledFormat):
+    def __init__(self, format: str):
+        super().__init__(format)
+        self._format: str = format
+
+    @property
+    def format(self) -> str:
+        return self._format
+
+
 _TYPE_TO_STR = {
     bool: 'b',
     int: 'u',
@@ -43,13 +53,13 @@ def _to_fmt(type_, size: int, bitorder: str = '',
     assert repeat > 0, f'invalid repeat: {repeat:r}'
 
     if is_decoder(type_):
-        decoder = get_decoder(type_)
-        if isinstance(decoder, Decoder):
-            return decoder._codec._fmt
+        decoder_ = get_decoder(type_)
+        if isinstance(decoder_, Decoder):
+            return decoder_.format
     elif (bpack.is_descriptor(type_) and
           bpack.baseunits(type_) is Decoder.baseunits):
-        decoder = Decoder(type_)
-        return decoder._codec._fmt
+        decoder_ = Decoder(type_)
+        return decoder_.format
 
     etype = bpack.utils.effective_type(type_)
     key = (etype, signed) if etype is int and signed is not None else etype
@@ -97,8 +107,7 @@ class Decoder:
         )
         fmt = fmt + byteorder  # byte order
 
-        codec = bitstruct.compile(fmt)
-        codec._fmt = fmt
+        codec = BitStruct(fmt)
 
         self._codec = codec
         self._descriptor = descriptor
@@ -108,6 +117,10 @@ class Decoder:
             if bpack.utils.is_enum_type(field_descr.type)
         ]
         self._groups = get_sequence_groups(descriptor)
+
+    @property
+    def format(self) -> str:
+        return self._codec.format
 
     def decode(self, data: bytes):
         """Decode binary data and return a record object."""
