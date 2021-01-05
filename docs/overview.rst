@@ -59,6 +59,7 @@ Possible additional features still not implemented
 
 * data encoding (packing)
 * user defined converters
+* support for complex and datetime
 
 
 .. _Python: https://www.python.org

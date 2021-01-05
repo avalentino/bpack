@@ -18,8 +18,7 @@ Miscellanea *To Do* list
 
 * replace :data:`EByteOrder.BIG` and :data:`EByteOrder.LITTLE`
   with ``BE`` and ``LE``
-* support for complex data type in all backends
 * new ``nfields(descriptor)`` helper function
-* nested records and repeat
+* nested records and repeat (test)
 * improve support for typing -- bpack.T('i4')
 * decoder attributes (Decoder.descriptor)
