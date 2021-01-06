@@ -14,7 +14,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-from setup import cfg  # noqa
+from setup import cfg                                           # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
@@ -46,7 +46,7 @@ extensions = [
 ]
 
 try:
-    import sphinxcontrib.spelling
+    import sphinxcontrib.spelling                               # noqa: F401
 except ImportError:
     pass
 else:

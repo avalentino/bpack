@@ -220,7 +220,7 @@ def _update_field_metadata(field_, **kwargs):
     return field_
 
 
-def get_field_descriptor(field: Field,
+def get_field_descriptor(field: Field,                                  # noqa
                          validate: bool = True) -> BinFieldDescriptor:
     """Return the field descriptor attached to a :class:`Field`."""
     if not is_field(field):
@@ -232,7 +232,7 @@ def get_field_descriptor(field: Field,
     return field_descr
 
 
-def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,
+def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,  # noqa
                          validate: bool = True) -> Field:
     """Set the field metadata according to the specified descriptor."""
     if validate:
@@ -271,7 +271,8 @@ _DEFAULT_SIZE_MAP = {
 }
 
 
-def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
+def _get_default_size(type_,
+                      baseunits: EBaseUnits) -> Union[int, None]:       # noqa
     if is_descriptor(type_):
         return calcsize(type_, baseunits)
 
@@ -301,12 +302,12 @@ def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
     #     else:
     #         return None
 
-    return _DEFAULT_SIZE_MAP[baseunits].get(etype)
+    return _DEFAULT_SIZE_MAP[baseunits].get(etype)                      # noqa
 
 
-def _get_effective_byteorder(byteorder: EByteOrder,
-                             baseunits: EBaseUnits) -> EByteOrder:
-    byteorder = EByteOrder(byteorder)
+def _get_effective_byteorder(byteorder: EByteOrder,                     # noqa
+                             baseunits: EBaseUnits) -> EByteOrder:      # noqa
+    byteorder = EByteOrder(byteorder)                                   # noqa
     effective_byteorder = byteorder
     if baseunits is EBaseUnits.BYTES:
         if byteorder in {EByteOrder.NATIVE, EByteOrder.DEFAULT}:
@@ -321,9 +322,9 @@ def _get_effective_byteorder(byteorder: EByteOrder,
 
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
-               byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,
-               bitorder: Optional[Union[str, EBitOrder]] = None,
-               baseunits: EBaseUnits = EBaseUnits.BYTES):
+               byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,  # noqa
+               bitorder: Optional[Union[str, EBitOrder]] = None,        # noqa
+               baseunits: EBaseUnits = EBaseUnits.BYTES):               # noqa
     """Class decorator to define descriptors for binary records.
 
     It converts a dataclass into a descriptor object for binary records.
@@ -334,8 +335,8 @@ def descriptor(cls, *, size: Optional[int] = None,
     * the ``__len__`` special method is added (returning always the
       record size in bytes).
     """
-    baseunits = EBaseUnits(baseunits)
-    byteorder = EByteOrder(byteorder)
+    baseunits = EBaseUnits(baseunits)                                   # noqa
+    byteorder = EByteOrder(byteorder)                                   # noqa
     fields_ = dataclasses.fields(cls)
 
     # Initialize to a dummy value with initial offset + size = 0
@@ -419,7 +420,7 @@ def descriptor(cls, *, size: Optional[int] = None,
             'it is not possible to specify the "bitorder" '
             'if "baseunits" is not "BITS"')
     elif baseunits is EBaseUnits.BITS and bitorder is None:
-        bitorder = EBitOrder.DEFAULT
+        bitorder = EBitOrder.DEFAULT                                    # noqa
 
     setattr(cls, BITORDER_ATTR_NAME,
             EBitOrder(bitorder) if bitorder is not None else None)
@@ -491,7 +492,8 @@ def bitorder(obj) -> Union[EBitOrder, None]:
 fields = dataclasses.fields
 
 
-def field_descriptors(descriptor, pad=False) -> Iterable[BinFieldDescriptor]:
+def field_descriptors(descriptor,                                       # noqa
+                      pad: bool = False) -> Iterable[BinFieldDescriptor]:
     """Return the list of field descriptors for the input record descriptor.
 
     Items are instances of the :class:`BinFieldDescriptor` class describing

@@ -50,7 +50,7 @@ class TestFieldFactory:
     @pytest.mark.parametrize('value', [-8, 'a'])
     def test_invalid_signed_type(value):
         with pytest.raises(TypeError):
-            bpack.field(size=8, default=1, signed=value)
+            bpack.field(size=8, default=1, signed=value)                # noqa
 
     @staticmethod
     @pytest.mark.parametrize(argnames='repeat', argvalues=[1.3, 'x'])
@@ -228,7 +228,7 @@ class TestEnumFields:
         with pytest.raises(TypeError):
             @bpack.descriptor
             @dataclasses.dataclass
-            class Record:
+            class Record:                                               # noqa
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: EEnumType = bpack.field(size=1, default=EEnumType.A)
 
@@ -242,7 +242,7 @@ class TestEnumFields:
         with pytest.warns(UserWarning):
             @bpack.descriptor
             @dataclasses.dataclass
-            class Record:
+            class Record:                                               # noqa
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: EEnumType = bpack.field(size=1, signed=True,
                                                  default=EEnumType.A)
@@ -284,16 +284,17 @@ class TestFieldDescriptor:
     @staticmethod
     def test_init_invalid_type():
         with pytest.raises(TypeError):
-            bpack.descriptors.BinFieldDescriptor(size=1.1)
+            bpack.descriptors.BinFieldDescriptor(size=1.1)              # noqa
 
         with pytest.raises(TypeError):
-            bpack.descriptors.BinFieldDescriptor(offset=2.1)
+            bpack.descriptors.BinFieldDescriptor(offset=2.1)            # noqa
 
         with pytest.raises(TypeError):
-            bpack.descriptors.BinFieldDescriptor(signed=complex(3.1, 0))
+            bpack.descriptors.BinFieldDescriptor(
+                signed=complex(3.1, 0))                                 # noqa
 
         with pytest.raises(TypeError):
-            bpack.descriptors.BinFieldDescriptor(repeat=1.1)
+            bpack.descriptors.BinFieldDescriptor(repeat=1.1)            # noqa
 
     @staticmethod
     def test_init_invalid_value():
@@ -527,35 +528,35 @@ class TestAnnotatedType:
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor(byteorder=bpack.EByteOrder.LITTLE)
             @dataclasses.dataclass
-            class Record:                                               # noqa
+            class Record:                                       # noqa
                 field: bpack.T[typestr]
 
         typestr = '<i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
-            @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)
+            @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)   # noqa: F811
             @dataclasses.dataclass
-            class Record:                                               # noqa
+            class Record:                                       # noqa
                 field: bpack.T[typestr]
 
         typestr = '>i8' if sys.byteorder == 'little' else '<i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
-            @bpack.descriptor
+            @bpack.descriptor                                   # noqa: F811
             @dataclasses.dataclass
-            class Record:                                               # noqa
+            class Record:                                       # noqa
                 field: bpack.T[typestr]
 
         typestr = '<i8' if sys.byteorder == 'little' else '>i8'
 
-        @bpack.descriptor
+        @bpack.descriptor                                       # noqa: F811
         @dataclasses.dataclass
-        class Record:                                                   # noqa
+        class Record:                                           # noqa
             field: bpack.T[typestr]
 
         typestr = '|i8'
 
-        @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)
+        @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)       # noqa: F811
         @dataclasses.dataclass
-        class Record:                                                   # noqa
+        class Record:                                           # noqa
             field: bpack.T[typestr]
 
     @staticmethod

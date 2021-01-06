@@ -24,7 +24,7 @@ class TestEnumType:
             A = 'a'
 
         with pytest.raises(TypeError):
-            assert bpack.utils.enum_item_type(EInvalidEnumType)
+            assert bpack.utils.enum_item_type(EInvalidEnumType)         # noqa
 
     @staticmethod
     def test_unsupported_enum_type():
@@ -65,12 +65,12 @@ class TestEnumType:
 
 
 def test_effective_type():
-    assert bpack.utils.effective_type(None) is None
     assert bpack.utils.effective_type(bool) is bool
     assert bpack.utils.effective_type(int) is int
     assert bpack.utils.effective_type(str) is str
     assert bpack.utils.effective_type(bytes) is bytes
     assert bpack.utils.effective_type(float) is float
+    assert bpack.utils.effective_type(None) is None                     # noqa
 
     for type_ in (typing.Type[typing.Any], typing.Tuple[int, float],
                   typing.Tuple[int]):

@@ -395,7 +395,7 @@ def test_field_descriptor_metadata():
     assert isinstance(descr_metadata, collections.abc.Mapping)
     with pytest.raises(TypeError):
         # immutable (types.MappingProxyType)
-        descr_metadata['new_key'] = 'new_value'
+        descr_metadata['new_key'] = 'new_value'                         # noqa
 
     assert 'type' not in descr_metadata
     assert 'size' in descr_metadata

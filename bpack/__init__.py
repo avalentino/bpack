@@ -4,12 +4,12 @@ bpack provides tools to describe, in a *declarative* way, and
 encode/decode binary data.
 """
 
-from .descriptors import (                                              # noqa
+from .descriptors import (                                      # noqa: F401
     descriptor, field, fields, is_descriptor, is_field,
     baseunits, byteorder, bitorder, calcsize,
 )
-from .enums import EBaseUnits, EByteOrder, EBitOrder                    # noqa
-from .typing import T                                                   # noqa
+from .enums import EBaseUnits, EByteOrder, EBitOrder            # noqa: F401
+from .typing import T                                           # noqa: F401
 
 
 __version__ = '0.6.0.dev2'

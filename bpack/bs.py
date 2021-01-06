@@ -22,7 +22,7 @@ BACKEND_TYPE = EBaseUnits.BITS
 
 
 class BitStruct(bitstruct.CompiledFormat):
-    def __init__(self, format: str):
+    def __init__(self, format: str):                                    # noqa
         super().__init__(format)
         self._format: str = format
 
@@ -65,7 +65,7 @@ def _to_fmt(type_, size: int, bitorder: str = '',
     key = (etype, signed) if etype is int and signed is not None else etype
 
     try:
-        fmt = f'{bitorder}{_TYPE_TO_STR[key]}{size}' * repeat
+        fmt = f'{bitorder}{_TYPE_TO_STR[key]}{size}' * repeat           # noqa
     except KeyError:
         raise TypeError(f'unsupported type: {etype:!r}')
 

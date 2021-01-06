@@ -64,13 +64,13 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     assert signed in (True, False, None)
 
     if is_decoder(type_):
-        decoder = get_decoder(type_)
-        if isinstance(decoder, Decoder):
-            return decoder._codec.format
+        decoder_ = get_decoder(type_)
+        if isinstance(decoder_, Decoder):
+            return decoder_._codec.format
     elif (bpack.is_descriptor(type_) and
           bpack.baseunits(type_) is Decoder.baseunits):
-        decoder = Decoder(type_)
-        return decoder._codec.format
+        decoder_ = Decoder(type_)
+        return decoder_._codec.format
 
     etype = bpack.utils.effective_type(type_)
     repeat = 1 if repeat is None else repeat

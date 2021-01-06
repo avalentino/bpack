@@ -434,8 +434,8 @@ BYTE_ENCODED_DATA_LE = bytes([
      pytest.param(
          bpack_ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='ba BE MSB',
          marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
-def test_decoder(backend, Record, encoded_data):  # noqa
-    decoded_data = Record()
+def test_decoder(backend, Record, encoded_data):                        # noqa
+    decoded_data = Record()                                             # noqa
     decoder = backend.Decoder(Record)
     assert hasattr(decoder, 'baseunits')
     assert decoder.baseunits is bpack.baseunits(Record)
@@ -468,8 +468,8 @@ def test_decoder(backend, Record, encoded_data):  # noqa
      pytest.param(
          bpack_ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='ba BE MSB',
          marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
-def test_decoder_func(backend, Record, encoded_data):  # noqa
-    decoded_data = Record()
+def test_decoder_func(backend, Record, encoded_data):                   # noqa
+    decoded_data = Record()                                             # noqa
     record_type = backend.decoder(Record)
     record = record_type.from_bytes(encoded_data)
     assert record == decoded_data
@@ -530,7 +530,7 @@ def test_unsupported_type(backend):
         @backend.decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         @dataclasses.dataclass(frozen=True)
-        class Record:  # noqa
+        class Record:                                                   # noqa
             field_1: CustomType = bpack.field(size=8)
 
 
@@ -591,7 +591,7 @@ def test_wrong_baseunits_bit(backend):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
         @dataclasses.dataclass
-        class Record:  # noqa
+        class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
 
@@ -601,7 +601,7 @@ def test_wrong_baseunits_byte(backend):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         @dataclasses.dataclass
-        class Record:  # noqa
+        class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
 

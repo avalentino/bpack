@@ -49,7 +49,7 @@ def get_sequence_groups(descriptor):
     for descr in field_descriptors(descriptor):
 
         if bpack.is_descriptor(descr.type):
-            nfields = len(bpack.fields(descr.type))
+            nfields = len(bpack.fields(descr.type))                     # noqa
             slice_ = slice(offset, offset + nfields)
 
             def to_record(values, func=descr.type):

@@ -36,7 +36,7 @@ def test_invalid_float_size():
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         @dataclasses.dataclass
-        class Record:  # noqa
+        class Record:                                                   # noqa
             field_1: float = bpack.field(size=80)
 
 
@@ -48,7 +48,7 @@ def test_little_endian():
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                           byteorder=bpack.EByteOrder.LITTLE)
         @dataclasses.dataclass(frozen=True)
-        class Record:  # noqa
+        class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
 
@@ -60,7 +60,7 @@ def test_invalid_bitorder():
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                           bitorder=bpack.EBitOrder.LSB)
         @dataclasses.dataclass(frozen=True)
-        class Record:  # noqa
+        class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
 
@@ -71,7 +71,7 @@ def test_sequence():
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         @dataclasses.dataclass
-        class Record:  # noqa
+        class Record:                                                   # noqa
             field_1: List[int] = bpack.field(size=4, signed=False,
                                              repeat=2, default=3)
             field_2: Sequence[int] = bpack.field(size=4, signed=False,

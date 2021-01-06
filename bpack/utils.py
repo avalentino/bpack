@@ -29,17 +29,17 @@ def classdecorator(func):
     return wrapper
 
 
-def create_fn(name, args, body, *, globals=None, locals=None,
+def create_fn(name, args, body, *, globals=None, locals=None,           # noqa
               return_type=dataclasses.MISSING):
     """Create a function object."""
-    return dataclasses._create_fn(name, args, body,
+    return dataclasses._create_fn(name, args, body,                     # noqa
                                   globals=globals, locals=locals,
                                   return_type=return_type)
 
 
 def set_new_attribute(cls, name, value):
     """Programmatically add a new attribute/method to a class."""
-    return dataclasses._set_new_attribute(cls, name, value)
+    return dataclasses._set_new_attribute(cls, name, value)             # noqa
 
 
 def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
@@ -52,10 +52,10 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
     considered homogeneous sequences even if all items are specified to
     have the same type.
     """
-    sequence_type = get_origin(type_)
-    if sequence_type is None:
+    sequence_type_ = get_origin(type_)
+    if sequence_type_ is None:
         return None
-    if not issubclass(sequence_type, typing.Sequence):
+    if not issubclass(sequence_type_, typing.Sequence):
         return None
     args = get_args(type_)
     if len(args) < 1:
@@ -70,12 +70,12 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
         # need to be a concrete type
         return None
 
-    if not issubclass(sequence_type, collections.abc.MutableSequence):
-        sequence_type = tuple
+    if not issubclass(sequence_type_, collections.abc.MutableSequence):
+        sequence_type_ = tuple
 
-    assert sequence_type in {list, tuple}
+    assert sequence_type_ in {list, tuple}
 
-    return sequence_type
+    return sequence_type_
 
 
 def is_sequence_type(type_: Type, error: bool = False) -> bool:
