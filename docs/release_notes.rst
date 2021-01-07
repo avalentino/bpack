@@ -8,7 +8,8 @@ bpack v0.6.0 (UNRELEASED)
 * The ``size`` parameter of the :func:`bpack.descriptors.field` factory
   function is now optional.
 * New :meth:`bpack.utils.EByteOrder.get_native` method.
-* Now data types in descriptor definition can also be specified with
+* Now data types in descriptor definition can also be specified by means of
+  special type annotation type (:class:`bpack.typing.T`) that accepts
   numpy-like format strings.
 * General improvements and code refactoring.
 * Improved CI testing.

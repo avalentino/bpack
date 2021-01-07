@@ -33,8 +33,9 @@ Features
 * both bit and byte order can be specified by the user
 * automatic size determination for some data types
 * record nesting (the field in a record descriptor can be another record)
-* possibility to specify data types using string specifiers compatible with
-  numpy_ "Array Interface" and ``dtype``
+* possibility to specify data types using the special type annotation class
+  :class:`bpack.typing.T` that accepts annotations and string specifiers
+  compatible with the numpy_ "Array Interface" and ``dtype``
 * comprehensive test suite
 
 
@@ -52,6 +53,8 @@ Limitations
   binary record is, in principle, possible but not planned at the moment.
 * record nesting is only possible for records having the same base-units,
   bits or bytes, and compatible decoder types eventually.
+* Sequence types can only contain basic numeric types; nested sequences,
+  sequences of enums or sequences of records are not allowed at the moment.
 
 
 Possible additional features still not implemented
@@ -59,7 +62,7 @@ Possible additional features still not implemented
 
 * data encoding (packing)
 * user defined converters
-* support for complex and datetime
+* support for complex and datetime data types
 
 
 .. _Python: https://www.python.org
