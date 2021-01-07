@@ -161,8 +161,9 @@ class BinFieldDescriptor:
             return False
         return True
 
-    def _set_type(self, type_):
-        assert self.type is None
+    def update_from_type(self, type_: Type):
+        if self.type is not None:
+            raise TypeError('the type attribute is already set')
         if bpack.typing.is_annotated(type_):
             _, params = bpack.typing.get_args(type_)
             valid = True
@@ -182,7 +183,7 @@ class BinFieldDescriptor:
                 self.size = params.size
         elif bpack.utils.is_sequence_type(type_):
             etype = bpack.utils.effective_type(type_, keep_annotations=True)
-            self._set_type(etype)
+            self.update_from_type(etype)
             self.type = _resolve_type(type_)
         else:
             self.type = type_
@@ -226,7 +227,7 @@ def get_field_descriptor(field: Field,                                  # noqa
     if not is_field(field):
         raise NotFieldDescriptorError(f'not a field descriptor: {field}')
     field_descr = BinFieldDescriptor(**field.metadata[METADATA_KEY])
-    field_descr._set_type(field.type)
+    field_descr.update_from_type(field.type)
     if validate:
         field_descr.validate()
     return field_descr
@@ -367,7 +368,7 @@ def descriptor(cls, *, size: Optional[int] = None,
         except NotFieldDescriptorError:
             field_descr = BinFieldDescriptor()
             if isinstance(field_, Field):
-                field_descr._set_type(field_.type)
+                field_descr.update_from_type(field_.type)
 
         if field_descr.size is None:
             field_descr.size = _get_default_size(field_descr.type, baseunits)
