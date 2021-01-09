@@ -25,6 +25,7 @@ __all__ = [
 BASEUNITS_ATTR_NAME = '__bpack_baseunits__'
 BYTEORDER_ATTR_NAME = '__bpack_byteorder__'
 BITORDER_ATTR_NAME = '__bpack_bitorder__'
+SIZE_ATTR_NAME = '__bpack_size__'
 DECODER_ATTR_NAME = '__bpack_decoder__'
 METADATA_KEY = '__bpack_metadata__'
 
@@ -411,10 +412,6 @@ def descriptor(cls, *, size: Optional[int] = None,
     if baseunits is EBaseUnits.BITS:
         if size % 8 != 0:
             warnings.warn('bit struct not aligned to bytes')
-        size = math.ceil(size / 8)
-
-    setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
-    setattr(cls, BYTEORDER_ATTR_NAME, byteorder)
 
     if baseunits is not EBaseUnits.BITS and bitorder is not None:
         raise ValueError(
@@ -423,19 +420,11 @@ def descriptor(cls, *, size: Optional[int] = None,
     elif baseunits is EBaseUnits.BITS and bitorder is None:
         bitorder = EBitOrder.DEFAULT                                    # noqa
 
+    setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
+    setattr(cls, BYTEORDER_ATTR_NAME, byteorder)
     setattr(cls, BITORDER_ATTR_NAME,
             EBitOrder(bitorder) if bitorder is not None else None)
-
-    get_len_func = bpack.utils.create_fn(
-        name='__len__',
-        args=tuple(),
-        body=['return size'],
-        locals={'size': size},
-    )
-    get_len_func = staticmethod(get_len_func)
-    get_len_func.__doc__ = "Return the record size in bytes"
-    assert not hasattr(cls, '__len__')
-    bpack.utils.set_new_attribute(cls, '__len__', get_len_func)
+    setattr(cls, SIZE_ATTR_NAME, size)
 
     return cls
 
@@ -454,16 +443,27 @@ def is_descriptor(obj) -> bool:
         return False
 
 
-def calcsize(obj, units: EBaseUnits = EBaseUnits.BYTES) -> int:
+def calcsize(obj, units: Optional[EBaseUnits] = None) -> int:
     """Return the size of the ``obj`` record.
 
-    By default the returned size is expressed in bytes.
+    If the *units* parameter is not specified (default) then the returned
+    *size* is expressed in the same *base units* of the descriptor.
     """
     if not is_descriptor(obj):
         raise TypeError(f'{obj!r} is not a descriptor')
 
-    bytes_to_units = 1 if EBaseUnits(units) is EBaseUnits.BYTES else 8
-    return obj.__len__() * bytes_to_units
+    size = getattr(obj, SIZE_ATTR_NAME)
+    baseunits_ = getattr(obj, BASEUNITS_ATTR_NAME)
+
+    if units and units is not baseunits_:
+        if units is EBaseUnits.BYTES:
+            # baseunits is BITS and units is BYTES
+            size = math.ceil(size / 8)
+        else:
+            # baseunits is BYTES and units is BITS
+            size *= 8
+
+    return size
 
 
 def baseunits(obj) -> EBaseUnits:

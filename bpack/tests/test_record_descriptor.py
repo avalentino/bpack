@@ -225,7 +225,7 @@ def test_repeat():
         field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
         field_2: float = bpack.field(size=8, default=1/3)
 
-    assert len(Record()) == 16
+    assert bpack.calcsize(Record()) == 16
 
 
 def test_no_repeat():
@@ -259,7 +259,6 @@ class TestExplicitSize:
 
         assert bpack.calcsize(Record) == size
         assert bpack.calcsize(Record()) == size
-        assert len(Record()) == size
 
     @staticmethod
     def test_invalid_explicit_size():
@@ -308,17 +307,9 @@ class TestExplicitSize:
                 field_2: float = bpack.field(size=8, default=1/3)
 
 
-class TestLen:
-    @staticmethod
-    def test_len():
-        @bpack.descriptor
-        @dataclasses.dataclass
-        class Record:
-            field_1: int = bpack.field(size=4, default=0)
-            field_2: float = bpack.field(size=8, default=1/3)
-            field_3: List[int] = bpack.field(size=1, default=0, repeat=4)
-
-        assert len(Record()) == 16
+class TestSize:
+    # NOTE: basic tests are in test_descriptor_utils.test_calcsize.
+    #       Here corner cases are addressed
 
     @staticmethod
     def test_len_with_offset_01():
@@ -328,7 +319,7 @@ class TestLen:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, offset=10, default=1/3)
 
-        assert len(Record()) == 18
+        assert bpack.calcsize(Record) == 18
 
     @staticmethod
     def test_len_with_offset_02():
@@ -338,7 +329,7 @@ class TestLen:
             field_1: int = bpack.field(size=4, offset=10, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert len(Record()) == 22
+        assert bpack.calcsize(Record) == 22
 
     @staticmethod
     def test_len_with_offset_03():
@@ -348,7 +339,7 @@ class TestLen:
             field_1: int = bpack.field(size=4, offset=10, default=0)
             field_2: float = bpack.field(size=8, offset=20, default=1/3)
 
-        assert len(Record()) == 28
+        assert bpack.calcsize(Record) == 28
 
     @staticmethod
     def test_len_with_offset_04():
@@ -360,7 +351,7 @@ class TestLen:
             field_1: int = bpack.field(size=4, offset=10, default=0)
             field_2: float = bpack.field(size=8, offset=20, default=1/3)
 
-        assert len(Record()) == size
+        assert bpack.calcsize(Record) == size
 
     @staticmethod
     def test_len_with_repeat_01():
@@ -370,7 +361,7 @@ class TestLen:
             field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
             field_2: float = bpack.field(size=8, default=1/3)
 
-        assert len(Record()) == 16
+        assert bpack.calcsize(Record) == 16
 
     @staticmethod
     def test_len_with_repeat_02():
@@ -380,7 +371,7 @@ class TestLen:
             field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
             field_2: List[float] = bpack.field(size=8, default=1/3, repeat=2)
 
-        assert len(Record()) == 24
+        assert bpack.calcsize(Record) == 24
 
     @staticmethod
     def test_len_with_repeat_and_offset_01():
@@ -391,7 +382,7 @@ class TestLen:
                                              offset=6)
             field_2: List[float] = bpack.field(size=8, default=1/3, repeat=2)
 
-        assert len(Record()) == 30
+        assert bpack.calcsize(Record) == 30
 
     @staticmethod
     def test_len_with_repeat_and_offset_02():
@@ -402,7 +393,7 @@ class TestLen:
             field_2: List[float] = bpack.field(size=8, default=1/3, repeat=2,
                                                offset=14)
 
-        assert len(Record()) == 30
+        assert bpack.calcsize(Record) == 30
 
     @staticmethod
     def test_len_with_repeat_and_offset_03():
@@ -423,6 +414,7 @@ def test_sequence_type():
 
     field_1 = bpack.fields(Record)[0]
     assert field_1.type is List[int]
+    assert bpack.calcsize(Record) == 4
 
     @bpack.descriptor
     @dataclasses.dataclass

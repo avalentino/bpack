@@ -24,6 +24,14 @@ bpack v0.6.0 (UNRELEASED)
     :data:`bpack.enums.EByteOrder.LITTLE` enumerates have been renamed into
     :data:`bpack.enums.EByteOrder.BE` and :data:`bpack.enums.EByteOrder.LE`
     respectively
+  - classes decorated with the :func:`bpack.descriptors.descriptor`
+    decorator no longer have the ``__len__`` method automatically added;
+    the recommended way to compute the size of a descriptors (class or
+    instance) is to use the :func:`bpack.descriptros.calcsize` function
+  - the default behavior of the :func:`bpack.decorators.calcsize` has been
+    changed to return the size of the input *descriptor* in the same
+    *base units* of the descriptor itself; previously the default behavior
+    was to return the size in bytes
 
 
 .. _numpy: https://numpy.org

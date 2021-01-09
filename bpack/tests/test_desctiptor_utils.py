@@ -2,6 +2,7 @@
 
 import dataclasses
 import collections.abc
+from typing import List
 
 import pytest
 
@@ -85,13 +86,14 @@ def test_calcsize():
     @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
-        field_2: float = bpack.field(size=8, default=1/3)
+        field_2: float = bpack.field(size=8, default=1 / 3)
+        field_3: List[int] = bpack.field(size=1, default=0, repeat=4)
 
     assert bpack.baseunits(Record) is EBaseUnits.BYTES
-    assert bpack.calcsize(Record) == 12
-    assert bpack.calcsize(Record()) == 12
-    assert bpack.calcsize(Record, EBaseUnits.BYTES) == 12
-    assert bpack.calcsize(Record, EBaseUnits.BITS) == 12 * 8
+    assert bpack.calcsize(Record) == 16
+    assert bpack.calcsize(Record()) == 16
+    assert bpack.calcsize(Record, EBaseUnits.BYTES) == 16
+    assert bpack.calcsize(Record, EBaseUnits.BITS) == 16 * 8
 
     @bpack.descriptor(baseunits=EBaseUnits.BITS)
     @dataclasses.dataclass
@@ -99,12 +101,13 @@ def test_calcsize():
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=16, default=1/3)
         field_3: int = bpack.field(size=4, default=3)
+        field_4: List[int] = bpack.field(size=4, default=0, repeat=2)
 
     assert bpack.baseunits(Record) is EBaseUnits.BITS
-    assert bpack.calcsize(Record) == 3
-    assert bpack.calcsize(Record()) == 3
-    assert bpack.calcsize(Record, EBaseUnits.BYTES) == 3
-    assert bpack.calcsize(Record, EBaseUnits.BITS) == 3 * 8
+    assert bpack.calcsize(Record) == 4 * 8
+    assert bpack.calcsize(Record()) == 4 * 8
+    assert bpack.calcsize(Record, EBaseUnits.BYTES) == 4
+    assert bpack.calcsize(Record, EBaseUnits.BITS) == 4 * 8
 
     @dataclasses.dataclass
     class Record:
