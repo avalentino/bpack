@@ -113,7 +113,7 @@ class Decoder:
         """
         if bpack.baseunits(descriptor) is not self.baseunits:
             raise ValueError(
-                f'struct decoder only accepts descriptors with '
+                f'{BACKEND_NAME} decoder only accepts descriptors with '
                 f'base units "{self.baseunits}"')
 
         assert bpack.bitorder(descriptor) is None
