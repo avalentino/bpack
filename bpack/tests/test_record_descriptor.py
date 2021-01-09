@@ -70,7 +70,7 @@ def test_byte_alignment_warning():
             field_2: float = bpack.field(size=8, default=1/3)
 
 
-def test_baseunits_attrs():
+def test_attrs():
     @bpack.descriptor
     @dataclasses.dataclass
     class Record:
@@ -80,6 +80,8 @@ def test_baseunits_attrs():
     assert hasattr(Record, bpack.descriptors.BASEUNITS_ATTR_NAME)
     assert hasattr(Record, bpack.descriptors.BYTEORDER_ATTR_NAME)
     assert hasattr(Record, bpack.descriptors.BITORDER_ATTR_NAME)
+    assert hasattr(Record, bpack.descriptors.SIZE_ATTR_NAME)
+    assert not hasattr(Record, bpack.descriptors.DECODER_ATTR_NAME)
 
 
 @pytest.mark.parametrize(argnames='baseunits', argvalues=[None, 8, 'x'])

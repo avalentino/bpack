@@ -49,6 +49,22 @@ def test_backend(backend):
     assert hasattr(backend, 'BACKEND_TYPE')
 
 
+@pytest.mark.parametrize('backend', ALL_BACKENDS)
+def test_attrs(backend):
+    @backend.decoder
+    @bpack.descriptor(baseunits=backend.BACKEND_TYPE)
+    @dataclasses.dataclass
+    class Record:
+        field_1: int = bpack.field(size=4, default=0)
+        field_2: int = bpack.field(size=4, default=1)
+
+    assert hasattr(Record, bpack.descriptors.BASEUNITS_ATTR_NAME)
+    assert hasattr(Record, bpack.descriptors.BYTEORDER_ATTR_NAME)
+    assert hasattr(Record, bpack.descriptors.BITORDER_ATTR_NAME)
+    assert hasattr(Record, bpack.descriptors.SIZE_ATTR_NAME)
+    assert hasattr(Record, bpack.descriptors.DECODER_ATTR_NAME)
+
+
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                   byteorder=bpack.EByteOrder.BE,
                   bitorder=bpack.EBitOrder.MSB)
