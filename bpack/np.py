@@ -118,6 +118,13 @@ class Decoder:
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
+        if bpack.baseunits(descriptor) is not self.baseunits:
+            raise ValueError(
+                f'{BACKEND_NAME} decoder only accepts descriptors with '
+                f'base units "{self.baseunits}"')
+
+        assert bpack.bitorder(descriptor) is None
+
         converters = [
             (idx, _converter_factory(field_descr.type))
             for idx, field_descr in enumerate(field_descriptors(descriptor))
