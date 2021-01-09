@@ -2,7 +2,6 @@
 
 import sys
 import enum
-import dataclasses
 
 from typing import List
 
@@ -73,7 +72,6 @@ class TestRecordFields:
     @staticmethod
     def test_field_properties_01():
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=0, signed=True)
             field_2: float = bpack.field(size=8, default=1/3)
@@ -100,7 +98,6 @@ class TestRecordFields:
     @staticmethod
     def test_field_properties_02():
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, offset=1, default=0,
                                        signed=False)
@@ -128,7 +125,6 @@ class TestRecordFields:
     @staticmethod
     def test_field_properties_03():
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, offset=1, default=0)
             field_2: float = bpack.field(size=8, offset=6, default=1/3)
@@ -154,7 +150,6 @@ class TestRecordFields:
     def test_finvalid_field_type():
         with pytest.raises(TypeError):
             @bpack.descriptor
-            @dataclasses.dataclass
             class Record:                                       # noqa
                 field_1: 'invalid' = bpack.field(size=4)        # noqa: F821
 
@@ -168,7 +163,6 @@ class TestEnumFields:
             C = 'c'
 
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: EEnumType = bpack.field(size=1, default=EEnumType.A)
@@ -187,7 +181,6 @@ class TestEnumFields:
             C = 4
 
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: EEnumType = bpack.field(size=1, signed=True,
@@ -207,7 +200,6 @@ class TestEnumFields:
             C = 4
 
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: EEnumType = bpack.field(size=1, default=EEnumType.A)
@@ -227,7 +219,6 @@ class TestEnumFields:
 
         with pytest.raises(TypeError):
             @bpack.descriptor
-            @dataclasses.dataclass
             class Record:                                               # noqa
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: EEnumType = bpack.field(size=1, default=EEnumType.A)
@@ -241,7 +232,6 @@ class TestEnumFields:
 
         with pytest.warns(UserWarning):
             @bpack.descriptor
-            @dataclasses.dataclass
             class Record:                                               # noqa
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: EEnumType = bpack.field(size=1, signed=True,
@@ -466,7 +456,6 @@ class TestAnnotatedType:
                              ids=['>', '<', '|', 'None'])
     def test_annotated_type(byteorder):
         @bpack.descriptor(byteorder=byteorder if byteorder != '|' else '')
-        @dataclasses.dataclass
         class Record:
             field_1: bpack.T[f'{byteorder}i4']                  # noqa: F821
             field_2: bpack.T[f'{byteorder}u4']                  # noqa: F821
@@ -509,7 +498,6 @@ class TestAnnotatedType:
         typestr = 'i4'
 
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field_1: List[bpack.T[typestr]] = bpack.field(repeat=2)
 
@@ -527,35 +515,30 @@ class TestAnnotatedType:
         typestr = '>i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor(byteorder=bpack.EByteOrder.LE)
-            @dataclasses.dataclass
             class Record:                                       # noqa
                 field: bpack.T[typestr]
 
         typestr = '<i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor(byteorder=bpack.EByteOrder.BE)   # noqa: F811
-            @dataclasses.dataclass
             class Record:                                       # noqa
                 field: bpack.T[typestr]
 
         typestr = '>i8' if sys.byteorder == 'little' else '<i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor                                   # noqa: F811
-            @dataclasses.dataclass
             class Record:                                       # noqa
                 field: bpack.T[typestr]
 
         typestr = '<i8' if sys.byteorder == 'little' else '>i8'
 
         @bpack.descriptor                                       # noqa: F811
-        @dataclasses.dataclass
         class Record:                                           # noqa
             field: bpack.T[typestr]
 
         typestr = '|i8'
 
         @bpack.descriptor(byteorder=bpack.EByteOrder.BE)       # noqa: F811
-        @dataclasses.dataclass
         class Record:                                           # noqa
             field: bpack.T[typestr]
 
@@ -564,7 +547,6 @@ class TestAnnotatedType:
         typestr = 'i8'
 
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field: bpack.T[typestr] = bpack.field(size=8, signed=True)
 
@@ -577,7 +559,6 @@ class TestAnnotatedType:
         typestr = 'u8'
 
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field: bpack.T[typestr] = bpack.field(size=8, signed=False)
 
@@ -590,7 +571,6 @@ class TestAnnotatedType:
         typestr = 'f8'
 
         @bpack.descriptor
-        @dataclasses.dataclass
         class Record:
             field: bpack.T[typestr] = bpack.field(size=8)
 
@@ -605,7 +585,6 @@ class TestAnnotatedType:
         typestr = 'i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor
-            @dataclasses.dataclass
             class Record:                                               # noqa
                 field: bpack.T[typestr] = bpack.field(size=3)
 
@@ -614,7 +593,6 @@ class TestAnnotatedType:
         typestr = 'i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor
-            @dataclasses.dataclass
             class Record:                                               # noqa
                 field: bpack.T[typestr] = bpack.field(size=8, signed=False)
 
@@ -624,6 +602,5 @@ class TestAnnotatedType:
     def test_invalid_typestr(typestr):
         with pytest.raises(ValueError):
             @bpack.descriptor
-            @dataclasses.dataclass
             class Record:                                               # noqa
                 field: bpack.T[typestr] = bpack.field(size=1)

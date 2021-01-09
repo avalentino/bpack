@@ -22,11 +22,9 @@ The user can define binary data structure in a declarative way, as follows:
 
 .. testcode::
 
-   import dataclasses
    import bpack
 
    @bpack.descriptor
-   @dataclasses.dataclass
    class BinaryRecord:
        field_1: int = bpack.field(size=4, signed=True)
        field_2: float = bpack.field(size=8)
@@ -139,7 +137,6 @@ could be described using different *baseunits*.
 .. testcode::
 
    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-   @dataclasses.dataclass
    class BitRecord:
        field_1: bool = bpack.field(size=1)
        field_2: int = bpack.field(size=3)

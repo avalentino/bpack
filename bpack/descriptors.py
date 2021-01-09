@@ -6,7 +6,7 @@ import math
 import types
 import warnings
 import dataclasses
-from typing import Optional, Iterable, Type, Union
+from typing import Iterable, Optional, Sequence, Type, Union
 
 import bpack.typing
 import bpack.utils
@@ -326,7 +326,8 @@ def _get_effective_byteorder(byteorder: EByteOrder,                     # noqa
 def descriptor(cls, *, size: Optional[int] = None,
                byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,  # noqa
                bitorder: Optional[Union[str, EBitOrder]] = None,        # noqa
-               baseunits: EBaseUnits = EBaseUnits.BYTES):               # noqa
+               baseunits: EBaseUnits = EBaseUnits.BYTES,                # noqa
+               **kwargs):
     """Class decorator to define descriptors for binary records.
 
     It converts a dataclass into a descriptor object for binary records.
@@ -334,11 +335,33 @@ def descriptor(cls, *, size: Optional[int] = None,
     * ensures that all fields are :class:`bpack.descriptor.Field` descriptors
     * offsets are automatically computed if necessary
     * consistency checks on offsets and sizes are performed
-    * the ``__len__`` special method is added (returning always the
-      record size in bytes).
+
+    :param cls:
+        class to be decorated
+    :param size:
+        the size (expressed in *base units*) of the binary record
+    :param byteorder:
+        the byte-order of the binary record
+    :param bitorder:
+        the bit-order of the binary record
+        (must be ``None`` if the *base units* are bytes)
+    :param baseunits:
+        the base units (:data:`bpack.enums.EBaseUnits.BITS` or
+        :data:`bpack.enums.EBaseUnits.BYTES`) used to specify the
+        binary record descriptor
+
+    It is also possible to specify as additional keyword arguments all the
+    parameters accepted by :func:`dataclasses.dataclass`.
     """
     baseunits = EBaseUnits(baseunits)                                   # noqa
     byteorder = EByteOrder(byteorder)                                   # noqa
+
+    if dataclasses.is_dataclass(cls):
+        warnings.warn('the explicit use of dataclasses is deprecated',
+                      category=DeprecationWarning)
+    else:
+        cls = dataclasses.dataclass(cls, **kwargs)
+
     fields_ = dataclasses.fields(cls)
 
     # Initialize to a dummy value with initial offset + size = 0
@@ -429,11 +452,15 @@ def descriptor(cls, *, size: Optional[int] = None,
     return cls
 
 
+def fields(obj) -> Sequence[Field]:
+    """Return a tuple describing the fields of this descriptor."""
+    return dataclasses.fields(obj)                                      # noqa
+
+
 def is_descriptor(obj) -> bool:
     """Return true if ``obj`` is a descriptor or a descriptor instance."""
     try:
-        return (hasattr(obj, BASEUNITS_ATTR_NAME) and
-                is_field(dataclasses.fields(obj)[0]))
+        return hasattr(obj, BASEUNITS_ATTR_NAME) and is_field(fields(obj)[0])
     except (TypeError, ValueError):
         # dataclass.fields(...) --> TypeError
         # attr.fields(...)      --> NotAnAttrsClassError(ValueError)
@@ -490,9 +517,6 @@ def bitorder(obj) -> Union[EBitOrder, None]:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-fields = dataclasses.fields
-
-
 def field_descriptors(descriptor,                                       # noqa
                       pad: bool = False) -> Iterable[BinFieldDescriptor]:
     """Return the list of field descriptors for the input record descriptor.
@@ -506,7 +530,7 @@ def field_descriptors(descriptor,                                       # noqa
     """
     if pad:
         offset = 0
-        for field_ in dataclasses.fields(descriptor):
+        for field_ in fields(descriptor):
             field_descr = get_field_descriptor(field_)
             assert field_descr.offset >= offset
             if field_descr.offset > offset:
@@ -522,5 +546,5 @@ def field_descriptors(descriptor,                                       # noqa
             # padding
             yield BinFieldDescriptor(size=size - offset, offset=offset)
     else:
-        for field_ in dataclasses.fields(descriptor):
+        for field_ in fields(descriptor):
             yield get_field_descriptor(field_)

@@ -6,9 +6,6 @@ Miscellanea *To Do* list
 * improve documentation
 * improve typing
 * benchmarks
-* include :func:`dataclasses.dataclass` generation in
-  :func:`bpack.descriptors.descriptor` (the use should not explicitly
-  use :mod:`dataclasses`)
 * :class:`EBaseUnits` shall become a :class:`IntFlag` to allow the
   *decoders* to declare base-units as follows::
 

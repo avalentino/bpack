@@ -1,10 +1,7 @@
 """Specific tests for the bitarray based decoder."""
 
-import dataclasses
 from typing import List, Sequence
-
 import pytest
-
 import bpack
 
 
@@ -20,7 +17,6 @@ def test_sequence():
 
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
-    @dataclasses.dataclass
     class Record:
         field_1: List[int] = bpack.field(size=size, repeat=repeat)
         field_2: Sequence[int] = bpack.field(size=size, repeat=repeat)

@@ -1,6 +1,5 @@
 """Specific tests for the bitarray based decoder."""
 
-import dataclasses
 from typing import List, Sequence
 
 import pytest
@@ -21,7 +20,6 @@ def test_float(size, data):
 
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-    @dataclasses.dataclass
     class Record:
         field_1: float = bpack.field(size=size)
 
@@ -35,7 +33,6 @@ def test_invalid_float_size():
     with pytest.raises(ValueError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-        @dataclasses.dataclass
         class Record:                                                   # noqa
             field_1: float = bpack.field(size=80)
 
@@ -46,8 +43,8 @@ def test_little_endian():
     with pytest.raises(NotImplementedError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                          byteorder=bpack.EByteOrder.LE)
-        @dataclasses.dataclass(frozen=True)
+                          byteorder=bpack.EByteOrder.LE,
+                          frozen=True)
         class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
@@ -58,8 +55,8 @@ def test_invalid_bitorder():
     with pytest.raises(NotImplementedError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                          bitorder=bpack.EBitOrder.LSB)
-        @dataclasses.dataclass(frozen=True)
+                          bitorder=bpack.EBitOrder.LSB,
+                          frozen=True)
         class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
@@ -70,7 +67,6 @@ def test_sequence():
     with pytest.raises(TypeError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-        @dataclasses.dataclass
         class Record:                                                   # noqa
             field_1: List[int] = bpack.field(size=4, signed=False,
                                              repeat=2, default=3)

@@ -5,12 +5,20 @@ bpack v0.6.0 (UNRELEASED)
 -------------------------
 
 * New numpy_ based backend.
-* The ``size`` parameter of the :func:`bpack.descriptors.field` factory
-  function is now optional.
 * New :meth:`bpack.enums.EByteOrder.get_native` method.
 * Now data types in descriptor definition can also be specified by means of
   special type annotation type (:class:`bpack.typing.T`) that accepts
   numpy-like format strings.
+* Now it is no longer necessary to use the :func:`dataclasses.dataclass`
+  decorator to define a descriptor.
+  That way to define descriptors is **depercated**.
+  All parameters previously specified via :func:`dataclasses.dataclass`
+  (like e.g. *frozen*) shall now be passed directly to the
+  :func:`bpack.descriptors.descriptor` decorator.
+  With this change the use of :mod:`dataclasses` becomes an
+  implementation detail.
+* The ``size`` parameter of the :func:`bpack.descriptors.field` factory
+  function is now optional.
 * General improvements and code refactoring.
 * Improved CI testing.
 * Added automatic spell checking of documentation in CI.

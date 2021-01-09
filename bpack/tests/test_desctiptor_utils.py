@@ -29,7 +29,6 @@ def test_is_descriptor():
     assert not bpack.is_descriptor(D())
 
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -37,7 +36,6 @@ def test_is_descriptor():
     assert bpack.is_descriptor(Record)
     assert bpack.is_descriptor(Record())
 
-    @dataclasses.dataclass
     class Record:
         field_1: int = 0
 
@@ -46,7 +44,6 @@ def test_is_descriptor():
     assert not bpack.is_descriptor(Record)
     assert not bpack.is_descriptor(Record())
 
-    @dataclasses.dataclass
     class Record:
         pass
 
@@ -66,7 +63,6 @@ def test_is_descriptor():
 
 def test_is_field():
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -83,7 +79,6 @@ def test_is_field():
 
 def test_calcsize():
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1 / 3)
@@ -96,7 +91,6 @@ def test_calcsize():
     assert bpack.calcsize(Record, EBaseUnits.BITS) == 16 * 8
 
     @bpack.descriptor(baseunits=EBaseUnits.BITS)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=16, default=1/3)
@@ -131,7 +125,6 @@ def test_calcsize():
 
 def test_fields():
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -144,7 +137,6 @@ def test_fields():
 
 def test_get_baseunits():
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -153,7 +145,6 @@ def test_get_baseunits():
     assert bpack.baseunits(Record()) == EBaseUnits.BYTES
 
     @bpack.descriptor(baseunits=EBaseUnits.BYTES)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -162,7 +153,6 @@ def test_get_baseunits():
     assert bpack.baseunits(Record()) == EBaseUnits.BYTES
 
     @bpack.descriptor(baseunits=EBaseUnits.BITS, size=16)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -183,7 +173,6 @@ def test_get_baseunits():
                           EByteOrder.DEFAULT])
 def test_byteorder_explicit(byteorder):
     @bpack.descriptor(byteorder=byteorder)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -194,7 +183,6 @@ def test_byteorder_explicit(byteorder):
 
 def test_byteorder():
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -202,7 +190,7 @@ def test_byteorder():
     assert bpack.byteorder(Record) is EByteOrder.DEFAULT
     assert bpack.byteorder(Record()) is EByteOrder.DEFAULT
 
-    @dataclasses.dataclass()
+    @dataclasses.dataclass
     class Dummy:
         x: int = 0
 
@@ -220,7 +208,6 @@ def test_byteorder():
                          [EBitOrder.MSB, EBitOrder.LSB, EBitOrder.DEFAULT])
 def test_bitorder(bitorder):
     @bpack.descriptor(bitorder=bitorder, baseunits=EBaseUnits.BITS)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -231,7 +218,7 @@ def test_bitorder(bitorder):
 
 
 def test_bitorder_error():
-    @dataclasses.dataclass()
+    @dataclasses.dataclass
     class Dummy:
         x: int = 0
 
@@ -247,7 +234,6 @@ def test_bitorder_error():
 
 def test_field_descriptors_iter():
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3)
@@ -269,7 +255,6 @@ def test_field_descriptors_iter():
 
 def test_field_descriptors_iter_with_pad():
     @bpack.descriptor(size=24)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1/3, offset=8)
@@ -320,7 +305,6 @@ def test_get_field_descriptor_01():
 
 def test_get_field_descriptor_02():
     @bpack.descriptor
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=1, offset=2, default=0,
                                    signed=True)
@@ -358,7 +342,7 @@ def test_set_field_descriptor():
 
 
 def test_set_field_descriptor_type_mismatch():
-    field = dataclasses.field()
+    field = bpack.field()
     field.type = int
 
     descr = bpack.descriptors.BinFieldDescriptor(type=float, size=1)
@@ -385,7 +369,7 @@ def test_set_field_descriptor_values():
 
 
 def test_field_descriptor_metadata():
-    field = dataclasses.field()
+    field = bpack.field()
     field.type = int
     descr = bpack.descriptors.BinFieldDescriptor(type=field.type,
                                                  size=1, offset=2,
@@ -411,7 +395,7 @@ def test_field_descriptor_metadata():
 
 
 def test_field_descriptor_minimal_metadata():
-    field = dataclasses.field()
+    field = bpack.field()
     field.type = int
 
     descr = bpack.descriptors.BinFieldDescriptor(type=field.type, size=1)

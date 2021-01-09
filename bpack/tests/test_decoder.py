@@ -2,7 +2,6 @@
 
 import sys
 import enum
-import dataclasses
 
 from typing import List, Sequence
 
@@ -53,7 +52,6 @@ def test_backend(backend):
 def test_attrs(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=backend.BACKEND_TYPE)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: int = bpack.field(size=4, default=1)
@@ -67,8 +65,8 @@ def test_attrs(backend):
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                   byteorder=bpack.EByteOrder.BE,
-                  bitorder=bpack.EBitOrder.MSB)
-@dataclasses.dataclass(frozen=True)
+                  bitorder=bpack.EBitOrder.MSB,
+                  frozen=True)
 class BitRecordBeMsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
@@ -121,8 +119,8 @@ BIT_ENCODED_DATA_BE_MSB = b''.join([
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                   byteorder=bpack.EByteOrder.LE,
-                  bitorder=bpack.EBitOrder.MSB)
-@dataclasses.dataclass(frozen=True)
+                  bitorder=bpack.EBitOrder.MSB,
+                  frozen=True)
 class BitRecordLeMsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
@@ -175,8 +173,8 @@ BIT_ENCODED_DATA_LE_MSB = b''.join([
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                   byteorder=bpack.EByteOrder.BE,
-                  bitorder=bpack.EBitOrder.LSB)
-@dataclasses.dataclass(frozen=True)
+                  bitorder=bpack.EBitOrder.LSB,
+                  frozen=True)
 class BitRecordBeLsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
@@ -229,8 +227,8 @@ BIT_ENCODED_DATA_BE_LSB = b''.join([
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                   byteorder=bpack.EByteOrder.LE,
-                  bitorder=bpack.EBitOrder.LSB)
-@dataclasses.dataclass(frozen=True)
+                  bitorder=bpack.EBitOrder.LSB,
+                  frozen=True)
 class BitRecordLeLsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
@@ -282,8 +280,8 @@ BIT_ENCODED_DATA_LE_LSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EByteOrder.BE)
-@dataclasses.dataclass(frozen=True)
+                  byteorder=bpack.EByteOrder.BE,
+                  frozen=True)
 class ByteRecordBe:
     field_01: bool = bpack.field(size=1, default=False)
 
@@ -354,8 +352,8 @@ BYTE_ENCODED_DATA_BE = bytes([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EByteOrder.LE)
-@dataclasses.dataclass(frozen=True)
+                  byteorder=bpack.EByteOrder.LE,
+                  frozen=True)
 class ByteRecordLe:
     field_01: bool = bpack.field(size=1, default=False)
 
@@ -494,8 +492,7 @@ def test_decoder_func(backend, Record, encoded_data):                   # noqa
 @pytest.mark.parametrize('backend', BITS_BACKENDS)
 def test_bit_decoder_decorator(backend):
     @backend.decoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-    @dataclasses.dataclass(frozen=True)
+    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS, frozen=True)
     class Record:
         field_01: bool = bpack.field(size=1, default=True)
         field_02: int = bpack.field(size=3, default=4)
@@ -523,8 +520,8 @@ def test_bit_decoder_decorator(backend):
 def test_byte_decoder_decorator(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                      byteorder=bpack.EByteOrder.BE)
-    @dataclasses.dataclass(frozen=True)
+                      byteorder=bpack.EByteOrder.BE,
+                      frozen=True)
     class Record:
         field_1: int = bpack.field(size=1, default=1)
         field_2: int = bpack.field(size=2, default=2)
@@ -544,8 +541,7 @@ def test_unsupported_type(backend):
 
     with pytest.raises(TypeError):
         @backend.decoder
-        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
-        @dataclasses.dataclass(frozen=True)
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits, frozen=True)
         class Record:                                                   # noqa
             field_1: CustomType = bpack.field(size=8)
 
@@ -556,8 +552,7 @@ def test_byte_decoder_native_byteorder(backend):
     value = 1
 
     @backend.decoder
-    @bpack.descriptor(byteorder=bpack.EByteOrder.NATIVE)
-    @dataclasses.dataclass(frozen=True)
+    @bpack.descriptor(byteorder=bpack.EByteOrder.NATIVE, frozen=True)
     class Record:
         field_1: int = bpack.field(size=size, default=value)
 
@@ -575,8 +570,8 @@ def test_bit_decoder_native_byteorder(backend):
 
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                      byteorder=bpack.EByteOrder.NATIVE)
-    @dataclasses.dataclass(frozen=True)
+                      byteorder=bpack.EByteOrder.NATIVE,
+                      frozen=True)
     class Record:
         field_1: int = bpack.field(size=8, default=1)
 
@@ -591,8 +586,8 @@ def test_bit_decoder_default_byteorder(backend):
 
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                      byteorder=bpack.EByteOrder.DEFAULT)
-    @dataclasses.dataclass(frozen=True)
+                      byteorder=bpack.EByteOrder.DEFAULT,
+                      frozen=True)
     class Record:
         field_1: int = bpack.field(size=8, default=1)
 
@@ -606,7 +601,6 @@ def test_wrong_baseunits_bit(backend):
     with pytest.raises(ValueError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
-        @dataclasses.dataclass
         class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
@@ -616,7 +610,6 @@ def test_wrong_baseunits_byte(backend):
     with pytest.raises(ValueError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-        @dataclasses.dataclass
         class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
 
@@ -661,7 +654,6 @@ def test_enum_decoding_bytes(backend):
 
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
-    @dataclasses.dataclass
     class Record:
         field_1: EStrEnumType = bpack.field(size=ssize, default=EStrEnumType.A)
         field_2: EBytesEnumType = bpack.field(size=ssize,
@@ -693,7 +685,6 @@ def test_sequence(backend):
 
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
-    @dataclasses.dataclass
     class Record:
         field_1: List[int] = bpack.field(size=size, repeat=repeat)
         field_2: Sequence[int] = bpack.field(size=size, repeat=repeat)
@@ -738,14 +729,12 @@ class TestNestedRecord:
 
         @backend.decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=1)
             field_2: int = bpack.field(size=4, default=2)
 
         @backend.decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
-        @dataclasses.dataclass
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
             field_2: Record = Record()
@@ -757,14 +746,12 @@ class TestNestedRecord:
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
 
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
-        @dataclasses.dataclass
         class Record:
             field_1: int = bpack.field(size=4, default=1)
             field_2: int = bpack.field(size=4, default=2)
 
         @backend.decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
-        @dataclasses.dataclass
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
             field_2: Record = Record()

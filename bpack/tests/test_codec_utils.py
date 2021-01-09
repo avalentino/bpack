@@ -1,7 +1,5 @@
 """Tests for codec utils."""
 
-import dataclasses
-
 import pytest
 
 import bpack
@@ -24,7 +22,6 @@ except ImportError:
 def test_decoder_helpers(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits)
-    @dataclasses.dataclass
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: int = bpack.field(size=4, default=0)
