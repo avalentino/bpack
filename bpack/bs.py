@@ -120,6 +120,7 @@ class Decoder:
 
     @property
     def format(self) -> str:
+        """Return the *bitstruct* format string."""
         return self._codec.format
 
     def decode(self, data: bytes):

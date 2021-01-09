@@ -66,11 +66,11 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     if is_decoder(type_):
         decoder_ = get_decoder(type_)
         if isinstance(decoder_, Decoder):
-            return decoder_._codec.format
+            return decoder_.format
     elif (bpack.is_descriptor(type_) and
           bpack.baseunits(type_) is Decoder.baseunits):
         decoder_ = Decoder(type_)
-        return decoder_._codec.format
+        return decoder_.format
 
     etype = bpack.utils.effective_type(type_)
     repeat = 1 if repeat is None else repeat
@@ -150,6 +150,11 @@ class Decoder:
             if field_descr.type in converters_map
         ]
         self._groups = get_sequence_groups(descriptor)
+
+    @property
+    def format(self) -> str:
+        """Return the :mod:`struct` format string."""
+        return self._codec.format
 
     def decode(self, data: bytes):
         """Decode binary data and return a record object."""
