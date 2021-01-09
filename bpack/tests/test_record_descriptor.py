@@ -93,7 +93,7 @@ def test_invalid_baseunits(baseunits):
 
 
 @pytest.mark.parametrize(argnames='order',
-                         argvalues=[EByteOrder.LITTLE, EByteOrder.BIG,
+                         argvalues=[EByteOrder.LE, EByteOrder.BE,
                                     EByteOrder.NATIVE, EByteOrder.DEFAULT,
                                     '<', '>', '=', ''])
 def test_byteorder(order):

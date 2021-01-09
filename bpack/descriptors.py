@@ -315,7 +315,7 @@ def _get_effective_byteorder(byteorder: EByteOrder,                     # noqa
             effective_byteorder = EByteOrder.get_native()
     else:
         if byteorder is EByteOrder.DEFAULT:
-            effective_byteorder = EByteOrder.BIG
+            effective_byteorder = EByteOrder.BE
         elif byteorder in EByteOrder.NATIVE:
             effective_byteorder = EByteOrder.get_native()
     return effective_byteorder

@@ -110,7 +110,7 @@ class TestStrToTypeParams:
      ('f8', float, bpack.typing.TypeParams(None, float, 8, None)),
      ('c16', complex, bpack.typing.TypeParams(None, complex, 16, None)),
      ('S128', bytes, bpack.typing.TypeParams(None, bytes, 128, None)),
-     ('>i8', int, bpack.typing.TypeParams(bpack.EByteOrder.BIG, int, 8, True)),
+     ('>i8', int, bpack.typing.TypeParams(bpack.EByteOrder.BE, int, 8, True)),
      ('f', float, bpack.typing.TypeParams(None, float, None, None))],
     ids=['i4', 'u2', 'f8', 'c16', 'S128', '>i8', 'f'])
 def test_type_annotation(typestr, type_, params):

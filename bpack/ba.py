@@ -114,7 +114,7 @@ class Decoder:
 
         byteorder = bpack.byteorder(descriptor)
 
-        if byteorder in {EByteOrder.LITTLE, EByteOrder.NATIVE}:
+        if byteorder in {EByteOrder.LE, EByteOrder.NATIVE}:
             raise NotImplementedError(
                 f'byte order "{byteorder}" is not supported by the {__name__} '
                 f'backend ({BACKEND_NAME})')

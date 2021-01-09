@@ -176,8 +176,8 @@ def test_get_baseunits():
 
 
 @pytest.mark.parametrize('byteorder',
-                         [EByteOrder.LITTLE, EByteOrder.BIG,
-                          EByteOrder.NATIVE, EByteOrder.DEFAULT])
+                         [EByteOrder.LE, EByteOrder.BE, EByteOrder.NATIVE,
+                          EByteOrder.DEFAULT])
 def test_byteorder_explicit(byteorder):
     @bpack.descriptor(byteorder=byteorder)
     @dataclasses.dataclass

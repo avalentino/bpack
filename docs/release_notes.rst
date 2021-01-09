@@ -16,9 +16,14 @@ bpack v0.6.0 (UNRELEASED)
 * Added automatic spell checking of documentation in CI.
 * Backward incompatible changes:
 
-  - :class:`EBaseUnits`, :class:`EByteOrder` and :class:`EBitOrder` enums
-    moved to the new :mod:`bpack.enums` module (the recommended way to access
-    enums is directly form :mod:`bpack`, e.g. ``bpack.EByteOrder``)
+  - :class:`bpack.enums.EBaseUnits`, :class:`bpack.enums.EByteOrder` and
+    :class:`bpack.enums.EBitOrder` enums moved to the new :mod:`bpack.enums`
+    module (the recommended way to access enums is directly form
+    :mod:`bpack`, e.g. ``bpack.EByteOrder``)
+  - :data:`bpack.enums.EByteOrder.BIG` and
+    :data:`bpack.enums.EByteOrder.LITTLE` enumerates have been renamed into
+    :data:`bpack.enums.EByteOrder.BE` and :data:`bpack.enums.EByteOrder.LE`
+    respectively
 
 
 .. _numpy: https://numpy.org

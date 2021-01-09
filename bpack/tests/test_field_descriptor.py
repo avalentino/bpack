@@ -526,14 +526,14 @@ class TestAnnotatedType:
     def test_byteorder_consistency():
         typestr = '>i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
-            @bpack.descriptor(byteorder=bpack.EByteOrder.LITTLE)
+            @bpack.descriptor(byteorder=bpack.EByteOrder.LE)
             @dataclasses.dataclass
             class Record:                                       # noqa
                 field: bpack.T[typestr]
 
         typestr = '<i8'
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
-            @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)   # noqa: F811
+            @bpack.descriptor(byteorder=bpack.EByteOrder.BE)   # noqa: F811
             @dataclasses.dataclass
             class Record:                                       # noqa
                 field: bpack.T[typestr]
@@ -554,7 +554,7 @@ class TestAnnotatedType:
 
         typestr = '|i8'
 
-        @bpack.descriptor(byteorder=bpack.EByteOrder.BIG)       # noqa: F811
+        @bpack.descriptor(byteorder=bpack.EByteOrder.BE)       # noqa: F811
         @dataclasses.dataclass
         class Record:                                           # noqa
             field: bpack.T[typestr]

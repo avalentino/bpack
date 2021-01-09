@@ -18,21 +18,18 @@ class EByteOrder(enum.Enum):
 
         the :data:`EByteOrder.DEFAULT` is equivalent to
         :data:`EByteOrder.NATIVE` for binary structures having
-        :data:`EBaseUnits.BYTE` base units, and :data:`EByteOrder.BIG`
+        :data:`EBaseUnits.BYTE` base units, and :data:`EByteOrder.BE`
         for binary structures having :data:`EBaseUnits.BIT` base units.
     """
 
-    BIG = '>'
-    LITTLE = '<'
+    BE = '>'
+    LE = '<'
     NATIVE = '='
     DEFAULT = ''
 
     @classmethod
     def get_native(cls):
-        if sys.byteorder == 'little':
-            return cls.LITTLE
-        else:
-            return cls.BIG
+        return cls.LE if sys.byteorder == 'little' else cls.BE
 
 
 class EBitOrder(enum.Enum):

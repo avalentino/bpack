@@ -16,8 +16,6 @@ Miscellanea *To Do* list
 
     baseunits = bpack.EBaseUnits.BITS | bpack.EBaseUnits.BYTES
 
-* replace :data:`EByteOrder.BIG` and :data:`EByteOrder.LITTLE`
-  with ``BE`` and ``LE``
 * new ``nfields(descriptor)`` helper function
 * nested records and repeat (test)
 * decoder attributes (Decoder.descriptor)

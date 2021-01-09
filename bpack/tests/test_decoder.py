@@ -50,7 +50,7 @@ def test_backend(backend):
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.BIG,
+                  byteorder=bpack.EByteOrder.BE,
                   bitorder=bpack.EBitOrder.MSB)
 @dataclasses.dataclass(frozen=True)
 class BitRecordBeMsb:
@@ -104,7 +104,7 @@ BIT_ENCODED_DATA_BE_MSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.LITTLE,
+                  byteorder=bpack.EByteOrder.LE,
                   bitorder=bpack.EBitOrder.MSB)
 @dataclasses.dataclass(frozen=True)
 class BitRecordLeMsb:
@@ -158,7 +158,7 @@ BIT_ENCODED_DATA_LE_MSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.BIG,
+                  byteorder=bpack.EByteOrder.BE,
                   bitorder=bpack.EBitOrder.LSB)
 @dataclasses.dataclass(frozen=True)
 class BitRecordBeLsb:
@@ -212,7 +212,7 @@ BIT_ENCODED_DATA_BE_LSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.LITTLE,
+                  byteorder=bpack.EByteOrder.LE,
                   bitorder=bpack.EBitOrder.LSB)
 @dataclasses.dataclass(frozen=True)
 class BitRecordLeLsb:
@@ -266,7 +266,7 @@ BIT_ENCODED_DATA_LE_LSB = b''.join([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EByteOrder.BIG)
+                  byteorder=bpack.EByteOrder.BE)
 @dataclasses.dataclass(frozen=True)
 class ByteRecordBe:
     field_01: bool = bpack.field(size=1, default=False)
@@ -338,7 +338,7 @@ BYTE_ENCODED_DATA_BE = bytes([
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EByteOrder.LITTLE)
+                  byteorder=bpack.EByteOrder.LE)
 @dataclasses.dataclass(frozen=True)
 class ByteRecordLe:
     field_01: bool = bpack.field(size=1, default=False)
@@ -507,7 +507,7 @@ def test_bit_decoder_decorator(backend):
 def test_byte_decoder_decorator(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                      byteorder=bpack.EByteOrder.BIG)
+                      byteorder=bpack.EByteOrder.BE)
     @dataclasses.dataclass(frozen=True)
     class Record:
         field_1: int = bpack.field(size=1, default=1)

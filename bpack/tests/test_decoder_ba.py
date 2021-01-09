@@ -46,7 +46,7 @@ def test_little_endian():
     with pytest.raises(NotImplementedError):
         @backend.decoder
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                          byteorder=bpack.EByteOrder.LITTLE)
+                          byteorder=bpack.EByteOrder.LE)
         @dataclasses.dataclass(frozen=True)
         class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
