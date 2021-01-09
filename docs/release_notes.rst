@@ -14,6 +14,12 @@ bpack v0.6.0 (UNRELEASED)
 * General improvements and code refactoring.
 * Improved CI testing.
 * Added automatic spell checking of documentation in CI.
+* Backward incompatible changes:
+
+  - :class:`EBaseUnits`, :class:`EByteOrder` and :class:`EBitOrder` enums
+    moved to the new :mod:`bpack.enums` module (the recommended way to access
+    enums is directly form :mod:`bpack`, e.g. ``bpack.EByteOrder``)
+
 
 .. _numpy: https://numpy.org
 
