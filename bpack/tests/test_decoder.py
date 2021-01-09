@@ -12,17 +12,17 @@ import bpack.st
 
 try:
     import bpack.bs as bpack_bs
-except ImportError:
+except ImportError:                                         # pragma: no cover
     bpack_bs = None
 
 try:
     import bpack.ba as bpack_ba
-except ImportError:
+except ImportError:                                         # pragma: no cover
     bpack_ba = None
 
 try:
     import bpack.np as bpack_np
-except ImportError:
+except ImportError:                                         # pragma: no cover
     bpack_np = None
 
 

@@ -3,14 +3,14 @@
 import re
 from typing import Type, Union, NamedTuple, Optional
 
-try:
-    from typing_extensions import _tp_cache                             # noqa
+try:                                                        # pragma: no cover
+    from typing_extensions import _tp_cache                 # noqa
     # @COMPATIBILITY: with Python < 3.9
     from typing_extensions import Annotated
     # @COMPATIBILITY: with Python < 3.7 (and 3.8)
     from typing_extensions import get_origin, get_args
-except ImportError:
-    from typing import _tp_cache                                        # noqa
+except ImportError:                                         # pragma: no cover
+    from typing import _tp_cache                            # noqa
     from typing import Annotated
     from typing import get_origin, get_args
 

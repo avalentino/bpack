@@ -65,10 +65,11 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
             raise TypeError(f'{type_} is not supported')
         else:
             return None
+
     if not is_annotated(args[0]) and not isinstance(args[0], type):
         # COMPATIBILITY: with typing_extensions and Python v3.7
         # need to be a concrete type
-        return None
+        return None                                         # pragma: no cover
 
     if not issubclass(sequence_type_, collections.abc.MutableSequence):
         sequence_type_ = tuple

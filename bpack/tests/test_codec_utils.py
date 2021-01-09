@@ -9,7 +9,7 @@ from bpack.codec_utils import is_decoder, get_decoder, get_decoder_type
 
 try:
     import bpack.bs as bpack_bs
-except ImportError:
+except ImportError:                                         # pragma: no cover
     bpack_bs = None
 
 
