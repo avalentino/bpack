@@ -18,7 +18,7 @@ __all__ = [
     'baseunits', 'byteorder', 'bitorder', 'field', 'Field', 'is_field',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
     'BASEUNITS_ATTR_NAME', 'BYTEORDER_ATTR_NAME', 'BITORDER_ATTR_NAME',
-    'DECODER_ATTR_NAME', 'METADATA_KEY',
+    'METADATA_KEY',
 ]
 
 
@@ -26,7 +26,6 @@ BASEUNITS_ATTR_NAME = '__bpack_baseunits__'
 BYTEORDER_ATTR_NAME = '__bpack_byteorder__'
 BITORDER_ATTR_NAME = '__bpack_bitorder__'
 SIZE_ATTR_NAME = '__bpack_size__'
-DECODER_ATTR_NAME = '__bpack_decoder__'
 METADATA_KEY = '__bpack_metadata__'
 
 

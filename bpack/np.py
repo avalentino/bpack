@@ -6,11 +6,12 @@ import numpy as np
 
 import bpack
 import bpack.utils
-from .codecs import make_decoder_decorator
+import bpack.codecs
+
+from .enums import EBaseUnits
 from .descriptors import (
     field_descriptors, get_field_descriptor, BinFieldDescriptor,
 )
-from bpack.enums import EBaseUnits
 
 
 __all__ = [
@@ -47,7 +48,7 @@ def bin_field_descripor_to_dtype(field_descr: BinFieldDescriptor) -> np.dtype:
     return np.dtype(f'{repeat}{typecode}{size}')
 
 
-def descriptor_to_dtype(descriptor):
+def descriptor_to_dtype(descriptor) -> np.dtype:
     """Convert the descriptor of a binary record into a :class:`numpy.dtype`.
 
     Please note that (unicode) strings are treated as "utf-8" encoded
@@ -104,7 +105,7 @@ def _converter_factory(type_):
     return converter
 
 
-class Decoder:
+class Decoder(bpack.codecs.Decoder):
     """Numpy based data decoder.
 
     (Unicode) strings are treated as "utf-8" encoded byte strings.
@@ -118,10 +119,7 @@ class Decoder:
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        if bpack.baseunits(descriptor) is not self.baseunits:
-            raise ValueError(
-                f'{BACKEND_NAME} decoder only accepts descriptors with '
-                f'base units "{self.baseunits}"')
+        super().__init__(descriptor)
 
         assert bpack.bitorder(descriptor) is None
 
@@ -131,10 +129,9 @@ class Decoder:
         ]
 
         self._dtype = descriptor_to_dtype(descriptor)
-        self._descriptor = descriptor
         self._converters = [(idx, func) for idx, func in converters if func]
 
-    def decode(self, data: bytes, count=1):
+    def decode(self, data: bytes, count: int = 1):
         """Decode binary data and return a record object."""
         v = np.frombuffer(data, dtype=self._dtype, count=count)
         if self._converters:
@@ -143,12 +140,12 @@ class Decoder:
                 item = list(item)
                 for idx, func in self._converters:
                     item[idx] = func(item[idx])
-                out.append(self._descriptor(*item))
+                out.append(self.descriptor(*item))
         else:
-            out = [self._descriptor(*item) for item in v]
+            out = [self.descriptor(*item) for item in v]
         if len(v) == 1:
             out = out[0]
         return out
 
 
-decoder = make_decoder_decorator(Decoder)
+decoder = bpack.codecs.make_codec_decorator(Decoder)

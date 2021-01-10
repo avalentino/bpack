@@ -6,12 +6,11 @@ import bitstruct
 
 import bpack
 import bpack.utils
+import bpack.codecs
 
-from .codecs import (
-    get_sequence_groups, make_decoder_decorator, is_decoder, get_decoder,
-)
+from .enums import EBaseUnits, EByteOrder
+from .codecs import get_sequence_groups, is_decoder, get_decoder
 from .descriptors import field_descriptors
-from bpack.enums import EBaseUnits, EByteOrder
 
 
 __all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
@@ -78,7 +77,7 @@ def _endianess_to_str(order: EByteOrder) -> str:
     return order.value
 
 
-class Decoder:
+class Decoder(bpack.codecs.Decoder):
     """Bitstruct based data decoder.
 
     Default bit-order: MSB.
@@ -91,10 +90,7 @@ class Decoder:
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        if bpack.baseunits(descriptor) is not self.baseunits:
-            raise ValueError(
-                f'{BACKEND_NAME} decoder only accepts descriptors with '
-                f'base units "{self.baseunits.value}"')
+        super().__init__(descriptor)
 
         byteorder = bpack.byteorder(descriptor)
         byteorder = _endianess_to_str(byteorder)
@@ -107,10 +103,7 @@ class Decoder:
         )
         fmt = fmt + byteorder  # byte order
 
-        codec = BitStruct(fmt)
-
-        self._codec = codec
-        self._descriptor = descriptor
+        self._codec = BitStruct(fmt)
         self._converters = [
             (idx, field_descr.type)
             for idx, field_descr in enumerate(field_descriptors(descriptor))
@@ -135,7 +128,7 @@ class Decoder:
             del values[slice_]
             values.insert(slice_.start, subtype)
 
-        return self._descriptor(*values)
+        return self.descriptor(*values)
 
 
-decoder = make_decoder_decorator(Decoder)
+decoder = bpack.codecs.make_codec_decorator(Decoder)

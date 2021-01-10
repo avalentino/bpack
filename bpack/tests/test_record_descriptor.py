@@ -76,7 +76,6 @@ def test_attrs():
     assert hasattr(Record, bpack.descriptors.BYTEORDER_ATTR_NAME)
     assert hasattr(Record, bpack.descriptors.BITORDER_ATTR_NAME)
     assert hasattr(Record, bpack.descriptors.SIZE_ATTR_NAME)
-    assert not hasattr(Record, bpack.descriptors.DECODER_ATTR_NAME)
 
 
 @pytest.mark.parametrize(argnames='baseunits', argvalues=[None, 8, 'x'])

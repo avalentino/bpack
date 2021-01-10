@@ -9,10 +9,10 @@ from bitarray.util import ba2int
 
 import bpack
 import bpack.utils
+import bpack.codecs
 
-from .codecs import make_decoder_decorator
-from .descriptors import field_descriptors
 from .enums import EBaseUnits, EBitOrder, EByteOrder
+from .descriptors import field_descriptors
 
 
 __all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
@@ -92,7 +92,7 @@ def _bitorder_to_baorder(bitorder: EBitOrder) -> str:
     return s
 
 
-class Decoder:
+class Decoder(bpack.codecs.Decoder):
     """Bitarray based data decoder.
 
     Only supports "big endian" byte-order and MSB bit-order.
@@ -105,15 +105,9 @@ class Decoder:
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        if bpack.baseunits(descriptor) is not self.baseunits:
-            raise ValueError(
-                f'{BACKEND_NAME} decoder only accepts descriptors with '
-                f'base units "{self.baseunits}"')
-
-        assert bpack.bitorder(descriptor) is not None
+        super().__init__(descriptor)
 
         byteorder = bpack.byteorder(descriptor)
-
         if byteorder in {EByteOrder.LE, EByteOrder.NATIVE}:
             raise NotImplementedError(
                 f'byte order "{byteorder}" is not supported by the {__name__} '
@@ -142,7 +136,6 @@ class Decoder:
                     f'the number of converters ({len(converters)}) does not '
                     f'match the number of fields ({n_fields})')
 
-        self._descriptor = descriptor
         self._converters = converters
         self._slices = [
             slice(field_descr.offset, field_descr.offset + field_descr.size)
@@ -161,7 +154,7 @@ class Decoder:
                 for convert, value in zip(self._converters, values)
             ]
 
-        return self._descriptor(*values)
+        return self.descriptor(*values)
 
 
-decoder = make_decoder_decorator(Decoder)
+decoder = bpack.codecs.make_codec_decorator(Decoder)

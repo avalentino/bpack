@@ -1,36 +1,87 @@
-"""Utility functions for codecs."""
+"""Base classes and utility functions for codecs."""
 
-from typing import Type
+import abc
+from typing import Union, Type
 
 import bpack.utils
-from bpack.descriptors import field_descriptors, DECODER_ATTR_NAME
+import bpack.descriptors
+
+from .enums import EBaseUnits
+from .descriptors import field_descriptors
 
 
-def make_decoder_decorator(decoder_type):
-    """Generate a decoder decorator for the input decoder class."""
+CODEC_ATTR_NAME = '__bpack_decoder__'
+
+
+class BaseCodec:
+    baseunits: EBaseUnits
+
+    def __init__(self, descriptor):
+        self._descriptor = descriptor
+
+        if bpack.baseunits(descriptor) is not self.baseunits:
+            raise ValueError(
+                f'{self.__class__.__module__}.{self.__class__.__name__} '
+                f'only accepts descriptors with base units '
+                f'"{self.baseunits.value}"')
+
+    @property
+    def descriptor(self):
+        return self._descriptor
+
+
+class Decoder(BaseCodec, abc.ABC):
+    @abc.abstractmethod
+    def decode(self, data: bytes):
+        pass
+
+
+class Encoder(BaseCodec, abc.ABC):
+    @abc.abstractmethod
+    def encode(self, record) -> bytes:
+        pass
+
+
+class Codec(Decoder, Encoder, abc.ABC):
+    pass
+
+
+CodecType = Type[Union[Decoder, Encoder, Codec]]
+
+
+def make_codec_decorator(codec_type: CodecType):
+    """Generate a codec decorator for the input decoder class."""
     @bpack.utils.classdecorator
-    def decoder(cls):
-        """Class decorator to add decoding methods to a descriptor classes.
+    def codec(cls):
+        """Class decorator to add (de)coding methods to a descriptor class.
 
-        The decorator automatically generates a :class:`Decoder` object
-        form the input descriptor class and attach a "from_bytes" method
-        using the decoder to the descriptor class itself.
+        The decorator automatically generates a *Codec* object form the
+        input descriptor class and attach to it methods for conversion
+        form/to bytes.
         """
-        decoder_ = decoder_type(descriptor=cls)
+        codec_ = codec_type(descriptor=cls)
+        bpack.utils.set_new_attribute(cls, CODEC_ATTR_NAME, codec_)
 
-        bpack.utils.set_new_attribute(cls, DECODER_ATTR_NAME, decoder_)
+        if isinstance(codec_, Decoder):
+            decode_func = bpack.utils.create_fn(
+                name='from_bytes',
+                args=('cls', 'data'),
+                body=[f'return cls.{CODEC_ATTR_NAME}.decode(data)'],
+            )
+            decode_func = classmethod(decode_func)
+            bpack.utils.set_new_attribute(cls, 'from_bytes', decode_func)
 
-        decode_func = bpack.utils.create_fn(
-            name='decode',
-            args=('cls', 'data'),
-            body=[f'return cls.{DECODER_ATTR_NAME}.decode(data)'],
-        )
-        decode_func = classmethod(decode_func)
-        bpack.utils.set_new_attribute(cls, 'from_bytes', decode_func)
+        if isinstance(codec_, Encoder):
+            encode_func = bpack.utils.create_fn(
+                name='tobytes',
+                args=('self',),
+                body=[f'return self.{CODEC_ATTR_NAME}.encode(self)'],
+            )
+            bpack.utils.set_new_attribute(cls, 'tobytes', encode_func)
 
         return cls
 
-    return decoder
+    return codec
 
 
 def get_sequence_groups(descriptor):
@@ -47,7 +98,6 @@ def get_sequence_groups(descriptor):
     groups = []
     offset = 0
     for descr in field_descriptors(descriptor):
-
         if bpack.is_descriptor(descr.type):
             nfields = len(bpack.fields(descr.type))                     # noqa
             slice_ = slice(offset, offset + nfields)
@@ -69,17 +119,17 @@ def get_sequence_groups(descriptor):
 
 def is_decoder(descriptor) -> bool:
     """Return True if the input descriptor is also a decoder."""
-    return (hasattr(descriptor, DECODER_ATTR_NAME) and
+    return (hasattr(descriptor, CODEC_ATTR_NAME) and
             hasattr(descriptor, 'from_bytes'))
 
 
-def get_decoder(descriptor) -> Type:
+def get_decoder(descriptor) -> BaseCodec:
     """Return the decoder instance attached to the input descriptor."""
-    return getattr(descriptor, DECODER_ATTR_NAME, None)
+    return getattr(descriptor, CODEC_ATTR_NAME, None)
 
 
-def get_decoder_type(descriptor) -> Type:
+def get_decoder_type(descriptor) -> Type[CodecType]:
     """Return the type of the decoder attached to the input descriptor."""
-    decoder_ = getattr(descriptor, DECODER_ATTR_NAME, None)
+    decoder_ = getattr(descriptor, CODEC_ATTR_NAME, None)
     if decoder_ is not None:
         return type(decoder_)

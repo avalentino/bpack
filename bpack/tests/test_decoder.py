@@ -9,6 +9,7 @@ import pytest
 
 import bpack
 import bpack.st
+import bpack.codecs
 
 try:
     import bpack.bs as bpack_bs
@@ -60,7 +61,7 @@ def test_attrs(backend):
     assert hasattr(Record, bpack.descriptors.BYTEORDER_ATTR_NAME)
     assert hasattr(Record, bpack.descriptors.BITORDER_ATTR_NAME)
     assert hasattr(Record, bpack.descriptors.SIZE_ATTR_NAME)
-    assert hasattr(Record, bpack.descriptors.DECODER_ATTR_NAME)
+    assert hasattr(Record, bpack.codecs.CODEC_ATTR_NAME)
 
 
 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,

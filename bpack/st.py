@@ -6,12 +6,11 @@ from typing import Optional
 
 import bpack
 import bpack.utils
+import bpack.codecs
 
-from .codecs import (
-    get_sequence_groups, make_decoder_decorator, is_decoder, get_decoder,
-)
-from .descriptors import field_descriptors
 from .enums import EBaseUnits
+from .codecs import get_sequence_groups, is_decoder, get_decoder
+from .descriptors import field_descriptors
 
 
 __all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
@@ -98,7 +97,7 @@ def _enum_converter_factory(type_, converters=None):
         return type_
 
 
-class Decoder:
+class Decoder(bpack.codecs.Decoder):
     """Struct based data decoder.
 
     Default byte-order: MSB.
@@ -111,10 +110,7 @@ class Decoder:
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        if bpack.baseunits(descriptor) is not self.baseunits:
-            raise ValueError(
-                f'{BACKEND_NAME} decoder only accepts descriptors with '
-                f'base units "{self.baseunits}"')
+        super().__init__(descriptor)
 
         assert bpack.bitorder(descriptor) is None
 
@@ -142,11 +138,10 @@ class Decoder:
         )
 
         self._codec = struct.Struct(fmt)
-        self._descriptor = descriptor
         self._converters = [
             (idx, converters_map[field_descr.type])
             for idx, field_descr in enumerate(
-                field_descriptors(self._descriptor))
+                field_descriptors(self.descriptor))
             if field_descr.type in converters_map
         ]
         self._groups = get_sequence_groups(descriptor)
@@ -168,7 +163,7 @@ class Decoder:
             del values[slice_]
             values.insert(slice_.start, subtype)
 
-        return self._descriptor(*values)
+        return self.descriptor(*values)
 
 
-decoder = make_decoder_decorator(Decoder)
+decoder = bpack.codecs.make_codec_decorator(Decoder)
