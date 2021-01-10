@@ -1,7 +1,7 @@
 """Base classes and utility functions for codecs."""
 
 import abc
-from typing import Union, Type
+from typing import Optional, Type, Union
 
 import bpack.utils
 import bpack.descriptors
@@ -46,10 +46,10 @@ class Codec(Decoder, Encoder, abc.ABC):
     pass
 
 
-CodecType = Type[Union[Decoder, Encoder, Codec]]
+CodecType = Union[Decoder, Encoder, Codec]
 
 
-def make_codec_decorator(codec_type: CodecType):
+def make_codec_decorator(codec_type: Type[CodecType]):
     """Generate a codec decorator for the input decoder class."""
     @bpack.utils.classdecorator
     def codec(cls):
@@ -84,6 +84,51 @@ def make_codec_decorator(codec_type: CodecType):
     return codec
 
 
+def has_codec(descriptor,
+              codec_type: Optional[Type[CodecType]] = None) -> bool:
+    """Return True if the input descriptor has a codec attached.
+
+    A descriptor decorated with a *codec* decorator has an attached codec
+    instance and "frombytes"/"tobytes" methods (depending on the kind of
+    codec).
+
+    The *codec_type* parameter can be used to query for specific codec
+    features:
+
+    * codec_type=None: return True for any king of codec
+    * codec_type=:class:`Decoder`: return True if the attached coded has
+      decoding capabilities
+    * codec_type=:class:`Encoder`: return True if the attached coded has
+      encoding capabilities
+    * codec_type=:class:`Codec`: return True if the attached coded has
+      both encoding and decoding capabilities
+    """
+    if hasattr(descriptor, CODEC_ATTR_NAME):
+        assert isinstance(get_codec(descriptor), (Codec, Decoder, Encoder))
+        if codec_type is None:
+            return True
+        elif issubclass(codec_type, Codec):
+            return (hasattr(descriptor, 'frombytes') and
+                    hasattr(descriptor, 'tobytes'))
+        elif issubclass(codec_type, Decoder):
+            return hasattr(descriptor, 'frombytes')
+        elif issubclass(codec_type, Encoder):
+            return hasattr(descriptor, 'tobytes')
+    return False
+
+
+def get_codec(descriptor) -> CodecType:
+    """Return the codec instance attached to the input descriptor."""
+    return getattr(descriptor, CODEC_ATTR_NAME, None)
+
+
+def get_codec_type(descriptor) -> Type[CodecType]:
+    """Return the type of the codec attached to the input descriptor."""
+    codec_ = getattr(descriptor, CODEC_ATTR_NAME, None)
+    if codec_ is not None:
+        return type(codec_)
+
+
 def get_sequence_groups(descriptor):
     """Return slices to group values belonging to sequence fields.
 
@@ -115,21 +160,3 @@ def get_sequence_groups(descriptor):
         else:
             offset += 1
     return groups
-
-
-def is_decoder(descriptor) -> bool:
-    """Return True if the input descriptor is also a decoder."""
-    return (hasattr(descriptor, CODEC_ATTR_NAME) and
-            hasattr(descriptor, 'frombytes'))
-
-
-def get_decoder(descriptor) -> BaseCodec:
-    """Return the decoder instance attached to the input descriptor."""
-    return getattr(descriptor, CODEC_ATTR_NAME, None)
-
-
-def get_decoder_type(descriptor) -> Type[CodecType]:
-    """Return the type of the decoder attached to the input descriptor."""
-    decoder_ = getattr(descriptor, CODEC_ATTR_NAME, None)
-    if decoder_ is not None:
-        return type(decoder_)

@@ -5,7 +5,7 @@ import pytest
 import bpack
 import bpack.st
 
-from bpack.codecs import is_decoder, get_decoder, get_decoder_type
+from bpack.codecs import has_codec, get_codec, get_codec_type
 
 try:
     import bpack.bs as bpack_bs
@@ -26,11 +26,17 @@ def test_decoder_helpers(backend):
         field_1: int = bpack.field(size=4, default=0)
         field_2: int = bpack.field(size=4, default=0)
 
-    assert is_decoder(Record)
-    assert get_decoder_type(Record) is backend.Decoder
-    assert type(get_decoder(Record)) is backend.Decoder
+    assert has_codec(Record)
+    assert has_codec(Record, bpack.codecs.Decoder)
+    assert has_codec(Record, backend.Decoder)
+    assert get_codec_type(Record) is backend.Decoder
+    assert isinstance(get_codec(Record), backend.Decoder)
+    assert isinstance(get_codec(Record), bpack.codecs.Decoder)
 
     record = Record()
-    assert is_decoder(record)
-    assert get_decoder_type(record) is backend.Decoder
-    assert type(get_decoder(record)) is backend.Decoder
+    assert has_codec(record)
+    assert has_codec(record, bpack.codecs.Decoder)
+    assert has_codec(record, backend.Decoder)
+    assert get_codec_type(record) is backend.Decoder
+    assert isinstance(get_codec(record), backend.Decoder)
+    assert isinstance(get_codec(record), bpack.codecs.Decoder)

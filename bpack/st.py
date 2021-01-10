@@ -9,7 +9,7 @@ import bpack.utils
 import bpack.codecs
 
 from .enums import EBaseUnits
-from .codecs import get_sequence_groups, is_decoder, get_decoder
+from .codecs import get_sequence_groups, has_codec, get_codec
 from .descriptors import field_descriptors
 
 
@@ -62,8 +62,8 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     assert order in ('', '>', '<', '=', '@', '!'), f'invalid order: {order!r}'
     assert signed in (True, False, None)
 
-    if is_decoder(type_):
-        decoder_ = get_decoder(type_)
+    if has_codec(type_, bpack.codecs.Decoder):
+        decoder_ = get_codec(type_)
         if isinstance(decoder_, Decoder):
             return decoder_.format
     elif (bpack.is_descriptor(type_) and
