@@ -64,12 +64,12 @@ def make_codec_decorator(codec_type: CodecType):
 
         if isinstance(codec_, Decoder):
             decode_func = bpack.utils.create_fn(
-                name='from_bytes',
+                name='frombytes',
                 args=('cls', 'data'),
                 body=[f'return cls.{CODEC_ATTR_NAME}.decode(data)'],
             )
             decode_func = classmethod(decode_func)
-            bpack.utils.set_new_attribute(cls, 'from_bytes', decode_func)
+            bpack.utils.set_new_attribute(cls, 'frombytes', decode_func)
 
         if isinstance(codec_, Encoder):
             encode_func = bpack.utils.create_fn(
@@ -120,7 +120,7 @@ def get_sequence_groups(descriptor):
 def is_decoder(descriptor) -> bool:
     """Return True if the input descriptor is also a decoder."""
     return (hasattr(descriptor, CODEC_ATTR_NAME) and
-            hasattr(descriptor, 'from_bytes'))
+            hasattr(descriptor, 'frombytes'))
 
 
 def get_decoder(descriptor) -> BaseCodec:

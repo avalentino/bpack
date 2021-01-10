@@ -486,7 +486,7 @@ def test_decoder(backend, Record, encoded_data):                        # noqa
 def test_decoder_func(backend, Record, encoded_data):                   # noqa
     decoded_data = Record()                                             # noqa
     record_type = backend.decoder(Record)
-    record = record_type.from_bytes(encoded_data)
+    record = record_type.frombytes(encoded_data)
     assert record == decoded_data
 
 
@@ -506,7 +506,7 @@ def test_bit_decoder_decorator(backend):
 
     decoded_data = Record()
     encoded_data = BIT_ENCODED_DATA_BE_MSB[:bpack.calcsize(Record)]
-    record = Record.from_bytes(encoded_data)
+    record = Record.frombytes(encoded_data)
 
     assert record.field_01 == decoded_data.field_01
     assert record.field_02 == decoded_data.field_02
@@ -529,7 +529,7 @@ def test_byte_decoder_decorator(backend):
 
     decoded_data = Record()
     encoded_data = bytes([0b00000001, 0b00000000, 0b00000010])
-    record = Record.from_bytes(encoded_data)
+    record = Record.frombytes(encoded_data)
 
     assert record.field_1 == decoded_data.field_1
     assert record.field_2 == decoded_data.field_2
@@ -558,7 +558,7 @@ def test_byte_decoder_native_byteorder(backend):
         field_1: int = bpack.field(size=size, default=value)
 
     data = value.to_bytes(size, sys.byteorder)
-    assert Record.from_bytes(data) == Record()
+    assert Record.frombytes(data) == Record()
 
 
 @pytest.mark.parametrize(
@@ -577,7 +577,7 @@ def test_bit_decoder_native_byteorder(backend):
         field_1: int = bpack.field(size=8, default=1)
 
     data = value.to_bytes(size, sys.byteorder)
-    assert Record.from_bytes(data) == Record()
+    assert Record.frombytes(data) == Record()
 
 
 @pytest.mark.parametrize('backend', BITS_BACKENDS)
@@ -594,7 +594,7 @@ def test_bit_decoder_default_byteorder(backend):
 
     # default byte order is big for bit descriptors
     data = value.to_bytes(size // 8, 'big')
-    assert Record.from_bytes(data) == Record()
+    assert Record.frombytes(data) == Record()
 
 
 @pytest.mark.parametrize('backend', BITS_BACKENDS)
@@ -663,7 +663,7 @@ def test_enum_decoding_bytes(backend):
         field_4: EFlagEnumType = bpack.field(size=isize,
                                              default=EFlagEnumType.A)
 
-    record = Record.from_bytes(encoded_data)
+    record = Record.frombytes(encoded_data)
     assert record == Record()
 
 
@@ -691,7 +691,7 @@ def test_sequence(backend):
         field_2: Sequence[int] = bpack.field(size=size, repeat=repeat)
 
     ref_record = Record([3, 3], (4, 4))
-    record = Record.from_bytes(encoded_data)
+    record = Record.frombytes(encoded_data)
     assert record == ref_record
 
     assert type(record.field_1) is list
@@ -741,7 +741,7 @@ class TestNestedRecord:
             field_2: Record = Record()
             field_3: int = bpack.field(size=4, default=3)
 
-        assert NestedRecord.from_bytes(encoded_data) == NestedRecord()
+        assert NestedRecord.frombytes(encoded_data) == NestedRecord()
 
     def test_nested_record(self, backend):
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
@@ -758,4 +758,4 @@ class TestNestedRecord:
             field_2: Record = Record()
             field_3: int = bpack.field(size=4, default=3)
 
-        assert NestedRecord.from_bytes(encoded_data) == NestedRecord()
+        assert NestedRecord.frombytes(encoded_data) == NestedRecord()

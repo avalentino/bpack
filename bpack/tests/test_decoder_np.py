@@ -22,7 +22,7 @@ def test_sequence():
         field_2: Sequence[int] = bpack.field(size=size, repeat=repeat)
 
     ref_record = Record([3, 3], (4, 4))
-    record = Record.from_bytes(encoded_data)
+    record = Record.frombytes(encoded_data)
     assert list(record.field_1) == list(ref_record.field_1)
     assert list(record.field_2) == list(ref_record.field_2)
 

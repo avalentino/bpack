@@ -23,7 +23,7 @@ def test_float(size, data):
     class Record:
         field_1: float = bpack.field(size=size)
 
-    record = Record.from_bytes(data)
+    record = Record.frombytes(data)
     assert record.field_1 == 1.
 
 
