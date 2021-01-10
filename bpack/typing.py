@@ -1,18 +1,17 @@
 """bpack support for type annotations."""
 
 import re
-from typing import Type, Union, NamedTuple, Optional
+from typing import NamedTuple, Optional, Type, Union
 
 try:                                                        # pragma: no cover
     from typing_extensions import _tp_cache                 # noqa
     # @COMPATIBILITY: with Python < 3.9
     from typing_extensions import Annotated
-    # @COMPATIBILITY: with Python < 3.7 (and 3.8)
+    # @COMPATIBILITY: with Python < 3.7 (and Python < 3.8.3)
     from typing_extensions import get_origin, get_args
 except ImportError:                                         # pragma: no cover
+    from typing import Annotated, get_origin, get_args
     from typing import _tp_cache                            # noqa
-    from typing import Annotated
-    from typing import get_origin, get_args
 
 from .enums import EByteOrder
 
