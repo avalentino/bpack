@@ -7,7 +7,7 @@ from typing import Optional
 import bpack
 import bpack.utils
 
-from .codec_utils import (
+from .codecs import (
     get_sequence_groups, make_decoder_decorator, is_decoder, get_decoder,
 )
 from .descriptors import field_descriptors

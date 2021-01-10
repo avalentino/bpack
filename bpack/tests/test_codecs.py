@@ -5,7 +5,7 @@ import pytest
 import bpack
 import bpack.st
 
-from bpack.codec_utils import is_decoder, get_decoder, get_decoder_type
+from bpack.codecs import is_decoder, get_decoder, get_decoder_type
 
 try:
     import bpack.bs as bpack_bs

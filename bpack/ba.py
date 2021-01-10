@@ -10,7 +10,7 @@ from bitarray.util import ba2int
 import bpack
 import bpack.utils
 
-from .codec_utils import make_decoder_decorator
+from .codecs import make_decoder_decorator
 from .descriptors import field_descriptors
 from .enums import EBaseUnits, EBitOrder, EByteOrder
 

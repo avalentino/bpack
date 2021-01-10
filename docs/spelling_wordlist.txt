@@ -7,6 +7,7 @@ bitstruct
 bpack
 bs
 codec
+codecs
 conda
 dataclass
 dev

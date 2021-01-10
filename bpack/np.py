@@ -6,7 +6,7 @@ import numpy as np
 
 import bpack
 import bpack.utils
-from .codec_utils import make_decoder_decorator
+from .codecs import make_decoder_decorator
 from .descriptors import (
     field_descriptors, get_field_descriptor, BinFieldDescriptor,
 )
