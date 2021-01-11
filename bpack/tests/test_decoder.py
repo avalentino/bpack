@@ -416,7 +416,7 @@ BYTE_ENCODED_DATA_LE = bytes([
     0b01100001, 0b01100010, 0b01100011,                 # b'abc'    bytes
     0b01000001, 0b01000010, 0b01000011,                 # 'ABC'     str
 
-    # 4 padding bytes ([36:40])
+    # 4 padding bytes ([66:70])
     0b01111000, 0b01111000, 0b01111000, 0b01111000,     # b'xxxx'   bytes
 
     # field_20
