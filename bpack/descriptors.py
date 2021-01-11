@@ -14,8 +14,9 @@ from .utils import classdecorator
 from .enums import EBaseUnits, EByteOrder, EBitOrder
 
 __all__ = [
-    'descriptor', 'is_descriptor', 'fields', 'field_descriptors', 'calcsize',
+    'descriptor', 'is_descriptor', 'fields', 'asdict', 'calcsize',
     'baseunits', 'byteorder', 'bitorder', 'field', 'Field', 'is_field',
+    'field_descriptors',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
     'BASEUNITS_ATTR_NAME', 'BYTEORDER_ATTR_NAME', 'BITORDER_ATTR_NAME',
     'METADATA_KEY',
@@ -467,6 +468,19 @@ def is_descriptor(obj) -> bool:
     except IndexError:
         # no fields
         return False
+
+
+def asdict(obj, *, dict_factory=dict) -> dict:
+    """Return the fields of a record as a new dictionary.
+
+     The returned dictionary maps field names to field values.
+
+    If given, 'dict_factory' will be used instead of built-in dict.
+    The function applies recursively to field values that are
+    dataclass instances. This will also look into built-in containers:
+    tuples, lists, and dicts.
+    """
+    return dataclasses.asdict(obj, dict_factory=dict_factory)
 
 
 def calcsize(obj, units: Optional[EBaseUnits] = None) -> int:
