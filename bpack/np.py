@@ -131,6 +131,10 @@ class Decoder(bpack.codecs.Decoder):
         self._dtype = descriptor_to_dtype(descriptor)
         self._converters = [(idx, func) for idx, func in converters if func]
 
+    @property
+    def dtype(self):
+        return self._dtype
+
     def decode(self, data: bytes, count: int = 1):
         """Decode binary data and return a record object."""
         v = np.frombuffer(data, dtype=self._dtype, count=count)
