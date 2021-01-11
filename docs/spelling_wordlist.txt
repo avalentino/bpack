@@ -10,6 +10,7 @@ codec
 codecs
 conda
 dataclass
+de
 dev
 dicts
 endian
