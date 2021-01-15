@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.6.0 (UNRELEASED)
+bpack v0.6.0 (15/01/2021)
 -------------------------
 
 * New numpy_ based backend.
