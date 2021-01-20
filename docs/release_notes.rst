@@ -4,7 +4,7 @@ Release Notes
 bpack v0.7.0 (UNRELEASED)
 -------------------------
 
-* TBW
+* fixed a bug in decoding of nested records
 
 
 bpack v0.6.0 (15/01/2021)

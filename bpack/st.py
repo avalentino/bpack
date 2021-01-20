@@ -53,6 +53,30 @@ _DEFAULT_SIZE = {
 }
 
 
+def _format_string_without_order(fmt: str, order: str) -> str:
+    # NOTE: in the current implementation the byte order is handled
+    #       externally to _to_fmt
+    # if order != '':
+    #     fmt = fmt[1:] if fmt.startswith(order) else fmt
+
+    # TODO: improve.
+    #       This is mainly a hack necessary because, in the current
+    #       implementation, _to_fmt is always called by Decoder.__init__
+    #       with order='' so here it is not possible to rely on the value
+    #       of order
+    if fmt[0] in {'>', '<', '=', '@', '!'}:
+        if order and fmt[0] != order:
+            raise ValueError(
+                f'inconsistent byteorder for nested record: '
+                f'record byteorder is "{order}", '
+                f'nested record byteorder is "{fmt[0]}"')
+        fmt = fmt[1:]
+    # else:
+    #     # TODO: how to check consistency when order=''?
+
+    return fmt
+
+
 def _to_fmt(type_, size: Optional[int] = None, order: str = '',
             signed: Optional[bool] = None,
             repeat: Optional[int] = None) -> str:
@@ -65,11 +89,11 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
     if has_codec(type_, bpack.codecs.Decoder):
         decoder_ = get_codec(type_)
         if isinstance(decoder_, Decoder):
-            return decoder_.format
+            return _format_string_without_order(decoder_.format, order)
     elif (bpack.is_descriptor(type_) and
           bpack.baseunits(type_) is Decoder.baseunits):
         decoder_ = Decoder(type_)
-        return decoder_.format
+        return _format_string_without_order(decoder_.format, order)
 
     etype = bpack.utils.effective_type(type_)
     repeat = 1 if repeat is None else repeat

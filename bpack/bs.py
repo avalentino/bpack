@@ -42,7 +42,15 @@ _TYPE_TO_STR = {
 }
 
 
-def _to_fmt(type_, size: int, bitorder: str = '',
+def _format_string_without_order(fmt: str, order: str) -> str:
+    # NOTE: in the current implementation the byte order is handled
+    #       externally to _to_fmt
+    if order != '':
+        fmt = fmt[:-1] if fmt.endswith(order) else fmt
+    return fmt
+
+
+def _to_fmt(type_, size: int, bitorder: str = '', byteorder: str = '',
             signed: Optional[bool] = None,
             repeat: Optional[int] = None) -> str:
     assert size > 0, f'invalid size: {size:r}'
@@ -54,11 +62,11 @@ def _to_fmt(type_, size: int, bitorder: str = '',
     if has_codec(type_, bpack.codecs.Decoder):
         decoder_ = get_codec(type_)
         if isinstance(decoder_, Decoder):
-            return decoder_.format
+            return _format_string_without_order(decoder_.format, byteorder)
     elif (bpack.is_descriptor(type_) and
           bpack.baseunits(type_) is Decoder.baseunits):
         decoder_ = Decoder(type_)
-        return decoder_.format
+        return _format_string_without_order(decoder_.format, byteorder)
 
     etype = bpack.utils.effective_type(type_)
     key = (etype, signed) if etype is int and signed is not None else etype
@@ -67,6 +75,8 @@ def _to_fmt(type_, size: int, bitorder: str = '',
         fmt = f'{bitorder}{_TYPE_TO_STR[key]}{size}' * repeat           # noqa
     except KeyError:
         raise TypeError(f'unsupported type: {etype:!r}')
+
+    # fmt += byteorder  # NOTE: handled externally
 
     return fmt
 
@@ -98,7 +108,8 @@ class Decoder(bpack.codecs.Decoder):
 
         fmt = ''.join(
             _to_fmt(field_descr.type, size=field_descr.size, bitorder=bitorder,
-                    signed=field_descr.signed, repeat=field_descr.repeat)
+                    byteorder=byteorder, signed=field_descr.signed,
+                    repeat=field_descr.repeat)
             for field_descr in field_descriptors(descriptor, pad=True)
         )
         fmt = fmt + byteorder  # byte order

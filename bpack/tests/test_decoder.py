@@ -713,22 +713,25 @@ class TestNestedRecord:
     @staticmethod
     def get_encoded_data(baseunits):
         if baseunits is bpack.EBaseUnits.BYTES:
+            # TODO: use the default byte order
             encoded_data = bytes([
                 0b00000000, 0b00000000, 0b00000000, 0b00000000,
                 0b00000001, 0b00000000, 0b00000000, 0b00000000,
                 0b00000010, 0b00000000, 0b00000000, 0b00000000,
                 0b00000011, 0b00000000, 0b00000000, 0b00000000,
+                0b00000001, 0b00000000, 0b00000000, 0b00000000,
+                0b00000010, 0b00000000, 0b00000000, 0b00000000,
             ])
 
         else:  # baseunits is bpack.EBaseUnits.BITS:
-            encoded_data = bytes([0b00000001, 0b00100011])
+            encoded_data = bytes([0b00000001, 0b00100011, 0b000010010])
 
         return encoded_data
 
     def test_nested_record_decoders(self, backend):
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
 
-        @backend.decoder
+        @backend.decoder  # NOTE: this is a decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class Record:
             field_1: int = bpack.field(size=4, default=1)
@@ -740,12 +743,14 @@ class TestNestedRecord:
             field_1: int = bpack.field(size=4, default=0)
             field_2: Record = Record()
             field_3: int = bpack.field(size=4, default=3)
+            field_4: Record = Record()
 
         assert NestedRecord.frombytes(encoded_data) == NestedRecord()
 
     def test_nested_record(self, backend):
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
 
+        # NOTE: this time the inner record is not a decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class Record:
             field_1: int = bpack.field(size=4, default=1)
@@ -757,5 +762,30 @@ class TestNestedRecord:
             field_1: int = bpack.field(size=4, default=0)
             field_2: Record = Record()
             field_3: int = bpack.field(size=4, default=3)
+            field_4: Record = Record()
+
+        assert NestedRecord.frombytes(encoded_data) == NestedRecord()
+
+    def test_nested_record_decoders_with_order(self, backend):
+        encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
+        if backend.Decoder.baseunits is bpack.EBaseUnits.BITS:
+            kwargs = dict(bitorder='>', byteorder='>')
+        else:
+            # TODO: use the default byteorder (see get_encoded_data)
+            kwargs = dict(byteorder=bpack.EByteOrder.LE)
+
+        @backend.decoder  # NOTE: this is a decoder
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits, **kwargs)
+        class Record:
+            field_1: int = bpack.field(size=4, default=1)
+            field_2: int = bpack.field(size=4, default=2)
+
+        @backend.decoder
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits, **kwargs)
+        class NestedRecord:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: Record = Record()
+            field_3: int = bpack.field(size=4, default=3)
+            field_4: Record = Record()
 
         assert NestedRecord.frombytes(encoded_data) == NestedRecord()
