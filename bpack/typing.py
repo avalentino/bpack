@@ -148,6 +148,28 @@ class T:
     String descriptors, or *typestr*, are compatible with numpy (a sub-set
     of one used in the numpy "array interface").
 
+    The *typestr* string format consists of 3 parts:
+
+    * an (optional) character describing the byte order of the data
+
+      - ``<``: little-endian,
+      - ``>``: big-endian,
+      - ``|``: not-relevant
+
+    * a character code giving the basic type of the array, and
+    * an integer providing the number of bytes the type uses
+
+    The basic type character codes are:
+
+    * ``i``: sighed integer
+    * ``u``: unsigned integer
+    * ``f``: float
+    * ``c``: complex
+    * ``S``: bytes (string)
+
+    .. note:: *typestr* the format described above is a sub-set of the
+       one used in the numpy "array interface".
+
     .. seealso:: :func:`str_to_type_params`, :class:`TypeParams`,
        https://numpy.org/doc/stable/reference/arrays.dtypes.html and
        https://numpy.org/doc/stable/reference/arrays.interface.html

@@ -12,4 +12,5 @@ Miscellanea *To Do* list
     baseunits = bpack.EBaseUnits.BITS | bpack.EBaseUnits.BYTES
 
 * nested records and repeat (test)
-* decoder attributes (Decoder.descriptor)
+* typing in generated methods (.frombytes) TBD
+

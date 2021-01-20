@@ -344,7 +344,11 @@ def descriptor(cls, *, size: Optional[int] = None,
         the byte-order of the binary record
     :param bitorder:
         the bit-order of the binary record
-        (must be ``None`` if the *base units* are bytes)
+        (must be ``None`` if the *base units* are bytes).
+        If set to none in bit-based records it is assumed
+        :data:`bpack.enums.EBitOrder.DEFAULT` which corresponds to
+        :data:`bpack.enums.EBitOrder.MSB` in all decoders currently
+        implemented.
     :param baseunits:
         the base units (:data:`bpack.enums.EBaseUnits.BITS` or
         :data:`bpack.enums.EBaseUnits.BYTES`) used to specify the
