@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.7.0 (UNRELEASED)
+bpack v0.7.0 (21/01/2021)
 -------------------------
 
 * New *packbit*/*unpackbit* functions (provisional API).
