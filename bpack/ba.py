@@ -1,7 +1,7 @@
 """Bitarray based codec for binary data structures."""
 
 import struct
-
+import itertools
 from typing import Any, Callable, Optional
 
 import bitarray
@@ -158,3 +158,37 @@ class Decoder(bpack.codecs.Decoder):
 
 
 decoder = bpack.codecs.make_codec_decorator(Decoder)
+
+
+def _pairwise(it):
+    a, b = itertools.tee(it)
+    next(b, None)
+    return itertools.zip_longest(a, b, fillvalue=None)
+
+
+def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False):
+    """Unpack packed (integer) values form a string of bytes.
+
+    Takes in input a string of bytes in which (integer) samples have been
+    stored using ``bits_per_sample`` bit for each sample, and returns
+    the sequence of corresponding Python integers.
+
+    Example::
+
+                 3 bytes                            4 samples
+
+      |------|------|------|------| --> [samp_1, samp_2, samp_3, samp_4]
+
+      4 samples (6 bits per sample)
+
+    If ``signed`` is set to True integers are assumed to be stored as
+    signed integers.
+    """
+    nbits = len(data) * 8
+    # assert nbits % bits_per_sample == 0
+    slices = [
+        slice(s, e) for s, e in _pairwise(range(0, nbits, bits_per_sample))
+    ]
+    ba = bitarray.bitarray()
+    ba.frombytes(data)
+    return [ba2int(ba[slice_],  signed) for slice_ in slices]

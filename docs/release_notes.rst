@@ -4,7 +4,8 @@ Release Notes
 bpack v0.7.0 (UNRELEASED)
 -------------------------
 
-* fixed a bug in decoding of nested records
+* New *packbit*/*unpackbit* functions (provisional API).
+* Fixed a bug in decoding of nested records.
 
 
 bpack v0.6.0 (15/01/2021)

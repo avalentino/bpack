@@ -1,5 +1,8 @@
 """Bitstruct based codec for binary data structures."""
 
+import math
+import warnings
+import functools
 from typing import Optional
 
 import bitstruct
@@ -13,7 +16,10 @@ from .codecs import get_sequence_groups, has_codec, get_codec
 from .descriptors import field_descriptors
 
 
-__all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
+__all__ = [
+    'Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE',
+    'packbits', 'unpackbits',
+]
 
 
 BACKEND_NAME = 'bitstruct'
@@ -143,3 +149,80 @@ class Decoder(bpack.codecs.Decoder):
 
 
 decoder = bpack.codecs.make_codec_decorator(Decoder)
+
+
+@functools.lru_cache()
+def _get_codec(nsamples: int, bits_per_sample, signed=False,
+               byteorder: str = '') -> bitstruct.CompiledFormat:
+    nbits = nsamples * bits_per_sample
+    outsize = math.ceil(nbits / 8)
+    npad = outsize * 8 - nbits
+
+    if signed:
+        fmt = f's{bits_per_sample:d}' * nsamples
+    else:
+        fmt = f'u{bits_per_sample:d}' * nsamples
+
+    if npad > 0:
+        fmt += f'p{npad:d}'
+
+    fmt += byteorder
+    return bitstruct.CompiledFormat(fmt)
+
+
+def packbits(values, bits_per_sample: int, signed: bool = False,
+             byteorder: str = '') -> bytes:
+    """Pack integer values using the specified number of bits for each sample.
+
+    Converts a sequence of values into a string of bytes in which each
+    sample is stored according to the specified number of bits.
+
+    Example::
+
+                 4 samples                          3 bytes
+
+      [samp_1, samp_2, samp_3, samp_4] --> |------|------|------|------|
+
+                                           4 samples (6 bits per sample)
+
+    Please note that no check that the input values actually fits in the
+    specified number of bits is performed is performed.
+
+    The function return a sting of bytes including same number of samples
+    of the input plus possibly some padding bit (at the end) to fill an
+    integer number of bytes.
+
+    If ``signed`` is set to True integers are stored as signed integers.
+    """
+    nsamples = len(values)
+    if (nsamples * bits_per_sample) % 8:
+        warnings.warn(f'packing {nsamples} with {bits_per_sample} bits per '
+                      f'sample requires padding')
+    encoder = _get_codec(nsamples, bits_per_sample,
+                         signed=signed, byteorder=byteorder)
+    return encoder.pack(*values)
+
+
+def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False,
+               byteorder: str = ''):
+    """Unpack packed (integer) values form a string of bytes.
+
+    Takes in input a string of bytes in which (integer) samples have been
+    stored using ``bits_per_sample`` bit for each sample, and returns
+    the sequence of corresponding Python integers.
+
+    Example::
+
+                 3 bytes                            4 samples
+
+      |------|------|------|------| --> [samp_1, samp_2, samp_3, samp_4]
+
+      4 samples (6 bits per sample)
+
+    If ``signed`` is set to True integers are assumed to be stored as
+    signed integers.
+    """
+    nsamples = len(data) * 8 // bits_per_sample
+    decoder_ = _get_codec(nsamples, bits_per_sample,
+                          signed=signed, byteorder=byteorder)
+    return decoder_.unpack(data)
