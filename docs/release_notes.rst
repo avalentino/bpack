@@ -6,6 +6,7 @@ bpack v0.7.0 (UNRELEASED)
 
 * New *packbit*/*unpackbit* functions (provisional API).
 * Fixed a bug in decoding of nested records.
+* Added example program for Sentinel-1 space packets decoding
 
 
 bpack v0.6.0 (15/01/2021)
