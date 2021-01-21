@@ -25,7 +25,7 @@ Conda
 
 .. code-block:: shell
 
-  $ conda install -c conda-forge bpack
+  $ conda install -c avalentino bpack
 
 
 Testing
