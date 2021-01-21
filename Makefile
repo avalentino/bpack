@@ -2,7 +2,7 @@
 
 PYTHON=python3
 
-.PHONY: default help sdist check clean distclean api
+.PHONY: default help sdist wheel check clean distclean api
 
 default: help
 
@@ -11,6 +11,8 @@ help:
 	@echo "Available targets:"
 	@echo "  help      - print this help message"
 	@echo "  sdist     - generate the source distribution"
+	@echo "  wheel     - generate the (binary) wheel distribution"
+	@echo "  dist      - generate the distribution packages (source and wheel)"
 	@echo "  check     - run a full test (using tox)"
 	@echo "  clean     - clean build artifacts"
 	@echo "  distclean - clean all generated and cache files"
@@ -18,6 +20,12 @@ help:
 
 sdist:
 	$(PYTHON) setup.py sdist
+
+wheel:
+	$(PYTHON) -m pip wheel --wheel-dir dist .
+
+dist: sdist wheel
+	$(PYTHON) -m twine check dist/*
 
 check:
 	$(PYTHON) -m tox
