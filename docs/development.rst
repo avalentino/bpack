@@ -125,7 +125,7 @@ Update the API documentation
 .. code-block:: shell
 
   $ rm -rf docs/api
-  $ sphinx-apidoc --module-first --separate  --no-toc \
+  $ sphinx-apidoc --module-first --separate --no-toc \
       --doc-project "bpack API" -o docs/api \
       --templatedir docs/_templates/apidoc \
       bpack bpack/tests

@@ -2,7 +2,7 @@
 
 PYTHON=python3
 
-.PHONY: default help sdist check clean distclean
+.PHONY: default help sdist check clean distclean api
 
 default: help
 
@@ -14,6 +14,7 @@ help:
 	@echo "  check     - run a full test (using tox)"
 	@echo "  clean     - clean build artifacts"
 	@echo "  distclean - clean all generated and cache files"
+	@echo "  api       - update the API source files in the documentation"
 
 sdist:
 	$(PYTHON) setup.py sdist
@@ -30,3 +31,9 @@ distclean: clean
 	$(RM) -r dist .coverage htmlcov .pytest_cache .tox
 	@# $(RM) .DS_Store */.DS_Store */*/.DS_Store
 	@# $(RM) -r .idea
+
+
+api:
+	$(RM) -r docs/api
+	sphinx-apidoc --module-first --separate --no-toc --doc-project "bpack API" \
+	  -o docs/api --templatedir docs/_templates/apidoc bpack bpack/tests
