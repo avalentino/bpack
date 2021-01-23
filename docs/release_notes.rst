@@ -4,7 +4,7 @@ Release Notes
 bpack v0.8.0 (UNRELEASED)
 -------------------------
 
-* TBW
+* Improved User Guide
 
 
 bpack v0.7.0 (21/01/2021)
