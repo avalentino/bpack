@@ -266,9 +266,9 @@ the standard Python syntax for type annotations.
 
 Currently supported data types are:
 
-:basic Python types:
-    ``bool``, ``int``, ``float``, ``bytes``, ``str`` (``complex`` is not
-    supported currently)
+:basic types:
+    basic Python types like ``bool``, ``int``, ``float``, ``bytes``, ``str``
+    (``complex`` is not supported currently)
 :enums:
     enumeration types defined using the :mod:`enum` module of the standard
     Python library.
@@ -281,11 +281,11 @@ Currently supported data types are:
     :class:`typing.Sequence` or :class:`typing.List`.
     Please refer to the `Sequence fields`_ section for more details about
     features and limitations
-:record descriptors:
+:descriptors:
     i.e. any binary data structure defined using the
     :func:`bpack.descriptors.descriptor` class decorator
     (see also `Record nesting`_)
-:special type annotations:
+:type annotations:
     annotated data types defined by means of the :class:`bpack.typing.T`
     type annotation. Please refer to the `Special type annotations`_ section
     for a more detailed description
