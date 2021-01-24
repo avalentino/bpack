@@ -574,6 +574,11 @@ suitable to handle based binary data structures with ``bits`` as *baseunits*:
 The result is directly mapped into Python enum values: ``EColor:BLACK`` and
 ``EColor:WHITE``.
 
+.. note::
+
+   If the :class:`Enum` sub-classes are accepted as field type only if all
+   the enumeration values have the same type (``int``, ``bytes`` or ``str``).
+
 
 Sequence fields
 ---------------
