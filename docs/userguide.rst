@@ -797,14 +797,14 @@ descriptor to be able to write code as the following:
    @bpack.st.decoder
    @bpack.descriptor
    class BinaryRecord:
-       field_1: int = bpack.field(size=4, signed=True)
-       field_2: float = bpack.field(size=8)
+       field_1: float = bpack.field(size=8)
+       field_2: int = bpack.field(size=4, signed=True)
 
-   data = b'\x15\xcd[\x07\x00\x00\x00\x00\x18-DT\xfb!\t@'
-   record = BinaryRecord.frombytes(data)
+   binary_data = b'\x18-DT\xfb!\t@\x15\xcd[\x07'
+   record = BinaryRecord.frombytes(binary_data)
 
    print(record)
 
 .. testoutput::
 
-   BinaryRecord(field_1=123456789, field_2=3.141592653589793)
+   BinaryRecord(field_1=3.141592653589793, field_2=123456789)
