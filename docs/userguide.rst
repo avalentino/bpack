@@ -26,8 +26,8 @@ The user can define binary data structure in a declarative way, as follows:
 
    @bpack.descriptor
    class BinaryRecord:
-       field_1: int = bpack.field(size=4, signed=True)
-       field_2: float = bpack.field(size=8)
+       field_1: float = bpack.field(size=8)
+       field_2: int = bpack.field(size=4, signed=True)
 
 Key concepts for definition of binary data structures are
 
@@ -68,17 +68,19 @@ to convert binary data into a Python objects:
 
    import bpack.st
 
-   decoder = bpack.st.Decoder(BinaryRecord)
-   record = decoder.decode(b'\x15\xcd[\x07\x00\x00\x00\x00\x18-DT\xfb!\t@')
+   binary_data = b'\x18-DT\xfb!\t@\x15\xcd[\x07'
 
-   assert record.field_1 == 123456789
-   assert record.field_2 == 3.141592653589793
+   decoder = bpack.st.Decoder(BinaryRecord)
+   record = decoder.decode(binary_data)
+
+   assert record.field_1 == 3.141592653589793
+   assert record.field_2 == 123456789
 
    print(record)
 
 .. testoutput::
 
-   BinaryRecord(field_1=123456789, field_2=3.141592653589793)
+   BinaryRecord(field_1=3.141592653589793, field_2=123456789)
 
 
 In the example above it has been used the :class:`bpack.st.Decoder` class
