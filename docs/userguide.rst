@@ -523,10 +523,10 @@ Example:
        BLACK = 10
        WHITE = 11
 
-   @bpack.descriptor
+   @bpack.descriptor(baseunits='bits')
    class BinaryRecord:
-       foreground: EColor = bpack.field(size=1, default=EColor.BLACK)
-       background: EColor = bpack.field(size=1, default=EColor.WHITE)
+       foreground: EColor = bpack.field(size=4, default=EColor.BLACK)
+       background: EColor = bpack.field(size=4, default=EColor.WHITE)
 
    record = BinaryRecord()
    print(record)
@@ -535,37 +535,37 @@ Example:
 
    BinaryRecord(foreground=<EColor.BLACK: 10>, background=<EColor.WHITE: 11>)
 
-The ``EColor`` enum values are lower that 256 so they can be represented
-with a single byte.
+The ``EColor`` enum values are lower that 16 so they can be represented
+with only 4 bits.
 
 In particular the binary representation of ``BLACK`` and ``WHITE`` is:
 
 .. doctest::
 
-   >>> format(EColor.BLACK, '08b')
-   '00001010'
-   >>> format(EColor.WHITE, '08b')
-   '00001011'
+   >>> format(EColor.BLACK, '04b')
+   '1010'
+   >>> format(EColor.WHITE, '04b')
+   '1011'
 
 and the binary string representing it is:
 
 .. testcode::
 
-   data = bytes([0b00001010, 0b00001011])
+   data = bytes([0b10101011])
    print(data)
 
 .. testoutput::
 
-   b'\n\x0b'
+   b'\xab'
 
 The data string can be decoded using the :mod:`bpack.bs` backend that is
 suitable to handle based binary data structures with ``bits`` as *baseunits*:
 
 .. testcode::
 
-   import bpack.st
+   import bpack.bs
 
-   decoder = bpack.st.Decoder(BinaryRecord)
+   decoder = bpack.bs.Decoder(BinaryRecord)
    record = decoder.decode(data)
    print(record)
 
