@@ -156,7 +156,8 @@ class Decoder(bpack.codecs.Decoder):
 decoder = bpack.codecs.make_codec_decorator(Decoder)
 
 
-def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False):
+def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False,
+               byteorder: str = '>'):
     """Unpack packed (integer) values form a string of bytes.
 
     Takes in input a string of bytes in which (integer) samples have been
@@ -174,16 +175,15 @@ def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False):
     If ``signed`` is set to True integers are assumed to be stored as
     signed integers.
     """
-    # TODO: support byteorder: str = ''
-    # if byteprder:
-    #     raise NotImplementedError(f'byteorder = "{byteprder}"')
+    # TODO: support byteorder other than '>'
+    if bits_per_sample == 1:
+        return np.unpackbits(np.frombuffer(data, dtype='uint8'))
+    elif bits_per_sample in {8, 16, 32, 64}:
+        size = bits_per_sample // 8
+        kind = "i" if signed else "u"
+        typestr = f'{byteorder}{kind}{size}'
+        return np.frombuffer(data, dtype=np.dtype(typestr))
 
-    if bits_per_sample > 8:
-        # TODO: support bits_per_sample > 8
-        raise NotImplementedError(f'bits_per_sample = {bits_per_sample}')
-    elif bits_per_sample == 8:
-        dtype = np.dtype('int8') if signed else np.dtype('uint8')
-        return np.frombuffer(data, dtype=dtype)
     nbits = len(data) * 8
     assert nbits % bits_per_sample == 0
     samples = nbits // bits_per_sample
@@ -194,13 +194,28 @@ def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False):
 
     basetypes = {
         # nbits: (basetype, offset),
+        # 1: done
         2: (np.dtype('>u1'), 0),
         3: (np.dtype('>u4'), 1),
         4: (np.dtype('>u1'), 0),
         5: (np.dtype('>u8'), 3),
         6: (np.dtype('>u4'), 1),
         7: (np.dtype('>u8'), 1),
+        # 8: done
+        # 9: TODO
+        10: (np.dtype('>u8'), 3),
+        # 11: TODO
+        12: (np.dtype('>u4'), 1),
+        # 13: TODO
+        14: (np.dtype('>u8'), 1),
+        # 15: TODO
+        # 16: done
+        # 32: done
+        # 64: done
     }
+    if bits_per_sample not in basetypes:
+        raise NotImplementedError(f'bits_per_sample = {bits_per_sample}')
+
     basetype, offset = basetypes[bits_per_sample]
     itemsize = basetype.itemsize
 
@@ -223,7 +238,8 @@ def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False):
     odata = np.right_shift(odata, shifts)
 
     # mask
-    mask = np.packbits([1] * bits_per_sample, bitorder='little')
+    shift = np.array(64 - bits_per_sample, dtype=np.uint32)
+    mask = (np.array(0xffffffffffffffff) >> shift).astype(basetype)
     odata = np.bitwise_and(odata, mask)
 
     dtype = np.int8 if signed else np.uint8

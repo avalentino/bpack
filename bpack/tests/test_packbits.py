@@ -109,3 +109,30 @@ def test_unpackbits(unpackfunc, bits_per_sample, nsamples):
     data, values = sample_data(bits_per_sample, nsamples)
     ovalues = unpackfunc(data, bits_per_sample)
     assert list(ovalues) == values
+
+
+@pytest.mark.parametrize('unpackfunc',
+                         [bpack_ba.unpackbits, bpack_bs.unpackbits,
+                          bpack_np.unpackbits],
+                         ids=['ba', 'bs', 'np'])
+def test_unpackbits_1(unpackfunc):
+    bits_per_sample = 1
+    nsamples = 8
+    values = [1, 0, 1, 0, 1, 0, 1, 0]
+    data = bytes([0b10101010])
+    ovalues = unpackfunc(data, bits_per_sample)
+    assert list(ovalues) == values
+
+
+@pytest.mark.parametrize('unpackfunc',
+                         [bpack_ba.unpackbits, bpack_bs.unpackbits,
+                          bpack_np.unpackbits],
+                         ids=['ba', 'bs', 'np'])
+@pytest.mark.parametrize('bits_per_sample', [10, 12, 14, 16, 32, 64])
+@pytest.mark.parametrize('nsamples', [256])
+@pytest.mark.parametrize('packfunc', [bpack_bs.packbits])
+def test_unpackbits_large(unpackfunc, bits_per_sample, nsamples, packfunc):
+    values = [item % (2**bits_per_sample) for item in range(nsamples)]
+    data = packfunc(values, bits_per_sample)
+    ovalues = unpackfunc(data, bits_per_sample)
+    assert list(ovalues) == values
