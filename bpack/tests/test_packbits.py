@@ -117,7 +117,6 @@ def test_unpackbits(unpackfunc, bits_per_sample, nsamples):
                          ids=['ba', 'bs', 'np'])
 def test_unpackbits_1(unpackfunc):
     bits_per_sample = 1
-    nsamples = 8
     values = [1, 0, 1, 0, 1, 0, 1, 0]
     data = bytes([0b10101010])
     ovalues = unpackfunc(data, bits_per_sample)
