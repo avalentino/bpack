@@ -5,14 +5,28 @@ from typing import Sequence, Tuple
 
 import pytest
 
+try:
+    import bpack.ba as bpack_ba
+except ImportError:  # pragma: no cover
+    bpack_ba = None
 
-bpack_ba = pytest.importorskip('bpack.ba')
-bpack_bs = pytest.importorskip('bpack.bs')
-bpack_np = pytest.importorskip('bpack.np')
+try:
+    import bitstruct
+    import bpack.bs as bpack_bs
+except ImportError:  # pragma: no cover
+    bitstruct = None
+    bpack_bs = None
+
+try:
+    import numpy as np
+    import bpack.np as bpack_np
+except ImportError:  # pragma: no cover
+    np = None
+    bpack_np = None
 
 
-def sample_data(bits_per_sample: int,
-                nsamples: int = 256) -> Tuple[bytes, Sequence[int]]:
+def _sample_data(bits_per_sample: int,
+                 nsamples: int = 256) -> Tuple[bytes, Sequence[int]]:
     """Generate a packed data block having spb samples bps bits each."""
     elementary_range = {
         2: bytes([0b00011011]),
@@ -56,82 +70,259 @@ def sample_data(bits_per_sample: int,
                   0b10010111, 0b00111110, 0b10011101, 0b01111011, 0b01110111,
                   0b11110001, 0b11100111, 0b11010111, 0b10111111, 0b10011111,
                   0b01111111, 0b01111111]),
-        8: bytes(range(2**8)),
+        8: bytes(range(2 ** 8)),
     }
     assert (nsamples * bits_per_sample) % 8 == 0
     base_range = elementary_range[bits_per_sample]
-    nreplica = math.ceil(nsamples / 2**bits_per_sample)
+    nreplica = math.ceil(nsamples / 2 ** bits_per_sample)
     nbytes = nsamples * bits_per_sample // 8
     data = (base_range * nreplica)[:nbytes]
 
-    base_range = list(range(2**bits_per_sample))
+    base_range = list(range(2 ** bits_per_sample))
     values = (base_range * nreplica)[:nsamples]
 
     return data, values
 
 
-@pytest.mark.parametrize('packfunc', [bpack_bs.packbits], ids=['bs'])
+@pytest.mark.parametrize('backend',
+                         [pytest.param(bpack_bs, id='bs',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_bs,
+                                           reason='not available'))])
 @pytest.mark.parametrize('bits_per_sample', [2, 3, 4, 5, 6, 7, 8])
 @pytest.mark.parametrize('nsamples', [256])
-def test_packbits(packfunc, bits_per_sample, nsamples):
-    data, values = sample_data(bits_per_sample, nsamples)
-    odata = packfunc(values, bits_per_sample)
+def test_packbits(backend, bits_per_sample, nsamples):
+    data, values = _sample_data(bits_per_sample, nsamples)
+    odata = backend.packbits(values, bits_per_sample)
     assert odata == data
 
 
-@pytest.mark.parametrize('packfunc', [bpack_bs.packbits], ids=['bs'])
+@pytest.mark.parametrize('backend',
+                         [pytest.param(bpack_bs, id='bs',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_bs,
+                                           reason='not available'))])
 @pytest.mark.parametrize('bits_per_sample', [3])
 @pytest.mark.parametrize('nsamples', [256])
-def test_packbits_bad_values(packfunc, bits_per_sample, nsamples):
+def test_packbits_bad_values(backend, bits_per_sample, nsamples):
     values = [2 ** bits_per_sample] * nsamples
     with pytest.raises(Exception):  # TODO: improve error handling
-        packfunc(values, bits_per_sample)
+        backend.packbits(values, bits_per_sample)
 
 
-@pytest.mark.parametrize('packfunc', [bpack_bs.packbits], ids=['bs'])
+@pytest.mark.parametrize('backend',
+                         [pytest.param(bpack_bs, id='bs',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_bs,
+                                           reason='not available'))])
 @pytest.mark.parametrize('bits_per_sample', [3])
-def test_packbits_nsanples_requires_pad(packfunc, bits_per_sample):
+def test_packbits_nsanples_requires_pad(backend, bits_per_sample):
     values = [1]
     nsamples = len(values)
     # the number of samples does not fits an integer number of bytes
     assert (nsamples * bits_per_sample % 8) != 0
     with pytest.warns(UserWarning):
-        packfunc(values, bits_per_sample)
+        backend.packbits(values, bits_per_sample)
 
 
-@pytest.mark.parametrize('unpackfunc',
-                         [bpack_ba.unpackbits, bpack_bs.unpackbits,
-                          bpack_np.unpackbits],
-                         ids=['ba', 'bs', 'np'])
+@pytest.mark.parametrize('backend',
+                         [pytest.param(bpack_ba, id='ba',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_ba,
+                                           reason='not available')),
+                          pytest.param(bpack_bs, id='bs',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_bs,
+                                           reason='not available')),
+                          pytest.param(bpack_np, id='np',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_np,
+                                           reason='not available'))])
 @pytest.mark.parametrize('bits_per_sample', [2, 3, 4, 5, 6, 7, 8])
 @pytest.mark.parametrize('nsamples', [256])
-def test_unpackbits(unpackfunc, bits_per_sample, nsamples):
-    data, values = sample_data(bits_per_sample, nsamples)
-    ovalues = unpackfunc(data, bits_per_sample)
+def test_unpackbits(backend, bits_per_sample, nsamples):
+    data, values = _sample_data(bits_per_sample, nsamples)
+    ovalues = backend.unpackbits(data, bits_per_sample)
     assert list(ovalues) == values
 
 
-@pytest.mark.parametrize('unpackfunc',
-                         [bpack_ba.unpackbits, bpack_bs.unpackbits,
-                          bpack_np.unpackbits],
-                         ids=['ba', 'bs', 'np'])
-def test_unpackbits_1(unpackfunc):
+@pytest.mark.parametrize('backend',
+                         [pytest.param(bpack_ba, id='ba',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_ba,
+                                           reason='not available')),
+                          pytest.param(bpack_bs, id='bs',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_bs,
+                                           reason='not available')),
+                          pytest.param(bpack_np, id='np',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_np,
+                                           reason='not available'))])
+def test_unpackbits_1(backend):
     bits_per_sample = 1
     values = [1, 0, 1, 0, 1, 0, 1, 0]
     data = bytes([0b10101010])
-    ovalues = unpackfunc(data, bits_per_sample)
+    ovalues = backend.unpackbits(data, bits_per_sample)
     assert list(ovalues) == values
 
 
-@pytest.mark.parametrize('unpackfunc',
-                         [bpack_ba.unpackbits, bpack_bs.unpackbits,
-                          bpack_np.unpackbits],
-                         ids=['ba', 'bs', 'np'])
+@pytest.mark.skipif(not bpack_bs, reason='bitstruct not available')
+@pytest.mark.parametrize('backend',
+                         [pytest.param(bpack_ba, id='ba',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_ba,
+                                           reason='not available')),
+                          pytest.param(bpack_bs, id='bs',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_bs,
+                                           reason='not available')),
+                          pytest.param(bpack_np, id='np',
+                                       marks=pytest.mark.skipif(
+                                           not bpack_np,
+                                           reason='not available'))])
 @pytest.mark.parametrize('bits_per_sample', [10, 12, 14, 16, 32, 64])
 @pytest.mark.parametrize('nsamples', [256])
-@pytest.mark.parametrize('packfunc', [bpack_bs.packbits])
-def test_unpackbits_large(unpackfunc, bits_per_sample, nsamples, packfunc):
-    values = [item % (2**bits_per_sample) for item in range(nsamples)]
-    data = packfunc(values, bits_per_sample)
-    ovalues = unpackfunc(data, bits_per_sample)
+def test_unpackbits_large(backend, bits_per_sample, nsamples):
+    values = [item % (2 ** bits_per_sample) for item in range(nsamples)]
+    data = bpack_bs.packbits(values, bits_per_sample)
+    ovalues = backend.unpackbits(data, bits_per_sample)
     assert list(ovalues) == values
+
+
+def _make_sample_data_block(header_size, bits_per_sample, samples_per_block,
+                            bit_offset=0, nblocks=1):
+    bits_per_block = header_size + bits_per_sample * samples_per_block
+    nbytes = math.ceil((bit_offset + bits_per_block) / 8)
+
+    block_fmt = f'u{bits_per_sample}' * samples_per_block
+    if header_size > 0:
+        block_fmt = f'u{header_size}' + block_fmt
+
+    leading_pad = f'p{bit_offset}' if bit_offset > 0 else ''
+    trailing_pad = nbytes * 8 - bits_per_block * nblocks - bit_offset
+    trailing_pad = f'p{trailing_pad}' if trailing_pad > 0 else ''
+    fmt = f'{leading_pad}{block_fmt * nblocks}{trailing_pad}'
+
+    n = 2 ** bits_per_sample
+
+    ramp_values = list(range(n)) * math.ceil(samples_per_block / n)
+    values = ramp_values[:samples_per_block]
+    if header_size > 0:
+        values = [113] + values
+    values *= nblocks
+    data = bitstruct.pack(fmt, *values)
+
+    return data, values
+
+
+@pytest.mark.skipif(not bitstruct, reason='bitstruct not available')
+@pytest.mark.skipif(not np, reason='numpy not available')
+@pytest.mark.parametrize('bit_offset', [0, 1, 2])
+@pytest.mark.parametrize('header_size', [9, 13])
+@pytest.mark.parametrize('bits_per_sample', [3, 4, 5, 6, 12, 13, 14])
+@pytest.mark.parametrize('samples_per_block', [64, 128, 256])
+@pytest.mark.parametrize('nblocks', [1, 3, 20])
+def test_headers(bit_offset, header_size, bits_per_sample, samples_per_block,
+                 nblocks):
+    data, values = _make_sample_data_block(header_size, bits_per_sample,
+                                           samples_per_block, bit_offset,
+                                           nblocks=nblocks)
+
+    block_size = header_size + bits_per_sample * samples_per_block
+
+    headers = bpack_np.unpackbits(data, bits_per_sample=header_size,
+                                  samples_per_block=1, bit_offset=bit_offset,
+                                  blockstride=block_size)
+    assert len(headers) == nblocks
+    assert all(headers == values[0])
+
+
+@pytest.mark.skipif(not bitstruct, reason='bitstruct not available')
+@pytest.mark.skipif(not np, reason='numpy not available')
+@pytest.mark.parametrize('bit_offset', [0, 1, 2])
+@pytest.mark.parametrize('header_size', [0, 9, 13])
+@pytest.mark.parametrize('bits_per_sample', [3, 4, 5, 6, 12, 13, 14])
+@pytest.mark.parametrize('samples_per_block', [64, 128, 256])
+@pytest.mark.parametrize('nblocks', [1, 3, 20])
+def test_data(bit_offset, header_size, bits_per_sample, samples_per_block,
+              nblocks):
+    data, values = _make_sample_data_block(header_size, bits_per_sample,
+                                           samples_per_block, bit_offset,
+                                           nblocks=nblocks)
+
+    block_size = header_size + bits_per_sample * samples_per_block
+
+    odata = bpack_np.unpackbits(data, bits_per_sample, samples_per_block,
+                                bit_offset=bit_offset + header_size,
+                                blockstride=block_size)
+
+    extra_bits = len(data) * 8 - bit_offset - block_size * nblocks
+    extra_bits = max(extra_bits - header_size, 0)
+    extra_samples = extra_bits // bits_per_sample
+    assert len(odata) == nblocks * samples_per_block + extra_samples
+    k = 1 if header_size > 0 else 0
+    for idx in range(nblocks):
+        oslice = slice(samples_per_block * idx,
+                       samples_per_block * (idx + 1))
+        vslice = slice(k + (samples_per_block + k) * idx,
+                       k + (samples_per_block + k) * idx + samples_per_block)
+        assert all(odata[oslice] == values[vslice])
+
+
+@pytest.mark.skipif(not bitstruct, reason='bitstruct not available')
+@pytest.mark.skipif(not np, reason='numpy not available')
+@pytest.mark.parametrize('header_size, dtype',
+                         [(7, '>u1'),
+                          (8, '>u1'),
+                          (9, '>u2'),
+                          (15, '>u2'),
+                          (16, '>u2'),
+                          (17, '>u4')])
+def test_headers_dtype(header_size, dtype):
+    bits_per_sample = 8
+    samples_per_block = 64
+
+    data, _ = _make_sample_data_block(header_size, bits_per_sample,
+                                      samples_per_block)
+
+    headers = bpack_np.unpackbits(data, bits_per_sample=header_size,
+                                  samples_per_block=1)
+    assert headers.dtype == np.dtype(dtype)
+
+
+@pytest.mark.skipif(not bitstruct, reason='bitstruct not available')
+@pytest.mark.skipif(not np, reason='numpy not available')
+@pytest.mark.parametrize('bits_per_sample, dtype',
+                         [(7, '>u1'),
+                          (8, '>u1'),
+                          (9, '>u2'),
+                          (15, '>u2'),
+                          (16, '>u2'),
+                          (17, '>u4')])
+def test_data_dtype(bits_per_sample, dtype):
+    header_size = 0
+    samples_per_block = 64
+
+    data, _ = _make_sample_data_block(header_size, bits_per_sample,
+                                      samples_per_block)
+
+    odata = bpack_np.unpackbits(data, bits_per_sample, samples_per_block)
+    assert odata.dtype == np.dtype(dtype)
+
+
+@pytest.mark.skipif(not bitstruct, reason='bitstruct not available')
+@pytest.mark.skipif(not np, reason='numpy not available')
+def test_auto_sample_per_block():
+    header_size = 0
+    samples_per_block = 64
+    bits_per_sample = 3
+
+    data, _ = _make_sample_data_block(header_size, bits_per_sample,
+                                      samples_per_block)
+    odata = bpack_np.unpackbits(data, bits_per_sample)
+    assert len(odata) == samples_per_block
+
+    with pytest.raises(ValueError):
+        bpack_np.unpackbits(data, bits_per_sample,
+                            blockstride=bits_per_sample * samples_per_block)

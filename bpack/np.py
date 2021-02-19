@@ -1,7 +1,8 @@
 """Numpy based codec for binary data structures."""
 
-import math
+import functools
 import collections
+from typing import NamedTuple, Optional
 
 import numpy as np
 
@@ -156,8 +157,108 @@ class Decoder(bpack.codecs.Decoder):
 decoder = bpack.codecs.make_codec_decorator(Decoder)
 
 
-def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False,
-               byteorder: str = '>'):
+# --- bits packing/unpacking --------------------------------------------------
+def _get_item_size(bits_per_sample: int) -> int:
+    """Item size of the integer type that can take requested bits."""
+    if bits_per_sample > 64 or bits_per_sample < 1:
+        raise ValueError(f'bits_per_sample: {bits_per_sample}')
+    elif bits_per_sample <= 8:
+        return 1
+    else:
+        return 2**int(np.ceil(np.log2(bits_per_sample))-3)
+
+
+def _get_buffer_size(bits_per_sample: int) -> int:
+    """Item size of the integer type that can take requested bits and shift."""
+    return _get_item_size(bits_per_sample + 7)
+
+
+def _get_mask(nbits: int, dtype: str) -> np.ndarray:
+    """Returns a mask for dtype to select the nbits least significant bits."""
+    shift = np.array(64 - nbits, dtype=np.uint32)
+    mask = np.array(0xffffffffffffffff) >> shift
+    return mask.astype(dtype)
+
+
+class _BitUnpackParams(NamedTuple):
+    samples: int
+    dtype: str
+    buf_itemsize: int
+    buf_dtype: str
+    index_map: np.ndarray
+    shifts: np.ndarray
+    mask: np.ndarray
+
+
+@functools.lru_cache
+def _unpackbits_params(nbits: int, bits_per_sample: int,
+                       samples_per_block: int, bit_offset: int,
+                       blockstride: int, signed: bool = False,
+                       byteorder: str = '>') -> _BitUnpackParams:
+    assert nbits >= bit_offset
+    if samples_per_block is None:
+        if blockstride is not None:
+            raise ValueError(
+                '"samples_per_block" cannot be computed automatically '
+                'when "blockstride" is provided')
+        samples_per_block = (nbits - bit_offset) // bits_per_sample
+    blocksize = bits_per_sample * samples_per_block
+    if blockstride is None:
+        blockstride = blocksize
+    else:
+        assert blockstride >= blocksize
+    nstrides = (nbits - bit_offset) // blockstride
+    extrabits = nbits - bit_offset - nstrides * blockstride
+    if extrabits >= blocksize:
+        nblocks = nstrides + 1
+        extra_samples = 0
+    else:
+        nblocks = nstrides
+        extra_samples = extrabits // bits_per_sample
+    assert nblocks >= 0
+    pad = blockstride - blocksize
+
+    sizes = [bit_offset]
+    if nblocks > 0:
+        sizes.extend([bits_per_sample] * (samples_per_block - 1))
+        block_sizes = (
+                [bits_per_sample + pad] +
+                [bits_per_sample] * (samples_per_block - 1)
+        )
+        sizes.extend(block_sizes * (nblocks - 1))
+    if extra_samples:
+        sizes.append(bits_per_sample + pad)
+        sizes.extend([bits_per_sample] * (extra_samples - 1))
+
+    bit_offsets = np.cumsum(sizes)
+    byte_offsets = bit_offsets // 8
+    samples = len(bit_offsets)
+
+    itemsize = _get_item_size(bits_per_sample)
+    buf_itemsize = _get_buffer_size(bits_per_sample)
+    dtype = f'{byteorder}{"i" if signed else "u"}{itemsize}'
+    buf_dtype = f'{byteorder}{"i" if signed else "u"}{buf_itemsize}'
+
+    index = np.arange(buf_itemsize) + byte_offsets[:, None]
+    index = np.clip(index, 0, nbits // 8 - 1)
+
+    mask = _get_mask(bits_per_sample, buf_dtype)
+    shifts = (bit_offsets - byte_offsets * 8 + bits_per_sample)
+    shifts = buf_itemsize * 8 - shifts
+
+    return _BitUnpackParams(samples=samples,
+                            dtype=dtype,
+                            buf_itemsize=buf_itemsize,
+                            buf_dtype=buf_dtype,
+                            index_map=index,
+                            shifts=shifts,
+                            mask=mask)
+
+
+def unpackbits(data: bytes, bits_per_sample: int,
+               samples_per_block: Optional[int] = None, bit_offset: int = 0,
+               blockstride: Optional[int] = None, signed: bool = False,
+               byteorder: str = '>') -> np.ndarray:
     """Unpack packed (integer) values form a string of bytes.
 
     Takes in input a string of bytes in which (integer) samples have been
@@ -175,72 +276,25 @@ def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False,
     If ``signed`` is set to True integers are assumed to be stored as
     signed integers.
     """
-    # TODO: support byteorder other than '>'
-    if bits_per_sample == 1:
-        return np.unpackbits(np.frombuffer(data, dtype='uint8'))
-    elif bits_per_sample in {8, 16, 32, 64}:
-        size = bits_per_sample // 8
-        kind = "i" if signed else "u"
-        typestr = f'{byteorder}{kind}{size}'
-        return np.frombuffer(data, dtype=np.dtype(typestr))
+    if bit_offset == 0:
+        if bits_per_sample == 1:
+            return np.unpackbits(np.frombuffer(data, dtype='uint8'))
+        elif bits_per_sample in {8, 16, 32, 64}:
+            size = bits_per_sample // 8
+            kind = "i" if signed else "u"
+            typestr = f'{byteorder}{kind}{size}'
+            return np.frombuffer(data, dtype=np.dtype(typestr))
 
     nbits = len(data) * 8
-    assert nbits % bits_per_sample == 0
-    samples = nbits // bits_per_sample
 
-    chunksize = bits_per_sample // math.gcd(bits_per_sample, 8)     # bytes
-    samples_per_chunk = (chunksize * 8) // bits_per_sample
-    nchunks = samples // samples_per_chunk
+    params = _unpackbits_params(nbits, bits_per_sample, samples_per_block,
+                                bit_offset, blockstride, signed, byteorder)
+    samples, dtype, buf_itemsize, buf_dtype, index_map, shifts, mask = params
 
-    basetypes = {
-        # nbits: (basetype, offset),
-        # 1: done
-        2: (np.dtype('>u1'), 0),
-        3: (np.dtype('>u4'), 1),
-        4: (np.dtype('>u1'), 0),
-        5: (np.dtype('>u8'), 3),
-        6: (np.dtype('>u4'), 1),
-        7: (np.dtype('>u8'), 1),
-        # 8: done
-        # 9: TODO
-        10: (np.dtype('>u8'), 3),
-        # 11: TODO
-        12: (np.dtype('>u4'), 1),
-        # 13: TODO
-        14: (np.dtype('>u8'), 1),
-        # 15: TODO
-        # 16: done
-        # 32: done
-        # 64: done
-    }
-    if bits_per_sample not in basetypes:
-        raise NotImplementedError(f'bits_per_sample = {bits_per_sample}')
+    npdata = np.frombuffer(data, dtype='u1')
+    buf = np.empty(samples, dtype=buf_dtype)
+    bytesview = buf.view(dtype='u1').reshape(samples, buf_itemsize)
+    bytesview[...] = npdata[index_map]
+    outdata = ((buf >> shifts) & mask).astype(dtype)
 
-    basetype, offset = basetypes[bits_per_sample]
-    itemsize = basetype.itemsize
-
-    # byte array
-    npdata = np.frombuffer(data, np.uint8)
-
-    # pad
-    odata = np.zeros([nchunks, itemsize], dtype=np.uint8)
-    odata[:, offset:] = npdata.reshape([nchunks, chunksize])
-
-    # to int
-    odata = odata.view(dtype=basetype)
-
-    # replicate
-    odata = odata.repeat(samples_per_chunk, 1)
-
-    # shift
-    shifts = bits_per_sample * np.arange(samples_per_chunk)[::-1]
-    shifts = np.asarray(shifts, dtype=np.uint32)  # workaround for numpy issue
-    odata = np.right_shift(odata, shifts)
-
-    # mask
-    shift = np.array(64 - bits_per_sample, dtype=np.uint32)
-    mask = (np.array(0xffffffffffffffff) >> shift).astype(basetype)
-    odata = np.bitwise_and(odata, mask)
-
-    dtype = np.int8 if signed else np.uint8
-    return odata.ravel().astype(dtype)
+    return outdata
