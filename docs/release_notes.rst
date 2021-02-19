@@ -5,8 +5,8 @@ bpack v0.8.0 (UNRELEASED)
 -------------------------
 
 * Improved User Guide
-* :func:`bpack.np.unpackbits` now supports ``bits_per sample`` values
-  for 1 to 8 and 10, 12, 14, 16, 32, 64.
+* :func:`bpack.np.unpackbits` has been generalized and optimized.
+* New example for packet decoding.
 
 
 bpack v0.7.0 (21/01/2021)
