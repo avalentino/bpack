@@ -190,7 +190,7 @@ class _BitUnpackParams(NamedTuple):
     mask: np.ndarray
 
 
-@functools.lru_cache
+@functools.lru_cache()  # COPMPATIBILITY with Python3.7
 def _unpackbits_params(nbits: int, bits_per_sample: int,
                        samples_per_block: int, bit_offset: int,
                        blockstride: int, signed: bool = False,
