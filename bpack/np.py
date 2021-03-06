@@ -276,7 +276,7 @@ def unpackbits(data: bytes, bits_per_sample: int,
     If ``signed`` is set to True integers are assumed to be stored as
     signed integers.
     """
-    if bit_offset == 0:
+    if bit_offset == 0 and blockstride is None:
         if bits_per_sample == 1:
             return np.unpackbits(np.frombuffer(data, dtype='uint8'))
         elif bits_per_sample in {8, 16, 32, 64}:
