@@ -497,15 +497,17 @@ def calcsize(obj, units: Optional[EBaseUnits] = None) -> int:
         raise TypeError(f'{obj!r} is not a descriptor')
 
     size = getattr(obj, SIZE_ATTR_NAME)
-    baseunits_ = getattr(obj, BASEUNITS_ATTR_NAME)
 
-    if units and units is not baseunits_:
-        if units is EBaseUnits.BYTES:
-            # baseunits is BITS and units is BYTES
-            size = math.ceil(size / 8)
-        else:
-            # baseunits is BYTES and units is BITS
-            size *= 8
+    if units:
+        baseunits_ = getattr(obj, BASEUNITS_ATTR_NAME)
+        units = EBaseUnits(units)
+        if units is not baseunits_:
+            if units is EBaseUnits.BYTES:
+                # baseunits is BITS and units is BYTES
+                size = math.ceil(size / 8)
+            else:
+                # baseunits is BYTES and units is BITS
+                size *= 8
 
     return size
 
