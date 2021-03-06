@@ -7,6 +7,7 @@ bpack v0.8.0 (UNRELEASED)
 * Improved User Guide
 * :func:`bpack.np.unpackbits` has been generalized and optimized.
 * New example for packet decoding.
+* Improved support for nested records.
 
 
 bpack v0.7.0 (21/01/2021)

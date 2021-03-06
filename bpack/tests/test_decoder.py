@@ -789,3 +789,87 @@ class TestNestedRecord:
             field_4: Record = Record()
 
         assert NestedRecord.frombytes(encoded_data) == NestedRecord()
+
+
+@pytest.mark.parametrize(
+    'backend',
+    [pytest.param(bpack.st, id='st'),
+     pytest.param(bpack_bs, id='bs',
+                  marks=skipif(not bpack_bs, reason='not available')),
+     pytest.param(bpack_np, id='np',
+                  marks=skipif(not bpack_np, reason='not available'))])
+class TestMultiNestedRecord:
+    def test_nested_record_two_levels(self, backend):
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel02:
+            field_0001: int = bpack.field(size=4, default=1)
+            field_0002: int = bpack.field(size=4, default=2)
+
+        @backend.decoder
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class NestedRecordLevel01:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: RecordLevel02 = RecordLevel02()
+            field_3: int = bpack.field(size=4, default=3)
+            field_4: RecordLevel02 = RecordLevel02()
+
+        nbytes = bpack.calcsize(NestedRecordLevel01, bpack.EBaseUnits.BYTES)
+        encoded_data = bytes(nbytes)
+
+        assert NestedRecordLevel01.frombytes(encoded_data)
+
+    def test_nested_record_three_levels(self, backend):
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel03:
+            field_0001: int = bpack.field(size=4, default=1)
+            field_0002: int = bpack.field(size=4, default=2)
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel02:
+            field_001: int = bpack.field(size=4, default=1)
+            field_002: RecordLevel03 = RecordLevel03()
+            field_003: int = bpack.field(size=4, default=3)
+
+        @backend.decoder
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class NestedRecordLevel01:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: RecordLevel02 = RecordLevel02()
+            field_3: int = bpack.field(size=4, default=3)
+            field_4: RecordLevel02 = RecordLevel02()
+
+        nbytes = bpack.calcsize(NestedRecordLevel01, bpack.EBaseUnits.BYTES)
+        encoded_data = bytes(nbytes)
+
+        assert NestedRecordLevel01.frombytes(encoded_data)
+
+    def test_nested_record_four_levels(self, backend):
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel04:
+            field_0001: int = bpack.field(size=4, default=1)
+            field_0002: int = bpack.field(size=4, default=2)
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel03:
+            field_001: int = bpack.field(size=4, default=1)
+            field_002: RecordLevel04 = RecordLevel04()
+            field_003: int = bpack.field(size=4, default=3)
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel02:
+            field_01: int = bpack.field(size=4, default=1)
+            field_02: RecordLevel03 = RecordLevel03()
+            field_03: int = bpack.field(size=4, default=3)
+
+        @backend.decoder
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class NestedRecordLevel01:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: RecordLevel02 = RecordLevel02()
+            field_3: int = bpack.field(size=4, default=3)
+            field_4: RecordLevel02 = RecordLevel02()
+
+        nbytes = bpack.calcsize(NestedRecordLevel01, bpack.EBaseUnits.BYTES)
+        encoded_data = bytes(nbytes)
+
+        assert NestedRecordLevel01.frombytes(encoded_data)

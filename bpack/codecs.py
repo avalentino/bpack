@@ -129,7 +129,7 @@ def get_codec_type(descriptor) -> Type[CodecType]:
         return type(codec_)
 
 
-def get_sequence_groups(descriptor):
+def get_sequence_groups(descriptor, offset=0, groups=None):
     """Return slices to group values belonging to sequence fields.
 
     If the descriptor contains sequence fields this function returns a
@@ -140,10 +140,12 @@ def get_sequence_groups(descriptor):
     An empty list is returned if no sequence field is present in the
     descriptor.
     """
-    groups = []
-    offset = 0
+    if groups is None:
+        groups = []
+
     for descr in field_descriptors(descriptor):
         if bpack.is_descriptor(descr.type):
+            groups.extend(get_sequence_groups(descr.type, offset))
             nfields = len(bpack.fields(descr.type))                     # noqa
             slice_ = slice(offset, offset + nfields)
 
