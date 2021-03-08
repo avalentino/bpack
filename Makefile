@@ -21,8 +21,8 @@ help:
 sdist:
 	$(PYTHON) setup.py sdist
 
-wheel:
-	$(PYTHON) -m pip wheel --wheel-dir dist .
+wheel: sdist
+	$(PYTHON) -m pip wheel --wheel-dir dist dist/bpack*.tar.gz
 
 dist: sdist wheel
 	$(PYTHON) -m twine check dist/*
