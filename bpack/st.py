@@ -9,7 +9,7 @@ import bpack.utils
 import bpack.codecs
 
 from .enums import EBaseUnits
-from .codecs import get_sequence_groups, has_codec, get_codec
+from .codecs import has_codec, get_codec
 from .descriptors import field_descriptors
 
 
@@ -121,7 +121,7 @@ def _enum_converter_factory(type_, converters=None):
         return type_
 
 
-class Decoder(bpack.codecs.Decoder):
+class Decoder(bpack.codecs.BaseStructDecoder):
     """Struct based data decoder.
 
     Default byte-order: MSB.
@@ -134,10 +134,6 @@ class Decoder(bpack.codecs.Decoder):
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
-        super().__init__(descriptor)
-
-        assert bpack.bitorder(descriptor) is None
-
         byteorder = bpack.byteorder(descriptor)
         # assert all(descr.order for descr in field_descriptors(descriptor))
         byteorder = byteorder.value
@@ -161,33 +157,14 @@ class Decoder(bpack.codecs.Decoder):
             if bpack.utils.is_enum_type(field_descr.type)
         )
 
-        self._codec = struct.Struct(fmt)
-        self._converters = [
+        codec = struct.Struct(fmt)
+        converters = [
             (idx, converters_map[field_descr.type])
-            for idx, field_descr in enumerate(
-                field_descriptors(self.descriptor))
+            for idx, field_descr in enumerate(field_descriptors(descriptor))
             if field_descr.type in converters_map
         ]
-        self._groups = get_sequence_groups(descriptor)
-
-    @property
-    def format(self) -> str:
-        """Return the :mod:`struct` format string."""
-        return self._codec.format
-
-    def decode(self, data: bytes):
-        """Decode binary data and return a record object."""
-        values = list(self._codec.unpack(data))
-
-        for idx, func in self._converters:
-            values[idx] = func(values[idx])
-
-        for type_, slice_ in self._groups[::-1]:
-            subtype = type_(values[slice_])
-            del values[slice_]
-            values.insert(slice_.start, subtype)
-
-        return self.descriptor(*values)
+        super().__init__(descriptor, codec, converters)
+        assert bpack.bitorder(descriptor) is None
 
 
 decoder = bpack.codecs.make_codec_decorator(Decoder)

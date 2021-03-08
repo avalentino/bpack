@@ -129,7 +129,8 @@ def get_codec_type(descriptor) -> Type[CodecType]:
         return type(codec_)
 
 
-def get_sequence_groups(descriptor, offset=0, groups=None):
+def _get_sequence_groups(descriptor, offset=0, groups=None,
+                         record_factory=None):
     """Return slices to group values belonging to sequence fields.
 
     If the descriptor contains sequence fields this function returns a
@@ -143,22 +144,88 @@ def get_sequence_groups(descriptor, offset=0, groups=None):
     if groups is None:
         groups = []
 
+    initial_offset = offset
+
     for descr in field_descriptors(descriptor):
         if bpack.is_descriptor(descr.type):
-            groups.extend(get_sequence_groups(descr.type, offset))
-            nfields = len(bpack.fields(descr.type))                     # noqa
-            slice_ = slice(offset, offset + nfields)
-
-            def to_record(values, func=descr.type):
-                return func(*values)
-
+            n_fields = len(bpack.fields(descr.type))  # noqa
+            slice_ = slice(offset, offset + n_fields)
+            if record_factory is not None:
+                to_record = record_factory(descr.type)
+            else:
+                def to_record(values, type_=descr.type):
+                    return type_(*values)
             groups.append((to_record, slice_))
-            offset += nfields
+            # the groups list is visited in reverse order to preserve indices
+            subgroups, n_items = _get_sequence_groups(
+                descr.type, offset, record_factory=record_factory)
+            groups.extend(subgroups)
+            offset += n_items
         elif descr.repeat is not None:
-            sequence_type = bpack.utils.sequence_type(descr.type, error=True)
+            sequence_type = bpack.utils.sequence_type(descr.type,
+                                                      error=True)
             slice_ = slice(offset, offset + descr.repeat)
             groups.append((sequence_type, slice_))
             offset += descr.repeat
         else:
             offset += 1
-    return groups
+
+    return groups, offset - initial_offset
+
+
+class BaseStructDecoder(Decoder):
+    def __init__(self, descriptor, codec, converters=None):
+        super().__init__(descriptor)
+        self._codec = codec
+        self._converters = converters
+        self._groups = self._get_sequence_groups(descriptor)
+
+    @property
+    def format(self) -> str:
+        """Return the format string."""
+        return self._codec.format
+
+    @classmethod
+    def _record_factory(cls, type_):
+        assert (bpack.is_descriptor(type_) and
+                bpack.baseunits(type_) is cls.baseunits)
+
+        if has_codec(type_, Decoder):
+            decoder_ = get_codec(type_)
+            if not isinstance(decoder_, cls):
+                decoder_ = cls(type_)
+        else:
+            decoder_ = cls(type_)
+
+        converters = getattr(decoder_, '_converters', None)
+
+        def to_record(values, converters=converters, type_=type_):
+            if converters:
+                values = list(values)
+                for idx, func in converters:
+                    values[idx] = func(values[idx])
+            return type_(*values)
+
+        return to_record
+
+    def _get_sequence_groups(self, descriptor):
+        groups, _ = _get_sequence_groups(descriptor,
+                                         record_factory=self._record_factory)
+        return groups
+
+    def _from_flat_list(self, values):
+        # visit in reverse order to preserve indices
+        for type_, slice_ in self._groups[::-1]:
+            subrecord = type_(values[slice_])
+            del values[slice_]
+            values.insert(slice_.start, subrecord)
+
+        for idx, func in self._converters:
+            values[idx] = func(values[idx])
+
+        return self.descriptor(*values)
+
+    def decode(self, data: bytes):
+        """Decode binary data and return a record object."""
+        values = list(self._codec.unpack(data))
+        return self._from_flat_list(values)
