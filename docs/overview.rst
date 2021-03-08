@@ -51,10 +51,12 @@ Limitations
 * currently it is assumed that all fields in a binary record share the
   same bit/byte order. The management of different byte order in the same
   binary record is, in principle, possible but not planned at the moment.
+* sequence types can only contain basic numeric types; nested sequences,
+  sequences of enums or sequences of records are not allowed at the moment.
 * record nesting is only possible for records having the same base-units,
   bits or bytes, and compatible decoder types eventually.
-* Sequence types can only contain basic numeric types; nested sequences,
-  sequences of enums or sequences of records are not allowed at the moment.
+* currently the :mod:`bpack.np` currently has a limited (incomplete) support
+  to record nesting.
 
 
 Possible additional features still not implemented
