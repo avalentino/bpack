@@ -193,18 +193,18 @@ class BaseStructDecoder(Decoder):
         if has_codec(type_, Decoder):
             decoder_ = get_codec(type_)
             if not isinstance(decoder_, cls):
-                decoder_ = cls(type_)
+                decoder_ = cls(type_)                           # noqa
         else:
-            decoder_ = cls(type_)
+            decoder_ = cls(type_)                               # noqa
 
-        converters = getattr(decoder_, '_converters', None)
+        converters_ = getattr(decoder_, '_converters', None)
 
-        def to_record(values, converters=converters, type_=type_):
+        def to_record(values, converters=converters_, record_type=type_):
             if converters:
                 values = list(values)
                 for idx, func in converters:
                     values[idx] = func(values[idx])
-            return type_(*values)
+            return record_type(*values)
 
         return to_record
 

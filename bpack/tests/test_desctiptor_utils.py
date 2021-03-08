@@ -89,8 +89,8 @@ def test_calcsize():
     assert bpack.calcsize(Record()) == 16
     assert bpack.calcsize(Record, EBaseUnits.BYTES) == 16
     assert bpack.calcsize(Record, EBaseUnits.BITS) == 16 * 8
-    assert bpack.calcsize(Record, 'bytes') == 16
-    assert bpack.calcsize(Record, 'bits') == 16 * 8
+    assert bpack.calcsize(Record, 'bytes') == 16                    # noqa
+    assert bpack.calcsize(Record, 'bits') == 16 * 8                 # noqa
 
     @bpack.descriptor(baseunits=EBaseUnits.BITS)
     class Record:
