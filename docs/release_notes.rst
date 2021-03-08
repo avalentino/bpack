@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.8.0 (UNRELEASED)
+bpack v0.7.1 (08/03/2021)
 -------------------------
 
 * Improved User Guide
