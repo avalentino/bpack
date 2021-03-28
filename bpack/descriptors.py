@@ -477,7 +477,7 @@ def is_descriptor(obj) -> bool:
 def asdict(obj, *, dict_factory=dict) -> dict:
     """Return the fields of a record as a new dictionary.
 
-     The returned dictionary maps field names to field values.
+    The returned dictionary maps field names to field values.
 
     If given, 'dict_factory' will be used instead of built-in dict.
     The function applies recursively to field values that are
@@ -485,6 +485,17 @@ def asdict(obj, *, dict_factory=dict) -> dict:
     tuples, lists, and dicts.
     """
     return dataclasses.asdict(obj, dict_factory=dict_factory)
+
+
+def astuple(obj, *, tuple_factory=tuple) -> Sequence:
+    """Return the fields of a dataclass instance as a new tuple of field values.
+
+    If given, 'tuple_factory' will be used instead of built-in tuple.
+    The function applies recursively to field values that are
+    dataclass instances. This will also look into built-in containers:
+    tuples, lists, and dicts.
+    """
+    return dataclasses.astuple(obj, tuple_factory=tuple_factory)
 
 
 def calcsize(obj, units: Optional[EBaseUnits] = None) -> int:

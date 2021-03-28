@@ -5,7 +5,7 @@ encode/decode binary data.
 """
 
 from .descriptors import (                                      # noqa: F401
-    descriptor, field, fields, asdict, is_descriptor, is_field,
+    descriptor, field, fields, asdict, astuple, is_descriptor, is_field,
     baseunits, byteorder, bitorder, calcsize,
 )
 from .enums import EBaseUnits, EByteOrder, EBitOrder            # noqa: F401
