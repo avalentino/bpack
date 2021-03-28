@@ -55,8 +55,8 @@ Limitations
   sequences of enums or sequences of records are not allowed at the moment.
 * record nesting is only possible for records having the same base-units,
   bits or bytes, and compatible decoder types eventually.
-* currently the :mod:`bpack.np` currently has a limited (incomplete) support
-  to record nesting.
+* currently the :mod:`bpack.np` has a limited (incomplete) support to record
+  nesting.
 
 
 Possible additional features still not implemented
