@@ -22,7 +22,7 @@ BACKEND_TYPE = EBaseUnits.BYTES
 
 _TYPE_SIGNED_AND_SIZE_TO_STR = {
     # type, signed, size
-    (bool, None, 1): 'B',
+    (bool, None, 1): '?',
     (int, None, 1): 'b',        # default
     (int, False, 1): 'B',
     (int, True, 1): 'b',
