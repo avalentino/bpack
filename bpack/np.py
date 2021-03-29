@@ -126,10 +126,12 @@ def _encode_converter_factory(type_):
             # TODO: harmonize with other backends that use 'ascii'
             return x.encode('utf-8')
     elif bpack.is_descriptor(type_):
-        def converter(x):
-            # TODO: check if the recursive behaviour of astuple is OK
-            #       in this context
-            return bpack.astuple(x, tuple_factory=list)
+        # astuple works recursively so nested descriptors have been
+        # already converted into sequences
+        #
+        # def converter(x):
+        #     return bpack.astuple(x, tuple_factory=list)
+        pass
 
     return converter
 
@@ -190,9 +192,9 @@ class Codec(bpack.codecs.Codec):
         return out
 
     def encode(self, record):
-        # TODO: check if the recursive behaviour of astuple is OK
-        #       in this context
-        values = bpack.astuple(record, tuple_factory=list)
+        # exploit the recursive behaviour of astuple
+        values = bpack.astuple(record)  # , tuple_factory=list)
+        values = list(values)  # nested record and sequences stay tuples
         for idx, func in self._encode_converters:
             values[idx] = func(values[idx])
         return np.array(tuple(values), dtype=self.dtype).tobytes()

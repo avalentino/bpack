@@ -238,4 +238,10 @@ class BaseStructDecoder(Decoder):
         values = bpack.astuple(record, tuple_factory=list)
         for idx, func in self._encode_converters:
             values[idx] = func(values[idx])
+
+        # visit in natural order
+        for type_, slice_ in self._groups:
+            idx = slice_.start
+            values[idx:idx+1] = values[idx]  # sequences
+
         return self._codec.pack(*values)
