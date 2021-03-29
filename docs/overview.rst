@@ -16,8 +16,9 @@ Features
 
 * declarative description of binary data structures
 * specification of data structures up to *bit* level
-* automatic codec generation form data descriptors
-* data decoding
+* automatic *codec* generation form data descriptors
+* decoding (form binary data to Python objects)
+* encoding (form Python objects to binary data)
 * backend:
 
   - :mod:`bpack.st` backend based on the :mod:`struct` module of
@@ -56,13 +57,12 @@ Limitations
 * record nesting is only possible for records having the same base-units,
   bits or bytes, and compatible decoder types eventually.
 * currently the :mod:`bpack.np` has a limited (incomplete) support to record
-  nesting.
+  nesting and encoding capabilities.
 
 
 Possible additional features still not implemented
 --------------------------------------------------
 
-* data encoding (packing)
 * user defined converters
 * support for complex and datetime data types
 

@@ -9,11 +9,6 @@ Core concepts
 * describe binary data structures
 * encode/decode binary data to/form Python object
 
-.. note::
-
-   Currently the encoding feature is still not implemented,
-   see also :doc:`overview`.
-
 
 Descriptors
 ~~~~~~~~~~~
@@ -57,12 +52,12 @@ The design is strongly inspired to the one of the :mod:`dataclasses` package
 of the Python standard library.
 
 
-Decoders
-~~~~~~~~
+Codecs
+~~~~~~
 
 Once a binary structure is defined, the *bpack* package allows to
-automatically generate :class:`Decoder` objects that are able
-to convert binary data into a Python objects:
+automatically generate :class:`Codec` objects that are able
+to convert binary data into a Python objects and vice versa:
 
 .. testcode::
 
@@ -70,8 +65,8 @@ to convert binary data into a Python objects:
 
    binary_data = b'\x18-DT\xfb!\t@\x15\xcd[\x07'
 
-   decoder = bpack.st.Decoder(BinaryRecord)
-   record = decoder.decode(binary_data)
+   codec = bpack.st.Codec(BinaryRecord)
+   record = codec.decode(binary_data)
 
    assert record.field_1 == 3.141592653589793
    assert record.field_2 == 123456789
@@ -82,18 +77,30 @@ to convert binary data into a Python objects:
 
    BinaryRecord(field_1=3.141592653589793, field_2=123456789)
 
+.. testcode::
 
-In the example above it has been used the :class:`bpack.st.Decoder` class
+    encoded_data = codec.encode(record)
+    assert binary_data == encoded_data
+
+    print('binary_data: ', binary_data)
+    print('encoded_data:', encoded_data)
+
+.. testoutput::
+
+    binary_data:  b'\x18-DT\xfb!\t@\x15\xcd[\x07'
+    encoded_data: b'\x18-DT\xfb!\t@\x15\xcd[\x07'
+
+In the example above it has been used the :class:`bpack.st.Codec` class
 form the :mod:`bpack.st` module.
 
-Please note that the decoder class (:class:`bpack.st.Decoder`)
+Please note that the decoder class (:class:`bpack.st.Codec`)
 
 * takes in input the *descriptor* (i.e. the type) of the binary data
   structure, and
-* return a *decoder* object which is capable to decode only binary data
+* return a *codec* object which is capable to encode/decode only binary data
   organized according to the *descriptor* received at the instantiation
-  time. If one need to decode a differed data structure than it is necessary
-  to instantiate a different decoder.
+  time. If one need to encode/decode a differed data structure than it is
+  necessary to instantiate a different codec.
 
 The :mod:`bpack.st` module used in the example is just one of the, so called,
 *backends* available in *bpack*.
@@ -297,7 +304,7 @@ Currently supported data types are:
    The ``str`` type in Python is used to represent unicode strings.
    The conversion of this kind of strings form/to binary format requires
    some form of decoding/encoding.
-   *Bpack* codecs (see `Data decoders`_) convert ``str`` data form/to
+   *Bpack* codecs (see `Data codecs`_) convert ``str`` data form/to
    ``bytes`` strings using the "UTF-8" encoding.
 
    Please note that the *size* of a ``str`` field still describes the
@@ -726,8 +733,8 @@ The basic type character codes are:
 .. _`array interface`: https://numpy.org/doc/stable/reference/arrays.interface.html
 
 
-Data decoders
--------------
+Data codecs
+-----------
 
 Backends
 ~~~~~~~~
@@ -741,7 +748,7 @@ Currently *bpack* provides the:
 * :mod:`bpack.bs` backend, based on the bitstruct_ package to decode
   binary data described at bit level, i.e. with fields that can have size
   expressed in terms of number of bits (also smaller that 8).
-* :mod:`bpack.np` backend, based on numpy_
+* :mod:`bpack.np` backend, based on numpy_ (limited encoding capabilities)
 
 Additionally a :mod:`bpack.ba` backend, feature incomplete, is also provided
 mainly for benchmarking purposes. The :mod:`bpack.ba` backend is based on the
@@ -752,18 +759,18 @@ bitarray_ package.
 .. _numpy: https://numpy.org
 
 
-Decoder objects
-~~~~~~~~~~~~~~~
+Coded objects
+~~~~~~~~~~~~~
 
-Each backend provides a ``Decoder`` class that can be used to instantiate
-a *decoder* objects.
+Each backend provides a ``Codec`` class that can be used to instantiate
+a *codec* objects.
 
-Please refer to the `Decoders`_ section for a description of basic concepts
+Please refer to the `Codecs`_ section for a description of basic concepts
 of how decoders work.
 
-Decoders are instantiated passing to the ``Decoder`` class a binary data
+Decoders are instantiated passing to the ``Codec`` class a binary data
 record *descriptor*.
-Each *decoder* has
+Each *codec* has
 
 * a ``descriptor`` property by which it is possible to access the *descriptor*
   associated to the ``Decoder`` instance
@@ -771,22 +778,33 @@ Each *decoder* has
   by the ``Decoder`` class
 * a ``decode(data: bytes)`` method that takes in input a string of
   :class:`bytes` and returns an instance of the record type specified
-  at the instantiation of the *decoder* object
+  at the instantiation of the *codec* object
+* a ``encode(record)`` method that takes in input an instance of the record
+  type specified at the instantiation of the *codec* object (a Python object)
+  and returns a string of :class:`bytes`
 
-Details on the ``Decoder`` API can be found in:
+Details on the ``Codec`` API can be found in:
 
-* :class:`bpack.bs.Decoder`,
-* :class:`bpack.np.Decoder`,
-* :class:`bpack.st.Decoder`
+* :class:`bpack.bs.Codec`,
+* :class:`bpack.np.Codec`,
+* :class:`bpack.st.Codec`
+
+.. note::
+
+   the :mod:`bpack.ba` backend does not provides encoding capabilities
+   so no :class:`bpack.ba.Codec` class exists.
+   A :class:`bpack.ba.Decoder` class exists instead providing only decoding
+   capabilities.
 
 
-Decoder decorator
-~~~~~~~~~~~~~~~~~
+Codec decorator
+~~~~~~~~~~~~~~~
 
-Each backend provides also a ``@decoder`` decorator the can be used to
+Each backend provides also a ``@codec`` decorator the can be used to
 add to a ^descriptor^ direct decoding capabilities.
-In particular the ``frompytes(data: bytes)`` class method is added to the
-descriptor to be able to write code as the following:
+In particular the ``frombytes(data: bytes)`` class method and the
+``tobytes()`` method are added to the descriptor to be able to write code
+as the following:
 
 
 .. testcode::
@@ -794,7 +812,7 @@ descriptor to be able to write code as the following:
    import bpack
    import bpack.st
 
-   @bpack.st.decoder
+   @bpack.st.codec
    @bpack.descriptor
    class BinaryRecord:
        field_1: float = bpack.field(size=8)
@@ -808,3 +826,14 @@ descriptor to be able to write code as the following:
 .. testoutput::
 
    BinaryRecord(field_1=3.141592653589793, field_2=123456789)
+
+.. testcode::
+
+   encoded_data = record.tobytes()
+   assert binary_data == encoded_data
+
+   print(encoded_data)
+
+.. testoutput::
+
+   b'\x18-DT\xfb!\t@\x15\xcd[\x07'

@@ -14,4 +14,3 @@ Miscellanea *To Do* list
 
 * nested records and repeat (test)
 * typing in generated methods (.frombytes) TBD
-

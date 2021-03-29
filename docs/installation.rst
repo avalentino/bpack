@@ -37,7 +37,7 @@ To run the test suite it is necessary to have pytest_ installed:
 
   $ python3 -m pytest --pyargs bpack
 
-This only tests decoder backends for which the necessary dependencies
+This only tests codec backends for which the necessary dependencies
 are available.
 To run a complete test please make sure to install all optional dependencies
 and testing libraries:
