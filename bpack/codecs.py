@@ -188,17 +188,32 @@ class BaseStructCodec(Codec):
         return self._codec.format
 
     @classmethod
+    def _get_decoder(cls, descr):
+        assert (bpack.is_descriptor(descr) and
+                bpack.baseunits(descr) is cls.baseunits)
+
+        if has_codec(descr, Decoder):
+            decoder_ = get_codec(descr)
+            return decoder_
+
+        decoder_ = cls(descr)                               # noqa
+        return decoder_
+
+    @classmethod
+    def _get_encoder(cls, descr):
+        assert (bpack.is_descriptor(descr) and
+                bpack.baseunits(descr) is cls.baseunits)
+
+        if has_codec(descr, Encoder):
+            encoder_ = get_codec(descr)
+            return encoder_
+
+        encoder_ = cls(descr)                               # noqa
+        return encoder_
+
+    @classmethod
     def _record_factory(cls, type_):
-        assert (bpack.is_descriptor(type_) and
-                bpack.baseunits(type_) is cls.baseunits)
-
-        if has_codec(type_, Decoder):
-            decoder_ = get_codec(type_)
-            if not isinstance(decoder_, cls):
-                decoder_ = cls(type_)                           # noqa
-        else:
-            decoder_ = cls(type_)                               # noqa
-
+        decoder_ = cls._get_decoder(type_)
         converters_ = getattr(decoder_, '_decode_converters', None)
 
         def to_record(values, converters=converters_, record_type=type_):
