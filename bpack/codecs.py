@@ -173,7 +173,7 @@ def _get_sequence_groups(descriptor, offset=0, groups=None,
     return groups, offset - initial_offset
 
 
-class BaseStructDecoder(Decoder):
+class BaseStructCodec(Codec):
     def __init__(self, descriptor, codec,
                  decode_converters, encode_converters):
         super().__init__(descriptor)

@@ -94,7 +94,7 @@ def _endianess_to_str(order: EByteOrder) -> str:
     return order.value
 
 
-class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
+class Codec(bpack.codecs.BaseStructCodec):
     """Bitstruct based codec.
 
     Default bit-order: MSB.
@@ -124,7 +124,7 @@ class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
         )
         fmt = fmt + byteorder  # byte order
 
-        # initialize BaseStructDecoder attributes
+        # initialize BaseStructCodec attributes
         self._codec = BitStruct(fmt)
         self._decode_converters = self._get_decode_converters(descriptor)
         self._encode_converters = self._get_encode_converters(descriptor)

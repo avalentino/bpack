@@ -143,7 +143,7 @@ def _enum_encode_converter_factory(type_, converters_map=None):
     return from_enum
 
 
-class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
+class Codec(bpack.codecs.BaseStructCodec):
     """Struct based codec.
 
     Default byte-order: MSB.
