@@ -1222,6 +1222,28 @@ class TestMultiNestedRecord:
         encoded_data = self._record_to_data(record)
         assert NestedRecord.frombytes(encoded_data) == record
 
+    def test_encode_nested_record_two_levels(self, backend):
+        class EEnum(enum.Enum):
+            ONE = 1
+            FOUR = 4
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel02:
+            field_01: EEnum = bpack.field(size=4, default=EEnum.ONE)
+            field_02: int = bpack.field(size=4, default=2)
+
+        @backend.codec
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class NestedRecord:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: RecordLevel02 = RecordLevel02()
+            field_3: int = bpack.field(size=4, default=3)
+            field_4: RecordLevel02 = RecordLevel02(EEnum.FOUR, 5)
+
+        record = NestedRecord()
+        encoded_data = self._record_to_data(record)
+        assert record.tobytes() == encoded_data
+
     def test_decode_nested_record_three_levels(self, backend):
         class EEnum(enum.Enum):
             ONE = 1
@@ -1251,6 +1273,36 @@ class TestMultiNestedRecord:
         record = NestedRecord()
         encoded_data = self._record_to_data(record)
         assert NestedRecord.frombytes(encoded_data) == record
+
+    def test_encode_nested_record_three_levels(self, backend):
+        class EEnum(enum.Enum):
+            ONE = 1
+            TWO = 2
+            SEVEN = 7
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel03:
+            field_001: EEnum = bpack.field(size=4, default=EEnum.ONE)
+            field_002: int = bpack.field(size=4, default=2)
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel02:
+            field_01: int = bpack.field(size=4, default=1)
+            field_02: RecordLevel03 = RecordLevel03(EEnum.TWO, 3)
+            field_03: int = bpack.field(size=4, default=4)
+
+        @backend.codec
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class NestedRecord:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: RecordLevel02 = RecordLevel02()
+            field_3: int = bpack.field(size=4, default=5)
+            field_4: RecordLevel02 = RecordLevel02(
+                6, RecordLevel03(EEnum.SEVEN, 8), 9)
+
+        record = NestedRecord()
+        encoded_data = self._record_to_data(record)
+        assert record.tobytes() == encoded_data
 
     def test_decode_nested_record_four_levels(self, backend):
         class EEnum(enum.Enum):
@@ -1288,3 +1340,40 @@ class TestMultiNestedRecord:
         record = NestedRecord()
         encoded_data = self._record_to_data(record)
         assert NestedRecord.frombytes(encoded_data) == record
+
+    def test_encode_nested_record_four_levels(self, backend):
+        class EEnum(enum.Enum):
+            ONE = 1
+            THREE = 3
+            TEN = 10
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel04:
+            field_0001: EEnum = bpack.field(size=4, default=EEnum.ONE)
+            field_0002: int = bpack.field(size=4, default=2)
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel03:
+            field_001: int = bpack.field(size=4, default=1)
+            field_002: RecordLevel04 = RecordLevel04()
+            field_003: int = bpack.field(size=4, default=3)
+
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class RecordLevel02:
+            field_01: int = bpack.field(size=4, default=1)
+            field_02: RecordLevel03 = RecordLevel03(
+                2, RecordLevel04(EEnum.THREE, 4), 5)
+            field_03: int = bpack.field(size=4, default=6)
+
+        @backend.codec
+        @bpack.descriptor(baseunits=backend.Decoder.baseunits)
+        class NestedRecord:
+            field_1: int = bpack.field(size=4, default=0)
+            field_2: RecordLevel02 = RecordLevel02()
+            field_3: int = bpack.field(size=4, default=7)
+            field_4: RecordLevel02 = RecordLevel02(
+                8, RecordLevel03(9, RecordLevel04(EEnum.TEN, 11), 12), 13)
+
+        record = NestedRecord()
+        encoded_data = self._record_to_data(record)
+        assert record.tobytes() == encoded_data
