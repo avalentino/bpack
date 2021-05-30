@@ -247,16 +247,17 @@ class BaseStructCodec(Codec):
         values = list(self._codec.unpack(data))
         return self._from_flat_list(values)
 
+    def _to_flat_list(self, record):
+        values = [
+            getattr(record, field.name) for field in bpack.fields(record)
+        ]
+        for slice_, func in self._encode_converters[::-1]:
+            idx = getattr(slice_, 'start', slice_)
+            values[slice_] = func(values[idx])
+
+        return values
+
     def encode(self, record) -> bytes:
-        # TODO: check if the recursive behaviour of astuple is OK
-        #       in this context
-        values = bpack.astuple(record, tuple_factory=list)
-        for idx, func in self._encode_converters:
-            values[idx] = func(values[idx])
-
-        # visit in natural order
-        for type_, slice_ in self._groups:
-            idx = slice_.start
-            values[idx:idx+1] = values[idx]  # sequences
-
+        """Encode a record object into binary data."""
+        values = self._to_flat_list(record)
         return self._codec.pack(*values)
