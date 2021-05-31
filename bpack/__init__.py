@@ -12,4 +12,4 @@ from .enums import EBaseUnits, EByteOrder, EBitOrder            # noqa: F401
 from .typing import T                                           # noqa: F401
 
 
-__version__ = '0.7.2.dev0'
+__version__ = '0.8.0.dev0'
