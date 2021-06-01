@@ -16,14 +16,17 @@ CODEC_ATTR_NAME = '__bpack_decoder__'
 class BaseCodec:
     baseunits: EBaseUnits
 
-    def __init__(self, descriptor):
-        self._descriptor = descriptor
-
-        if bpack.baseunits(descriptor) is not self.baseunits:
+    @classmethod
+    def _check_descriptor(cls, descriptor):
+        if bpack.baseunits(descriptor) is not cls.baseunits:
             raise ValueError(
-                f'{self.__class__.__module__}.{self.__class__.__name__} '
+                f'{cls.__module__}.{cls.__name__} '
                 f'only accepts descriptors with base units '
-                f'"{self.baseunits.value}"')
+                f'"{cls.baseunits.value}"')
+
+    def __init__(self, descriptor):
+        self._check_descriptor(descriptor)
+        self._descriptor = descriptor
 
     @property
     def descriptor(self):
@@ -175,9 +178,26 @@ def _get_sequence_groups(descriptor, offset=0, groups=None,
 
 
 class BaseStructCodec(Codec):
-    def __init__(self, descriptor, codec,
-                 decode_converters, encode_converters):
+    @staticmethod
+    @abc.abstractmethod
+    def _get_base_codec(descriptor):
+        pass
+
+    def __init__(self, descriptor, codec=None,
+                 decode_converters=None, encode_converters=None):
+        """Initializer.
+
+        The *descriptor* parameter* is a bpack record descriptor.
+        """
         super().__init__(descriptor)
+
+        if codec is None:
+            codec = self._get_base_codec(descriptor)
+        if decode_converters is None:
+            decode_converters = self._get_decode_converters(descriptor)
+        if encode_converters is None:
+            encode_converters = self._get_encode_converters(descriptor)
+
         self._codec = codec
         self._decode_converters = decode_converters
         self._encode_converters = encode_converters
@@ -247,6 +267,20 @@ class BaseStructCodec(Codec):
         """Decode binary data and return a record object."""
         values = list(self._codec.unpack(data))
         return self._from_flat_list(values)
+
+    @staticmethod
+    def _get_decode_converters_map(descriptor):
+        return {}
+
+    @classmethod
+    def _get_decode_converters(cls, descriptor):
+        converters_map = cls._get_decode_converters_map(descriptor)
+        converters = [
+            (idx, converters_map[field_descr.type])
+            for idx, field_descr in enumerate(field_descriptors(descriptor))
+            if field_descr.type in converters_map
+        ]
+        return converters
 
     @staticmethod
     def _get_encode_converters_map(descriptor):

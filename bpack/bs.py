@@ -102,16 +102,8 @@ class Codec(bpack.codecs.BaseStructCodec):
 
     baseunits = EBaseUnits.BITS
 
-    def __init__(self, descriptor):
-        """Initializer.
-
-        The *descriptor* parameter* is a bpack record descriptor.
-        """
-        # NOTE: early initialization of the super-class to perform checks
-        #       on the descriptor
-        super().__init__(descriptor, codec=None,
-                         decode_converters=[], encode_converters=[])
-
+    @staticmethod
+    def _get_base_codec(descriptor):
         byteorder = bpack.byteorder(descriptor)
         byteorder = _endianess_to_str(byteorder)
         bitorder = bpack.bitorder(descriptor).value
@@ -124,19 +116,15 @@ class Codec(bpack.codecs.BaseStructCodec):
         )
         fmt = fmt + byteorder  # byte order
 
-        # initialize BaseStructCodec attributes
-        self._codec = BitStruct(fmt)
-        self._decode_converters = self._get_decode_converters(descriptor)
-        self._encode_converters = self._get_encode_converters(descriptor)
+        return BitStruct(fmt)
 
     @staticmethod
-    def _get_decode_converters(descriptor):
-        converters = [
-            (idx, field_descr.type)
-            for idx, field_descr in enumerate(field_descriptors(descriptor))
+    def _get_decode_converters_map(descriptor):
+        return {
+            field_descr.type: field_descr.type
+            for field_descr in field_descriptors(descriptor)
             if bpack.utils.is_enum_type(field_descr.type)
-        ]
-        return converters
+        }
 
     @staticmethod
     def _get_encode_converters_map(descriptor):
