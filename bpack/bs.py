@@ -138,27 +138,18 @@ class Codec(bpack.codecs.BaseStructCodec):
         ]
         return converters
 
-    @classmethod
-    def _get_encode_converters(cls, descriptor):
+    @staticmethod
+    def _get_encode_converters_map(descriptor):
         def from_enum(x):
             return x.value
 
-        converters = []
-        for idx, field_descr in enumerate(field_descriptors(descriptor)):
+        converters_map = {
+            field_descr.type: from_enum
+            for field_descr in field_descriptors(descriptor)
             if (bpack.utils.is_enum_type(field_descr.type) and
-                    not issubclass(field_descr.type, int)):
-                converters.append((idx, from_enum))
-
-            elif bpack.is_descriptor(field_descr.type):
-                slice_ = slice(idx, idx + 1)
-                encoder_ = cls._get_encoder(field_descr.type)
-                converters.append((slice_, encoder_._to_flat_list))
-
-            elif field_descr.repeat is not None:
-                slice_ = slice(idx, idx + 1)
-                converters.append((slice_, lambda x: x))
-
-        return converters
+                not issubclass(field_descr.type, int))
+        }
+        return converters_map
 
 
 codec = bpack.codecs.make_codec_decorator(Codec)

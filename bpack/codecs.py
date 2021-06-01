@@ -122,6 +122,7 @@ def get_codec(descriptor) -> CodecType:
     return getattr(descriptor, CODEC_ATTR_NAME, None)
 
 
+# TODO: remove
 def get_codec_type(descriptor) -> Type[CodecType]:
     """Return the type of the codec attached to the input descriptor."""
     codec_ = getattr(descriptor, CODEC_ATTR_NAME, None)
@@ -246,6 +247,30 @@ class BaseStructCodec(Codec):
         """Decode binary data and return a record object."""
         values = list(self._codec.unpack(data))
         return self._from_flat_list(values)
+
+    @staticmethod
+    def _get_encode_converters_map(descriptor):
+        return {}
+
+    @classmethod
+    def _get_encode_converters(cls, descriptor):
+        converters_map = cls._get_encode_converters_map(descriptor)
+
+        converters = []
+        for idx, field_descr in enumerate(field_descriptors(descriptor)):
+            if field_descr.type in converters_map:
+                converters.append((idx, converters_map[field_descr.type]))
+
+            elif bpack.is_descriptor(field_descr.type):
+                slice_ = slice(idx, idx + 1)
+                encoder_ = cls._get_encoder(field_descr.type)
+                converters.append((slice_, encoder_._to_flat_list))
+
+            elif field_descr.repeat is not None:
+                slice_ = slice(idx, idx + 1)
+                converters.append((slice_, lambda x: x))
+
+        return converters
 
     def _to_flat_list(self, record):
         values = [

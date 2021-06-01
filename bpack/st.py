@@ -168,11 +168,11 @@ class Codec(bpack.codecs.BaseStructCodec):
             for field_descr in field_descriptors(descriptor, pad=True)
         )
 
-        codec = struct.Struct(fmt)
+        codec_ = struct.Struct(fmt)
         decode_converters = self._get_decode_converters(descriptor)
         encode_converters = self._get_encode_converters(descriptor)
 
-        super().__init__(descriptor, codec,
+        super().__init__(descriptor, codec_,
                          decode_converters=decode_converters,
                          encode_converters=encode_converters)
         assert bpack.bitorder(descriptor) is None
@@ -196,8 +196,8 @@ class Codec(bpack.codecs.BaseStructCodec):
 
         return converters
 
-    @classmethod
-    def _get_encode_converters(cls, descriptor):
+    @staticmethod
+    def _get_encode_converters_map(descriptor):
         converters_map = {
             str: lambda s: s.encode('ascii'),
         }
@@ -207,22 +207,7 @@ class Codec(bpack.codecs.BaseStructCodec):
             for field_descr in field_descriptors(descriptor)
             if bpack.utils.is_enum_type(field_descr.type)
         )
-
-        converters = []
-        for idx, field_descr in enumerate(field_descriptors(descriptor)):
-            if field_descr.type in converters_map:
-                converters.append((idx, converters_map[field_descr.type]))
-
-            elif bpack.is_descriptor(field_descr.type):
-                slice_ = slice(idx, idx + 1)
-                encoder_ = cls._get_encoder(field_descr.type)
-                converters.append((slice_, encoder_._to_flat_list))
-
-            elif field_descr.repeat is not None:
-                slice_ = slice(idx, idx + 1)
-                converters.append((slice_, lambda x: x))
-
-        return converters
+        return converters_map
 
 
 codec = bpack.codecs.make_codec_decorator(Codec)
