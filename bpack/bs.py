@@ -135,8 +135,8 @@ decoder = bpack.codecs.make_codec_decorator(Decoder)
 
 
 @functools.lru_cache()
-def _get_codec(nsamples: int, bits_per_sample, signed=False,
-               byteorder: str = '') -> bitstruct.CompiledFormat:
+def _get_sequence_codec(nsamples: int, bits_per_sample, signed=False,
+                        byteorder: str = '') -> bitstruct.CompiledFormat:
     nbits = nsamples * bits_per_sample
     outsize = math.ceil(nbits / 8)
     npad = outsize * 8 - nbits
@@ -181,8 +181,8 @@ def packbits(values, bits_per_sample: int, signed: bool = False,
     if (nsamples * bits_per_sample) % 8:
         warnings.warn(f'packing {nsamples} with {bits_per_sample} bits per '
                       f'sample requires padding')
-    encoder = _get_codec(nsamples, bits_per_sample,
-                         signed=signed, byteorder=byteorder)
+    encoder = _get_sequence_codec(nsamples, bits_per_sample,
+                                  signed=signed, byteorder=byteorder)
     return encoder.pack(*values)
 
 
@@ -206,6 +206,6 @@ def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False,
     signed integers.
     """
     nsamples = len(data) * 8 // bits_per_sample
-    decoder_ = _get_codec(nsamples, bits_per_sample,
-                          signed=signed, byteorder=byteorder)
+    decoder_ = _get_sequence_codec(nsamples, bits_per_sample,
+                                   signed=signed, byteorder=byteorder)
     return decoder_.unpack(data)
