@@ -263,8 +263,7 @@ def test_field_descriptors_iter_with_pad():
 
     types_ = [int, None, float, None]
 
-    field_descriptors = bpack.descriptors.field_descriptors(Record,
-                                                            pad=True)
+    field_descriptors = bpack.descriptors.field_descriptors(Record, pad=True)
     assert isinstance(field_descriptors, collections.abc.Iterable)
     field_descriptors = list(field_descriptors)
     assert all(isinstance(field_descr, BinFieldDescriptor)
@@ -274,8 +273,7 @@ def test_field_descriptors_iter_with_pad():
     assert sum(descr.size for descr in field_descriptors) == 24
     assert bpack.calcsize(Record) == 24
 
-    field_descriptors = bpack.descriptors.field_descriptors(Record(),
-                                                            pad=True)
+    field_descriptors = bpack.descriptors.field_descriptors(Record(), pad=True)
     assert isinstance(field_descriptors, collections.abc.Iterable)
     field_descriptors = list(field_descriptors)
     assert all(isinstance(field_descr, BinFieldDescriptor)
@@ -308,11 +306,10 @@ def test_get_field_descriptor_01():
 def test_get_field_descriptor_02():
     @bpack.descriptor
     class Record:
-        field_1: int = bpack.field(size=1, offset=2, default=0,
-                                   signed=True)
-        field_2: float = bpack.field(size=3, offset=4, default=0.1)
+        field_1: int = bpack.field(size=1, offset=2, default=0, signed=True)
+        field_2: float = bpack.field(size=4, offset=3, default=0.1)
 
-    data = [(int, 1, 2, True), (float, 3, 4, None)]
+    data = [(int, 1, 2, True), (float, 4, 3, None)]
     for field, (type_, size, offset, signed) in zip(bpack.fields(Record),
                                                     data):
         descr = bpack.descriptors.get_field_descriptor(field)
@@ -408,3 +405,34 @@ def test_field_descriptor_minimal_metadata():
     assert 'size' in descr_metadata
     assert descr_metadata['size'] == 1
     assert len(descr_metadata) == 1
+
+
+def test_asdict():
+    @bpack.descriptor
+    class Record:
+        field_1: int = bpack.field(size=2, default=0, signed=True)
+        field_2: float = bpack.field(size=4, default=0.1)
+
+    record = Record()
+    assert bpack.asdict(record) == dict(field_1=record.field_1,
+                                        field_2=record.field_2)
+
+
+def test_astuple():
+    @bpack.descriptor
+    class SubRecord:
+        field_2_1: int = bpack.field(size=2, default=0, signed=True)
+        field_2_2: float = bpack.field(size=4, default=0.1)
+
+    @bpack.descriptor
+    class Record:
+        field_1: str = bpack.field(size=20, default='field_3_value')
+        field_2: SubRecord = SubRecord()
+
+    record = Record()
+    values = (
+        record.field_1, (record.field_2.field_2_1, record.field_2.field_2_2),
+    )
+    assert bpack.astuple(record) == values
+    assert type(bpack.astuple(record)) is tuple
+    assert type(bpack.astuple(record, tuple_factory=list)) is list
