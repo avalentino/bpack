@@ -1,7 +1,7 @@
 """Base classes and utility functions for codecs."""
 
 import abc
-from typing import Optional, Type, Union
+from typing import Callable, NamedTuple, Optional, Type, Union
 
 import bpack.utils
 import bpack.descriptors
@@ -133,48 +133,22 @@ def get_codec_type(descriptor) -> Type[CodecType]:
         return type(codec_)
 
 
-def _get_sequence_groups(descriptor, offset=0, groups=None,
-                         record_factory=None):
-    """Return slices to group values belonging to sequence fields.
-
-    If the descriptor contains sequence fields this function returns a
-    list of slices that can be used to extract values belonging to
-    sequence fields from a flat list of all decoded values of the
-    record.
-
-    An empty list is returned if no sequence field is present in the
-    descriptor.
-    """
-    if groups is None:
-        groups = []
-
-    initial_offset = offset
-
-    for descr in field_descriptors(descriptor):
-        if bpack.is_descriptor(descr.type):
-            n_fields = len(bpack.fields(descr.type))  # noqa
-            slice_ = slice(offset, offset + n_fields)
-            if record_factory is not None:
-                to_record = record_factory(descr.type)
-            else:
-                def to_record(values, type_=descr.type):
-                    return type_(*values)
-            groups.append((to_record, slice_))
-            # the groups list is visited in reverse order to preserve indices
-            subgroups, n_items = _get_sequence_groups(
-                descr.type, offset, record_factory=record_factory)
-            groups.extend(subgroups)
-            offset += n_items
-        elif descr.repeat is not None:
-            sequence_type = bpack.utils.sequence_type(descr.type,
-                                                      error=True)
-            slice_ = slice(offset, offset + descr.repeat)
-            groups.append((sequence_type, slice_))
-            offset += descr.repeat
+def _get_flat_len(descriptor):
+    count = 0
+    for field_descr in field_descriptors(descriptor):
+        if bpack.is_descriptor(field_descr.type):
+            count += _get_flat_len(field_descr.type)
+        elif field_descr.repeat is not None:
+            count += field_descr.repeat
         else:
-            offset += 1
+            count += 1
+    return count
 
-    return groups, offset - initial_offset
+
+class ConverterInfo(NamedTuple):
+    func: Callable
+    src: Union[int, slice]
+    dst: Union[int, slice]
 
 
 class BaseStructCodec(Codec):
@@ -201,7 +175,7 @@ class BaseStructCodec(Codec):
         self._codec = codec
         self._decode_converters = decode_converters
         self._encode_converters = encode_converters
-        self._groups = self._get_sequence_groups(descriptor)
+        self._flat_len = _get_flat_len(descriptor)
 
     @property
     def format(self) -> str:
@@ -220,25 +194,6 @@ class BaseStructCodec(Codec):
         decoder_ = cls(descr)                               # noqa
         return decoder_
 
-    @classmethod
-    def _record_factory(cls, type_):
-        decoder_ = cls._get_decoder(type_)
-        converters_ = getattr(decoder_, '_decode_converters', None)
-
-        def to_record(values, converters=converters_, record_type=type_):
-            if converters:
-                values = list(values)
-                for func, idx in converters:
-                    values[idx] = func(values[idx])
-            return record_type(*values)
-
-        return to_record
-
-    def _get_sequence_groups(self, descriptor):
-        groups, _ = _get_sequence_groups(descriptor,
-                                         record_factory=self._record_factory)
-        return groups
-
     @staticmethod
     def _get_decode_converters_map(descriptor):
         return {}
@@ -246,23 +201,34 @@ class BaseStructCodec(Codec):
     @classmethod
     def _get_decode_converters(cls, descriptor):
         converters_map = cls._get_decode_converters_map(descriptor)
-        converters = [
-            (converters_map[field_descr.type], idx)
-            for idx, field_descr in enumerate(field_descriptors(descriptor))
-            if field_descr.type in converters_map
-        ]
+
+        converters = []
+        for idx, field_descr in enumerate(field_descriptors(descriptor)):
+            if field_descr.type in converters_map:
+                func = converters_map[field_descr.type]
+                converters.append(ConverterInfo(func, idx, idx))
+            elif bpack.is_descriptor(field_descr.type):
+                decoder_ = cls._get_decoder(field_descr.type)
+                n_items = decoder_._flat_len
+                src = slice(idx, idx + n_items)
+                func = decoder_._from_flat_list
+                converters.append(ConverterInfo(func, src, idx))
+            elif field_descr.repeat is not None:
+                sequence_type = bpack.utils.sequence_type(field_descr.type,
+                                                          error=True)
+                src = slice(idx, idx + field_descr.repeat)
+                converters.append(ConverterInfo(sequence_type, src, idx))
+
         return converters
 
     def _from_flat_list(self, values):
-        # visit in reverse order to preserve indices
-        for func, slice_ in self._groups[::-1]:
-            value = func(values[slice_])
-            del values[slice_]
-            values.insert(slice_.start, value)
-
-        for func, idx in self._decode_converters:
-            values[idx] = func(values[idx])
-
+        for func, src, dst in self._decode_converters:
+            if isinstance(src, int):
+                values[dst] = func(values[src])
+            else:
+                value = func(values[src])
+                del values[src]
+                values.insert(dst, value)
         return self.descriptor(*values)
 
     def decode(self, data: bytes):
