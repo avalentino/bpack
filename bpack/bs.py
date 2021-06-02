@@ -192,9 +192,9 @@ def packbits(values, bits_per_sample: int, signed: bool = False,
     if (nsamples * bits_per_sample) % 8:
         warnings.warn(f'packing {nsamples} with {bits_per_sample} bits per '
                       f'sample requires padding')
-    encoder = _get_sequence_codec(nsamples, bits_per_sample,
-                                  signed=signed, byteorder=byteorder)
-    return encoder.pack(*values)
+    encoder_ = _get_sequence_codec(nsamples, bits_per_sample,
+                                   signed=signed, byteorder=byteorder)
+    return encoder_.pack(*values)
 
 
 def unpackbits(data: bytes, bits_per_sample: int, signed: bool = False,
