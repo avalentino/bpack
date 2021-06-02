@@ -221,18 +221,6 @@ class BaseStructCodec(Codec):
         return decoder_
 
     @classmethod
-    def _get_encoder(cls, descr):
-        assert (bpack.is_descriptor(descr) and
-                bpack.baseunits(descr) is cls.baseunits)
-
-        if has_codec(descr, Encoder):
-            encoder_ = get_codec(descr)
-            return encoder_
-
-        encoder_ = cls(descr)                               # noqa
-        return encoder_
-
-    @classmethod
     def _record_factory(cls, type_):
         decoder_ = cls._get_decoder(type_)
         converters_ = getattr(decoder_, '_decode_converters', None)
@@ -251,6 +239,20 @@ class BaseStructCodec(Codec):
                                          record_factory=self._record_factory)
         return groups
 
+    @staticmethod
+    def _get_decode_converters_map(descriptor):
+        return {}
+
+    @classmethod
+    def _get_decode_converters(cls, descriptor):
+        converters_map = cls._get_decode_converters_map(descriptor)
+        converters = [
+            (idx, converters_map[field_descr.type])
+            for idx, field_descr in enumerate(field_descriptors(descriptor))
+            if field_descr.type in converters_map
+        ]
+        return converters
+
     def _from_flat_list(self, values):
         # visit in reverse order to preserve indices
         for type_, slice_ in self._groups[::-1]:
@@ -268,19 +270,17 @@ class BaseStructCodec(Codec):
         values = list(self._codec.unpack(data))
         return self._from_flat_list(values)
 
-    @staticmethod
-    def _get_decode_converters_map(descriptor):
-        return {}
-
     @classmethod
-    def _get_decode_converters(cls, descriptor):
-        converters_map = cls._get_decode_converters_map(descriptor)
-        converters = [
-            (idx, converters_map[field_descr.type])
-            for idx, field_descr in enumerate(field_descriptors(descriptor))
-            if field_descr.type in converters_map
-        ]
-        return converters
+    def _get_encoder(cls, descr):
+        assert (bpack.is_descriptor(descr) and
+                bpack.baseunits(descr) is cls.baseunits)
+
+        if has_codec(descr, Encoder):
+            encoder_ = get_codec(descr)
+            return encoder_
+
+        encoder_ = cls(descr)                               # noqa
+        return encoder_
 
     @staticmethod
     def _get_encode_converters_map(descriptor):
