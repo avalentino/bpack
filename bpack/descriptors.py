@@ -14,7 +14,7 @@ from .utils import classdecorator
 from .enums import EBaseUnits, EByteOrder, EBitOrder
 
 __all__ = [
-    'descriptor', 'is_descriptor', 'fields', 'asdict', 'calcsize',
+    'descriptor', 'is_descriptor', 'fields', 'asdict', 'astuple', 'calcsize',
     'baseunits', 'byteorder', 'bitorder', 'field', 'Field', 'is_field',
     'field_descriptors',
     'BinFieldDescriptor', 'get_field_descriptor', 'set_field_descriptor',
