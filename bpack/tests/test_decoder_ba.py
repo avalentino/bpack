@@ -17,8 +17,9 @@ bpack_ba = pytest.importorskip('bpack.ba')
     ids=['float16', 'float32', 'float64'])
 def test_float(size, data):
     backend = bpack_ba
+    codec = getattr(backend, 'codec', backend.decoder)
 
-    @backend.decoder
+    @codec
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
     class Record:
         field_1: float = bpack.field(size=size)
@@ -29,9 +30,10 @@ def test_float(size, data):
 
 def test_invalid_float_size():
     backend = bpack_ba
+    codec = getattr(backend, 'codec', backend.decoder)
 
     with pytest.raises(ValueError):
-        @backend.decoder
+        @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         class Record:                                                   # noqa
             field_1: float = bpack.field(size=80)
@@ -39,9 +41,10 @@ def test_invalid_float_size():
 
 def test_little_endian():
     backend = bpack_ba
+    codec = getattr(backend, 'codec', backend.decoder)
 
     with pytest.raises(NotImplementedError):
-        @backend.decoder
+        @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                           byteorder=bpack.EByteOrder.LE,
                           frozen=True)
@@ -51,9 +54,10 @@ def test_little_endian():
 
 def test_invalid_bitorder():
     backend = bpack_ba
+    codec = getattr(backend, 'codec', backend.decoder)
 
     with pytest.raises(NotImplementedError):
-        @backend.decoder
+        @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                           bitorder=bpack.EBitOrder.LSB,
                           frozen=True)
@@ -63,9 +67,10 @@ def test_invalid_bitorder():
 
 def test_sequence():
     backend = bpack_ba
+    codec = getattr(backend, 'codec', backend.decoder)
 
     with pytest.raises(TypeError):
-        @backend.decoder
+        @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         class Record:                                                   # noqa
             field_1: List[int] = bpack.field(size=4, signed=False,

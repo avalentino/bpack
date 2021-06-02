@@ -1,4 +1,4 @@
-"""Test bpack decoders."""
+"""Test bpack codecs."""
 
 import sys
 import enum
@@ -52,7 +52,9 @@ def test_backend(backend):
 
 @pytest.mark.parametrize('backend', ALL_BACKENDS)
 def test_attrs(backend):
-    @backend.decoder
+    codec = getattr(backend, 'codec', backend.decoder)
+
+    @codec
     @bpack.descriptor(baseunits=backend.BACKEND_TYPE)
     class Record:
         field_1: int = bpack.field(size=4, default=0)
@@ -425,6 +427,12 @@ BYTE_ENCODED_DATA_LE = bytes([
 ])
 
 
+def _fix_padding(data, refdata):
+    if refdata in {BYTE_ENCODED_DATA_BE, BYTE_ENCODED_DATA_LE}:
+        return data[:66] + b'xxxx' + data[70:]
+    return refdata
+
+
 @pytest.mark.parametrize(
     'backend, Record, encoded_data',
     [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
@@ -452,11 +460,19 @@ BYTE_ENCODED_DATA_LE = bytes([
          marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
 def test_decoder(backend, Record, encoded_data):                        # noqa
     decoded_data = Record()                                             # noqa
+
     decoder = backend.Decoder(Record)
     assert hasattr(decoder, 'baseunits')
     assert decoder.baseunits is bpack.baseunits(Record)
     record = decoder.decode(encoded_data)
     assert record == decoded_data
+
+    if hasattr(backend, 'Codec'):
+        codec = backend.Codec(Record)
+        assert hasattr(codec, 'baseunits')
+        assert codec.baseunits is bpack.baseunits(Record)
+        record = codec.decode(encoded_data)
+        assert record == decoded_data
 
 
 @pytest.mark.parametrize(
@@ -486,9 +502,95 @@ def test_decoder(backend, Record, encoded_data):                        # noqa
          marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
 def test_decoder_func(backend, Record, encoded_data):                   # noqa
     decoded_data = Record()                                             # noqa
+
     record_type = backend.decoder(Record)
     record = record_type.frombytes(encoded_data)
     assert record == decoded_data
+
+    if hasattr(backend, 'codec'):
+        record_type = backend.codec(Record)
+        record = record_type.frombytes(encoded_data)
+        assert record == decoded_data
+
+
+@pytest.mark.parametrize(
+    'backend, Record, encoded_data',
+    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
+     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
+     pytest.param(
+         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
+     pytest.param(
+         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, id='bs LE MSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, id='bs BE LSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available'))])
+def test_encoder(backend, Record, encoded_data):                        # noqa
+    record = Record()                                                   # noqa
+
+    encoder = backend.Encoder(Record)
+    assert hasattr(encoder, 'baseunits')
+    assert encoder.baseunits is bpack.baseunits(Record)
+    data = encoder.encode(record)
+    if backend.BACKEND_TYPE is bpack.EBaseUnits.BYTES:
+        data = _fix_padding(data, encoded_data)
+    assert data == encoded_data
+
+    codec = backend.Codec(Record)
+    assert hasattr(codec, 'baseunits')
+    assert codec.baseunits is bpack.baseunits(Record)
+    data = codec.encode(record)
+    if backend.BACKEND_TYPE is bpack.EBaseUnits.BYTES:
+        data = _fix_padding(data, encoded_data)
+    assert data == encoded_data
+
+
+@pytest.mark.parametrize(
+    'backend, Record, encoded_data',
+    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
+     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
+     pytest.param(
+         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
+     pytest.param(
+         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
+         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, id='bs LE MSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, id='bs BE LSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
+     pytest.param(
+         bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
+         marks=pytest.mark.skipif(not bpack_bs, reason='not available'))])
+def test_encoder_func(backend, Record, encoded_data):                   # noqa
+    record = Record()                                                   # noqa
+
+    record_type = backend.encoder(Record)
+    data = record_type.tobytes(record)
+    if backend.BACKEND_TYPE is bpack.EBaseUnits.BYTES:
+        data = _fix_padding(data, encoded_data)
+    assert data == encoded_data
+
+    record_type = backend.codec(Record)
+    data = record_type.tobytes(record)
+    if backend.BACKEND_TYPE is bpack.EBaseUnits.BYTES:
+        data = _fix_padding(data, encoded_data)
+    assert data == encoded_data
 
 
 @pytest.mark.parametrize('backend', BITS_BACKENDS)
@@ -541,8 +643,10 @@ def test_unsupported_type(backend):
     class CustomType:
         pass
 
+    codec = getattr(backend, 'codec', backend.decoder)
+
     with pytest.raises(TypeError):
-        @backend.decoder
+        @codec
         @bpack.descriptor(baseunits=backend.Decoder.baseunits, frozen=True)
         class Record:                                                   # noqa
             field_1: CustomType = bpack.field(size=8)
@@ -600,8 +704,10 @@ def test_bit_decoder_default_byteorder(backend):
 
 @pytest.mark.parametrize('backend', BITS_BACKENDS)
 def test_wrong_baseunits_bit(backend):
+    codec = getattr(backend, 'codec', backend.decoder)
+
     with pytest.raises(ValueError):
-        @backend.decoder
+        @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
         class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
@@ -609,8 +715,10 @@ def test_wrong_baseunits_bit(backend):
 
 @pytest.mark.parametrize('backend', BYTES_BACKENDS)
 def test_wrong_baseunits_byte(backend):
+    codec = getattr(backend, 'codec', backend.decoder)
+
     with pytest.raises(ValueError):
-        @backend.decoder
+        @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         class Record:                                                   # noqa
             field_1: int = bpack.field(size=8, default=1)
