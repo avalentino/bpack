@@ -109,7 +109,8 @@ class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
         """
         # NOTE: early initialization of the super-class to perform checks
         #       on the descriptor
-        super().__init__(descriptor, codec=None, converters=None)
+        super().__init__(descriptor, codec=None,
+                         decode_converters=[], encode_converters=[])
 
         byteorder = bpack.byteorder(descriptor)
         byteorder = _endianess_to_str(byteorder)
@@ -125,15 +126,30 @@ class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
 
         # initialize BaseStructDecoder attributes
         self._codec = BitStruct(fmt)
-        self._converters = [
+        self._decode_converters = self._get_decode_converters(descriptor)
+        self._encode_converters = self._get_encode_converters(descriptor)
+
+    @staticmethod
+    def _get_decode_converters(descriptor):
+        converters = [
             (idx, field_descr.type)
             for idx, field_descr in enumerate(field_descriptors(descriptor))
             if bpack.utils.is_enum_type(field_descr.type)
         ]
+        return converters
 
-    def encode(self, record) -> bytes:
-        values = list(bpack.asdict(record).values())
-        return self._codec.pack(*values)
+    @staticmethod
+    def _get_encode_converters(descriptor):
+        def from_enum(x):
+            return x.value
+
+        converters = [
+            (idx, from_enum)
+            for idx, field_descr in enumerate(field_descriptors(descriptor))
+            if (bpack.utils.is_enum_type(field_descr.type) and
+                not issubclass(field_descr.type, int))
+        ]
+        return converters
 
 
 codec = bpack.codecs.make_codec_decorator(Codec)

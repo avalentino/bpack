@@ -174,10 +174,12 @@ def _get_sequence_groups(descriptor, offset=0, groups=None,
 
 
 class BaseStructDecoder(Decoder):
-    def __init__(self, descriptor, codec, converters=None):
+    def __init__(self, descriptor, codec,
+                 decode_converters, encode_converters):
         super().__init__(descriptor)
         self._codec = codec
-        self._converters = converters
+        self._decode_converters = decode_converters
+        self._encode_converters = encode_converters
         self._groups = self._get_sequence_groups(descriptor)
 
     @property
@@ -197,7 +199,7 @@ class BaseStructDecoder(Decoder):
         else:
             decoder_ = cls(type_)                               # noqa
 
-        converters_ = getattr(decoder_, '_converters', None)
+        converters_ = getattr(decoder_, '_decode_converters', None)
 
         def to_record(values, converters=converters_, record_type=type_):
             if converters:
@@ -220,7 +222,7 @@ class BaseStructDecoder(Decoder):
             del values[slice_]
             values.insert(slice_.start, subrecord)
 
-        for idx, func in self._converters:
+        for idx, func in self._decode_converters:
             values[idx] = func(values[idx])
 
         return self.descriptor(*values)
@@ -229,3 +231,11 @@ class BaseStructDecoder(Decoder):
         """Decode binary data and return a record object."""
         values = list(self._codec.unpack(data))
         return self._from_flat_list(values)
+
+    def encode(self, record) -> bytes:
+        # TODO: check if the recursive behaviour of astuple is OK
+        #       in this context
+        values = bpack.astuple(record, tuple_factory=list)
+        for idx, func in self._encode_converters:
+            values[idx] = func(values[idx])
+        return self._codec.pack(*values)

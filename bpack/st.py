@@ -114,14 +114,33 @@ def _to_fmt(type_, size: Optional[int] = None, order: str = '',
             f'signed="{signed}", repeat="{repeat}"')
 
 
-def _enum_converter_factory(type_, converters=None):
-    converters = converters if converters is not None else dict()
+def _enum_decode_converter_factory(type_, converters_map=None):
+    converters_map = converters_map if converters_map is not None else dict()
     enum_item_type = bpack.utils.enum_item_type(type_)
-    if enum_item_type in converters:
-        base_converter = converters[enum_item_type]
-        return lambda x: type_(base_converter(x))
+    if enum_item_type in converters_map:
+        base_converter = converters_map[enum_item_type]
+
+        def to_enum(x):
+            return type_(base_converter(x))
     else:
-        return type_
+        to_enum = type_
+
+    return to_enum
+
+
+def _enum_encode_converter_factory(type_, converters_map=None):
+    converters_map = converters_map if converters_map is not None else dict()
+    enum_item_type = bpack.utils.enum_item_type(type_)
+    if enum_item_type in converters_map:
+        base_converter = converters_map[enum_item_type]
+
+        def from_enum(x):
+            return base_converter(x.value)
+    else:
+        def from_enum(x):
+            return x.value
+
+    return from_enum
 
 
 class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
@@ -149,33 +168,52 @@ class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
             for field_descr in field_descriptors(descriptor, pad=True)
         )
 
+        codec = struct.Struct(fmt)
+        decode_converters = self._get_decode_converters(descriptor)
+        encode_converters = self._get_encode_converters(descriptor)
+
+        super().__init__(descriptor, codec,
+                         decode_converters=decode_converters,
+                         encode_converters=encode_converters)
+        assert bpack.bitorder(descriptor) is None
+
+    @staticmethod
+    def _get_decode_converters(descriptor):
         converters_map = {
             str: lambda s: s.decode('ascii'),
-            bool: bool,
         }
         converters_map.update(
             (field_descr.type,
-             _enum_converter_factory(field_descr.type, converters_map))
+             _enum_decode_converter_factory(field_descr.type, converters_map))
             for field_descr in field_descriptors(descriptor)
             if bpack.utils.is_enum_type(field_descr.type)
         )
-
-        codec = struct.Struct(fmt)
         converters = [
             (idx, converters_map[field_descr.type])
             for idx, field_descr in enumerate(field_descriptors(descriptor))
             if field_descr.type in converters_map
         ]
-        super().__init__(descriptor, codec, converters)
-        assert bpack.bitorder(descriptor) is None
 
-    def encode(self, record) -> bytes:
-        values = list(bpack.asdict(record).values())
-        values = [
-            item.encode('ascii') if isinstance(item, str) else item
-            for item in values
+        return converters
+
+    @staticmethod
+    def _get_encode_converters(descriptor):
+        converters_map = {
+            str: lambda s: s.encode('ascii'),
+        }
+        converters_map.update(
+            (field_descr.type,
+             _enum_encode_converter_factory(field_descr.type, converters_map))
+            for field_descr in field_descriptors(descriptor)
+            if bpack.utils.is_enum_type(field_descr.type)
+        )
+        converters = [
+            (idx, converters_map[field_descr.type])
+            for idx, field_descr in enumerate(field_descriptors(descriptor))
+            if field_descr.type in converters_map
         ]
-        return self._codec.pack(*values)
+
+        return converters
 
 
 codec = bpack.codecs.make_codec_decorator(Codec)

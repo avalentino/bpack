@@ -87,23 +87,49 @@ def descriptor_to_dtype(descriptor) -> np.dtype:
     return dt
 
 
-def _converter_factory(type_):
+def _decode_converter_factory(type_):
     etype = bpack.utils.effective_type(type_)
     if bpack.utils.is_enum_type(type_):
         if etype is str:
             def converter(x, cls=type_):
+                # TODO: harmonize with other backends that use 'ascii'
                 return cls(x.tobytes().decode('utf-8'))
         else:
             def converter(x, cls=type_):
                 return cls(x)
     elif etype is str:
         def converter(x):
+            # TODO: harmonize with other backends that use 'ascii'
             return x.tobytes().decode('utf-8')
     elif bpack.is_descriptor(type_):
         def converter(x, cls=type_):
             return cls(*x)
     else:
         converter = None
+
+    return converter
+
+
+def _encode_converter_factory(type_):
+    converter = None
+    etype = bpack.utils.effective_type(type_)
+    if bpack.utils.is_enum_type(type_):
+        if etype is str:
+            def converter(x):
+                # TODO: harmonize with other backends that use 'ascii'
+                return x.value.encode('utf-8')
+        elif not issubclass(type_, int):
+            def converter(x, cls=type_):
+                return x.value
+    elif etype is str:
+        def converter(x):
+            # TODO: harmonize with other backends that use 'ascii'
+            return x.encode('utf-8')
+    elif bpack.is_descriptor(type_):
+        def converter(x):
+            # TODO: check if the recursive behaviour of astuple is OK
+            #       in this context
+            return bpack.astuple(x, tuple_factory=list)
 
     return converter
 
@@ -126,13 +152,22 @@ class Codec(bpack.codecs.Codec):
 
         assert bpack.bitorder(descriptor) is None
 
-        converters = [
-            (idx, _converter_factory(field_descr.type))
+        decode_converters = [
+            (idx, _decode_converter_factory(field_descr.type))
             for idx, field_descr in enumerate(field_descriptors(descriptor))
         ]
+        encode_converters = [
+            (idx, _encode_converter_factory(field_descr.type))
+            for idx, field_descr in enumerate(field_descriptors(descriptor))
 
+        ]
         self._dtype = descriptor_to_dtype(descriptor)
-        self._converters = [(idx, func) for idx, func in converters if func]
+        self._decode_converters = [
+            (idx, func) for idx, func in decode_converters if func
+        ]
+        self._encode_converters = [
+            (idx, func) for idx, func in encode_converters if func
+        ]
 
     @property
     def dtype(self):
@@ -141,11 +176,11 @@ class Codec(bpack.codecs.Codec):
     def decode(self, data: bytes, count: int = 1):
         """Decode binary data and return a record object."""
         v = np.frombuffer(data, dtype=self._dtype, count=count)
-        if self._converters:
+        if self._decode_converters:
             out = []
             for item in v:
-                item = list(item)
-                for idx, func in self._converters:
+                item = list(item)  # fields of the np record
+                for idx, func in self._decode_converters:
                     item[idx] = func(item[idx])
                 out.append(self.descriptor(*item))
         else:
@@ -154,9 +189,13 @@ class Codec(bpack.codecs.Codec):
             out = out[0]
         return out
 
-    def encode(self, record) -> bytes:
-        v = np.array([tuple(bpack.asdict(record).values())], dtype=self.dtype)
-        return v.tobytes()
+    def encode(self, record):
+        # TODO: check if the recursive behaviour of astuple is OK
+        #       in this context
+        values = bpack.astuple(record, tuple_factory=list)
+        for idx, func in self._encode_converters:
+            values[idx] = func(values[idx])
+        return np.array(tuple(values), dtype=self.dtype).tobytes()
 
 
 codec = bpack.codecs.make_codec_decorator(Codec)
