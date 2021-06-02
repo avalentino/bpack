@@ -8,7 +8,7 @@ import bpack
 bpack_np = pytest.importorskip('bpack.np')
 
 
-def test_sequence():
+def test_decode_sequence():
     backend = bpack_np
     bitorder = None
     size = 1
@@ -29,3 +29,8 @@ def test_sequence():
     for field, sequence_type in zip(bpack.fields(Record),
                                     (List[int], Sequence[int])):
         assert field.type == sequence_type
+
+
+# TODO
+# def test_encode_sequence():
+#     pass
