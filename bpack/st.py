@@ -13,7 +13,10 @@ from .codecs import has_codec, get_codec
 from .descriptors import field_descriptors
 
 
-__all__ = ['Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE']
+__all__ = [
+    'Decoder', 'decoder', 'Encoder', 'encoder', 'Codec', 'codec',
+    'BACKEND_NAME', 'BACKEND_TYPE',
+]
 
 
 BACKEND_NAME = 'bitstruct'
@@ -121,8 +124,8 @@ def _enum_converter_factory(type_, converters=None):
         return type_
 
 
-class Decoder(bpack.codecs.BaseStructDecoder):
-    """Struct based data decoder.
+class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
+    """Struct based codec.
 
     Default byte-order: MSB.
     """
@@ -166,5 +169,15 @@ class Decoder(bpack.codecs.BaseStructDecoder):
         super().__init__(descriptor, codec, converters)
         assert bpack.bitorder(descriptor) is None
 
+    def encode(self, record) -> bytes:
+        values = list(bpack.asdict(record).values())
+        values = [
+            item.encode('ascii') if isinstance(item, str) else item
+            for item in values
+        ]
+        return self._codec.pack(*values)
 
-decoder = bpack.codecs.make_codec_decorator(Decoder)
+
+codec = bpack.codecs.make_codec_decorator(Codec)
+Decoder = Encoder = Codec
+decoder = encoder = codec

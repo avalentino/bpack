@@ -17,7 +17,8 @@ from .descriptors import (
 
 
 __all__ = [
-    'Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE',
+    'Decoder', 'decoder', 'Encoder', 'encoder', 'Codec', 'codec',
+    'BACKEND_NAME', 'BACKEND_TYPE',
     'descriptor_to_dtype', 'unpackbits',
 ]
 
@@ -107,8 +108,8 @@ def _converter_factory(type_):
     return converter
 
 
-class Decoder(bpack.codecs.Decoder):
-    """Numpy based data decoder.
+class Codec(bpack.codecs.Codec):
+    """Numpy based codec.
 
     (Unicode) strings are treated as "utf-8" encoded byte strings.
     UCS4 encoded strings are not supported.
@@ -153,8 +154,14 @@ class Decoder(bpack.codecs.Decoder):
             out = out[0]
         return out
 
+    def encode(self, record) -> bytes:
+        v = np.array([tuple(bpack.asdict(record).values())], dtype=self.dtype)
+        return v.tobytes()
 
-decoder = bpack.codecs.make_codec_decorator(Decoder)
+
+codec = bpack.codecs.make_codec_decorator(Codec)
+Decoder = Encoder = Codec
+decoder = encoder = codec
 
 
 # --- bits packing/unpacking --------------------------------------------------

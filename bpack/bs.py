@@ -17,7 +17,8 @@ from .descriptors import field_descriptors
 
 
 __all__ = [
-    'Decoder', 'decoder', 'BACKEND_NAME', 'BACKEND_TYPE',
+    'Decoder', 'decoder', 'Encoder', 'encoder', 'Codec', 'codec',
+    'BACKEND_NAME', 'BACKEND_TYPE',
     'packbits', 'unpackbits',
 ]
 
@@ -93,8 +94,8 @@ def _endianess_to_str(order: EByteOrder) -> str:
     return order.value
 
 
-class Decoder(bpack.codecs.BaseStructDecoder):
-    """Bitstruct based data decoder.
+class Codec(bpack.codecs.Codec, bpack.codecs.BaseStructDecoder):
+    """Bitstruct based codec.
 
     Default bit-order: MSB.
     """
@@ -130,8 +131,14 @@ class Decoder(bpack.codecs.BaseStructDecoder):
             if bpack.utils.is_enum_type(field_descr.type)
         ]
 
+    def encode(self, record) -> bytes:
+        values = list(bpack.asdict(record).values())
+        return self._codec.pack(*values)
 
-decoder = bpack.codecs.make_codec_decorator(Decoder)
+
+codec = bpack.codecs.make_codec_decorator(Codec)
+Decoder = Encoder = Codec
+decoder = encoder = codec
 
 
 @functools.lru_cache()
