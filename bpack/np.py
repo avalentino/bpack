@@ -119,7 +119,7 @@ def _encode_converter_factory(type_):
                 # TODO: harmonize with other backends that use 'ascii'
                 return x.value.encode('utf-8')
         elif not issubclass(type_, int):
-            def converter(x, cls=type_):
+            def converter(x):
                 return x.value
     elif etype is str:
         def converter(x):
