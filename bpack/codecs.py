@@ -256,19 +256,24 @@ class BaseStructCodec(Codec):
     def _get_encode_converters(cls, descriptor):
         converters_map = cls._get_encode_converters_map(descriptor)
 
+        def nullop(x):
+            return x
+
         converters = []
         for idx, field_descr in enumerate(field_descriptors(descriptor)):
             if field_descr.type in converters_map:
-                converters.append((converters_map[field_descr.type], idx))
+                func = converters_map[field_descr.type]
+                converters.append(ConverterInfo(func, idx, idx))
 
             elif bpack.is_descriptor(field_descr.type):
-                slice_ = slice(idx, idx + 1)
                 encoder_ = cls._get_encoder(field_descr.type)
-                converters.append((encoder_._to_flat_list, slice_))
+                func = encoder_._to_flat_list
+                slice_ = slice(idx, idx + 1)
+                converters.append(ConverterInfo(func, idx, slice_))
 
             elif field_descr.repeat is not None:
                 slice_ = slice(idx, idx + 1)
-                converters.append((lambda x: x, slice_))
+                converters.append(ConverterInfo(nullop, idx, slice_))
 
         return converters
 
@@ -276,9 +281,8 @@ class BaseStructCodec(Codec):
         values = [
             getattr(record, field.name) for field in bpack.fields(record)
         ]
-        for func, slice_ in self._encode_converters[::-1]:
-            idx = getattr(slice_, 'start', slice_)
-            values[slice_] = func(values[idx])
+        for func, src, dst in self._encode_converters[::-1]:
+            values[dst] = func(values[src])
 
         return values
 
