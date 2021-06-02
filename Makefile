@@ -40,7 +40,6 @@ distclean: clean
 	@# $(RM) .DS_Store */.DS_Store */*/.DS_Store
 	@# $(RM) -r .idea
 
-
 api:
 	$(RM) -r docs/api
 	sphinx-apidoc --module-first --separate --no-toc --doc-project "bpack API" \
