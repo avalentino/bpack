@@ -39,10 +39,10 @@ def ba_to_float_factory(size, byteorder: str = '>',
     else:
         raise ValueError('floating point item size must be 16, 32 or 64 bits')
 
-    codec = struct.Struct(fmt)
+    codec_ = struct.Struct(fmt)
 
     def func(ba):
-        return codec.unpack(ba.tobytes())[0]
+        return codec_.unpack(ba.tobytes())[0]
 
     return func
 
