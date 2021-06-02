@@ -125,13 +125,14 @@ def _encode_converter_factory(type_):
         def converter(x):
             # TODO: harmonize with other backends that use 'ascii'
             return x.encode('utf-8')
-    elif bpack.is_descriptor(type_):
-        # astuple works recursively so nested descriptors have been
-        # already converted into sequences
-        #
-        # def converter(x):
-        #     return bpack.astuple(x, tuple_factory=list)
-        pass
+    # TODO: cleanup
+    # elif bpack.is_descriptor(type_):
+    #     # astuple works recursively so nested descriptors have been
+    #     # already converted into sequences
+    #     #
+    #     # def converter(x):
+    #     #     return bpack.astuple(x, tuple_factory=list)
+    #     pass
 
     return converter
 
