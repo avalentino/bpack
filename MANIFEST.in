@@ -4,4 +4,6 @@ prune .github
 include requirements-dev.txt tox.ini
 include docs/conf.py docs/Makefile docs/make.bat docs/spelling_wordlist.txt
 recursive-include docs *.rst *.rst_t
-recursive-include examples *.py *.rst *.txt
+# recursive-include examples *.py *.rst *.txt
+include examples/s1isp.py
+include examples/packet_decoding.py
