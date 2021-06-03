@@ -1,13 +1,13 @@
 Release Notes
 =============
 
-bpack v0.8.0 (UNRELEASED)
+bpack v0.8.0 (03/06/2021)
 -------------------------
 
 * New "encoding" feature. Records can be now encoded into binary strings
   using the :mod:`bpack.st` and :mod:`bpack.bs` backends.
   Previously only "decoding" was supported.
-
+  The :mod:`bpack.np` only implements a partial support to encoding currently.
 
 bpack v0.7.1 (08/03/2021)
 -------------------------
