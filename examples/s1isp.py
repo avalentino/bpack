@@ -282,8 +282,8 @@ if __name__ == '__main__':
                         format='%(asctime)s %(levelname)s: %(message)s')
 
     filename = (
-        'S1B_S3_RAW__0SDV_20200615T162409_20200615T162435_022046_029D76_F3E6.SAFE/'
-        's1b-s3-raw-s-vv-20200615t162409-20200615t162435-022046-029d76.dat'
+        'S1B_S3_RAW__0SDV_20210530T130904_20210530T130929_027134_033DC1_1AF2.SAFE/'
+        's1b-s3-raw-s-vv-20210530t130904-20210530t130929-027134-033dc1.dat'
     )
     if not os.path.exists(filename):
         sys.exit("""ERROR: sample product not available.
@@ -296,3 +296,12 @@ $ sentinelsat --name 'S1B_S3_RAW__0SDV_20200615T162409_20200615T162435_022046_02
     df = sequential_stream_decoder(filename)  # , maxcount=10)
     # print()
     # print(df.head())
+
+"""
+$ env PYTHONPATH=.. python3 s1isp.py 
+2021-06-03 08:56:31,783 INFO: start decoding: "S1B_S3_RAW__0SDV_20210530T130904_20210530T130929_027134_033DC1_1AF2.SAFE/s1b-s3-raw-s-vv-20210530t130904-20210530t130929-027134-033dc1.dat"
+decoded: 48941 packets [00:19, 2506.83 packets/s]
+2021-06-03 08:56:51,320 INFO: decoding complete (elapsed time: 0:00:19.537022)
+
+
+"""
