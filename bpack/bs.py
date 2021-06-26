@@ -6,6 +6,10 @@ import functools
 from typing import Optional
 
 import bitstruct
+try:
+    import bitstruct.c
+except ImportError:
+    pass
 
 import bpack
 import bpack.utils
@@ -27,14 +31,33 @@ BACKEND_NAME = 'bitstruct'
 BACKEND_TYPE = EBaseUnits.BITS
 
 
-class BitStruct(bitstruct.CompiledFormat):
-    def __init__(self, format: str):                                    # noqa
-        super().__init__(format)
+class BitStruct:
+    @staticmethod
+    def _simplified_fmt(format: str) -> Optional[str]:
+        fmt = format.replace('>', '')
+        if '<' in fmt:
+            return None
+        else:
+            return fmt
+
+    def __init__(self, format: str, names=None):                        # noqa
+        if hasattr(bitstruct, 'c'):
+            fmt = self._simplified_fmt(format)
+            if fmt is not None:
+                codec_ = bitstruct.c.compile(fmt, names)
+            else:
+                codec_ = bitstruct.compile(format, names)
+        else:
+            codec_ = bitstruct.compile(format, names)
+        self._bitstruct = codec_
         self._format: str = format
 
     @property
     def format(self) -> str:
         return self._format
+
+    def __getattr__(self, name):
+        return getattr(self._bitstruct, name)
 
 
 _TYPE_TO_STR = {
@@ -147,7 +170,7 @@ decoder = encoder = codec
 
 @functools.lru_cache()
 def _get_sequence_codec(nsamples: int, bits_per_sample, signed=False,
-                        byteorder: str = '') -> bitstruct.CompiledFormat:
+                        byteorder: str = '') -> BitStruct:
     nbits = nsamples * bits_per_sample
     outsize = math.ceil(nbits / 8)
     npad = outsize * 8 - nbits
@@ -161,7 +184,7 @@ def _get_sequence_codec(nsamples: int, bits_per_sample, signed=False,
         fmt += f'p{npad:d}'
 
     fmt += byteorder
-    return bitstruct.CompiledFormat(fmt)
+    return BitStruct(fmt)
 
 
 def packbits(values, bits_per_sample: int, signed: bool = False,
