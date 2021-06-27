@@ -5,11 +5,15 @@ import warnings
 import functools
 from typing import Optional
 
-import bitstruct
+
 try:
-    import bitstruct.c
+    import cbitstruct as bitstruct
 except ImportError:
-    pass
+    import bitstruct
+    try:
+        import bitstruct.c
+    except ImportError:
+        pass
 
 import bpack
 import bpack.utils
