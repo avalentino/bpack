@@ -3,15 +3,19 @@
 import re
 from typing import NamedTuple, Optional, Type, Union
 
+try:
+    from typing import _tp_cache  # noqa
+except ImportError:
+    def _tp_cache(x):
+        return x
+
 try:                                                        # pragma: no cover
-    from typing_extensions import _tp_cache                 # noqa
     # @COMPATIBILITY: with Python < 3.9
     from typing_extensions import Annotated
     # @COMPATIBILITY: with Python < 3.7 (and Python < 3.8.3)
     from typing_extensions import get_origin, get_args
 except ImportError:                                         # pragma: no cover
     from typing import Annotated, get_origin, get_args
-    from typing import _tp_cache                            # noqa
 
 from .enums import EByteOrder
 

@@ -5,6 +5,9 @@ bpack v0.8.1 (UNRELEASED)
 -------------------------
 
 * Drop ``setup.py``, no longer needed.
+* Improve compatibility with `typing-extensions`_ v4.0.
+
+.. _`typing-extensions`: https://pypi.org/project/typing-extensions
 
 
 bpack v0.8.0 (03/06/2021)
