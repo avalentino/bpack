@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.8.1 (UNRELEASED)
+bpack v0.8.1 (30/11/2021)
 -------------------------
 
 * Drop ``setup.py``, no longer needed.
