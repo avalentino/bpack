@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+bpack v0.8.2 (UNRELEASED)
+-------------------------
+
+* TBW
+
+
 bpack v0.8.1 (30/11/2021)
 -------------------------
 
@@ -10,7 +16,7 @@ bpack v0.8.1 (30/11/2021)
 * Use the compiled extension of `bitstruct`_ when available
   (and compatible with the specified format string).
 * Use `cbitsturct`_ when available (preferred over the
-  compiled extension of `bitstruct`_)
+  compiled extension of `bitstruct`_).
 
 .. _`typing-extensions`: https://pypi.org/project/typing-extensions
 .. _bitstruct: https://github.com/eerimoq/bitstruct
