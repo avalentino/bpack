@@ -37,6 +37,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
@@ -123,6 +124,12 @@ for module_name in ['bitarray', 'bitstruct', 'numpy']:
 intersphinx_mapping = {
     'https://docs.python.org/3/': None,
     'https://numpy.org/doc/stable/': None,
+}
+
+# -- Options for extlinks extension ------------------------------------------
+
+extlinks = {
+    'issue': ('https://github.com/avalentino/bpack/issues/%s', 'gh-'),
 }
 
 # -- Options for todo extension ----------------------------------------------
