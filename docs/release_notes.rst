@@ -7,8 +7,14 @@ bpack v0.8.1 (UNRELEASED)
 * Drop ``setup.py``, no longer needed.
 * Improve compatibility with `typing-extensions`_ v4.0
   (closes :issue:`1`).
+* Use the compiled extension of `bitstruct`_ when available
+  (and compatible with the specified format string).
+* Use `cbitsturct`_ when available (preferred over the
+  compiled extension of `bitstruct`_)
 
 .. _`typing-extensions`: https://pypi.org/project/typing-extensions
+.. _bitstruct: https://github.com/eerimoq/bitstruct
+.. _cbitsturct: https://github.com/qchateau/cbitstruct
 
 
 bpack v0.8.0 (03/06/2021)
