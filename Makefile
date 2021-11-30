@@ -19,7 +19,7 @@ help:
 	@echo "  api       - update the API source files in the documentation"
 
 sdist:
-	$(PYTHON) setup.py sdist
+	$(PYTHON) -m build --sdist --no-isolation
 
 wheel: sdist
 	$(PYTHON) -m pip wheel --wheel-dir dist dist/bpack*.tar.gz
