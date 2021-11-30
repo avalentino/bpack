@@ -4,7 +4,7 @@ Release Notes
 bpack v0.8.1 (UNRELEASED)
 -------------------------
 
-* TBW
+* Drop ``setup.py``, no longer needed.
 
 
 bpack v0.8.0 (03/06/2021)

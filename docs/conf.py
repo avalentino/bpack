@@ -14,8 +14,6 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-from setup import cfg                                           # noqa: E402
-
 
 # -- Project information -----------------------------------------------------
 
@@ -24,7 +22,8 @@ copyright = '2020-2021, Antonio Valentino'
 author = 'Antonio Valentino'
 
 # The full version, including alpha/beta/rc tags
-release = cfg['version']
+import bpack
+release = bpack.__version__
 
 master_doc = 'index'
 
