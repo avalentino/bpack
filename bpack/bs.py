@@ -45,14 +45,18 @@ class BitStruct:
             return fmt
 
     def __init__(self, format: str, names=None):                        # noqa
+        codec_ = None
         if hasattr(bitstruct, 'c'):
             fmt = self._simplified_fmt(format)
             if fmt is not None:
-                codec_ = bitstruct.c.compile(fmt, names)
-            else:
-                codec_ = bitstruct.compile(format, names)
-        else:
+                try:
+                    codec_ = bitstruct.c.compile(fmt, names)
+                except NotImplementedError:
+                    pass
+
+        if codec_ is None:
             codec_ = bitstruct.compile(format, names)
+
         self._bitstruct = codec_
         self._format: str = format
 
