@@ -4,7 +4,8 @@ Release Notes
 bpack v0.8.2 (UNRELEASED)
 -------------------------
 
-* TBW
+* Fallback to standard bitstruct if the bitstruct.c extension
+  does not support the format string
 
 
 bpack v0.8.1 (30/11/2021)
