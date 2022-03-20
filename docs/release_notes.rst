@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.8.2 (UNRELEASED)
+bpack v0.8.2 (20/03/2022)
 -------------------------
 
 * Fallback to standard bitstruct if the bitstruct.c extension
