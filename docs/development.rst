@@ -12,6 +12,8 @@ Project links
     https://github.com/avalentino/bpack/issues
 :CI:
     https://github.com/avalentino/bpack/actions
+:HTML documentation:
+    https://bpack.readthedocs.io
 
 
 Set-up the development environment
