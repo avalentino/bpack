@@ -34,7 +34,7 @@ def create_fn(
     args,
     body,
     *,
-    globals=None,
+    globals=None,  # noqa: A002
     locals=None,  # noqa: A002
     return_type=dataclasses.MISSING,
 ):

@@ -5,6 +5,7 @@ import string
 import pytest
 
 import bpack.typing
+from bpack.typing import TypeParams
 
 TYPE_CODES = "iufcS"
 UNSUPPORTED_TYPE_CODES = "?bBOatmMUV"
@@ -103,15 +104,18 @@ class TestStrToTypeParams:
 
 
 @pytest.mark.parametrize(
-    'typestr, type_, params',
-    [('i4', int, bpack.typing.TypeParams(None, int, 4, True)),
-     ('u2', int, bpack.typing.TypeParams(None, int, 2, False)),
-     ('f8', float, bpack.typing.TypeParams(None, float, 8, None)),
-     ('c16', complex, bpack.typing.TypeParams(None, complex, 16, None)),
-     ('S128', bytes, bpack.typing.TypeParams(None, bytes, 128, None)),
-     ('>i8', int, bpack.typing.TypeParams(bpack.EByteOrder.BE, int, 8, True)),
-     ('f', float, bpack.typing.TypeParams(None, float, None, None))],
-    ids=['i4', 'u2', 'f8', 'c16', 'S128', '>i8', 'f'])
+    "typestr, type_, params",
+    [
+        ("i4", int, TypeParams(None, int, 4, True)),
+        ("u2", int, TypeParams(None, int, 2, False)),
+        ("f8", float, TypeParams(None, float, 8, None)),
+        ("c16", complex, TypeParams(None, complex, 16, None)),
+        ("S128", bytes, TypeParams(None, bytes, 128, None)),
+        (">i8", int, TypeParams(bpack.EByteOrder.BE, int, 8, True)),
+        ("f", float, TypeParams(None, float, None, None)),
+    ],
+    ids=["i4", "u2", "f8", "c16", "S128", ">i8", "f"],
+)
 def test_type_annotation(typestr, type_, params):
     T = bpack.typing.T[typestr]  # noqa: N806
     assert isinstance(T(), type_)

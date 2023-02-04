@@ -100,7 +100,8 @@ class BitRecordBeMsb:
     field_28: int = bpack.field(size=32, default=2**31, signed=False)
 
 
-BIT_ENCODED_DATA_BE_MSB = b''.join([
+# fmt: off
+BIT_ENCODED_DATA_BE_MSB = [
     # default (unsigned)
     bytes([
         0b11001000, 0b00000000,                             # fields 1 to 3
@@ -123,7 +124,9 @@ BIT_ENCODED_DATA_BE_MSB = b''.join([
         0b11001000, 0b00000000,                             # fields 21 to 23
         0b10000000, 0b00000000, 0b00000000, 0b00000000,     # field_28 (sint32)
     ]),
-])
+]
+BIT_ENCODED_DATA_BE_MSB = b''.join(BIT_ENCODED_DATA_BE_MSB)
+# fmt: on
 
 
 @bpack.descriptor(
@@ -156,7 +159,8 @@ class BitRecordLeMsb:
     field_28: int = bpack.field(size=32, default=2**31, signed=False)
 
 
-BIT_ENCODED_DATA_LE_MSB = b''.join([
+# fmt: off
+BIT_ENCODED_DATA_LE_MSB = [
     # default (unsigned)
     bytes([
         0b11000000, 0b10000000,                             # fields 1 to 3
@@ -179,7 +183,9 @@ BIT_ENCODED_DATA_LE_MSB = b''.join([
         0b11000000, 0b10000000,                             # fields 21 to 23
         0b00000000, 0b00000000, 0b00000000, 0b10000000,     # field_28 (uint32)
     ]),
-])
+]
+BIT_ENCODED_DATA_LE_MSB = b''.join(BIT_ENCODED_DATA_LE_MSB)
+# fmt: on
 
 
 @bpack.descriptor(
@@ -212,7 +218,8 @@ class BitRecordBeLsb:
     field_28: int = bpack.field(size=32, default=2**31, signed=False)
 
 
-BIT_ENCODED_DATA_BE_LSB = b''.join([
+# fmt: off
+BIT_ENCODED_DATA_BE_LSB = [
     # default (unsigned)
     bytes([
         0b10010000, 0b00000001,                             # fields 1 to 3
@@ -235,7 +242,9 @@ BIT_ENCODED_DATA_BE_LSB = b''.join([
         0b10010000, 0b00000001,                             # fields 21 to 23
         0b00000000, 0b00000000, 0b00000000, 0b00000001,     # field_28 (sint32)
     ]),
-])
+]
+BIT_ENCODED_DATA_BE_LSB = b''.join(BIT_ENCODED_DATA_BE_LSB)
+# fmt: on
 
 
 @bpack.descriptor(
@@ -268,7 +277,8 @@ class BitRecordLeLsb:
     field_28: int = bpack.field(size=32, default=2**31, signed=False)
 
 
-BIT_ENCODED_DATA_LE_LSB = b''.join([
+# fmt: off
+BIT_ENCODED_DATA_LE_LSB = [
     # default (unsigned)
     bytes([
         0b10010001, 0b00000000,                             # fields 1 to 3
@@ -291,7 +301,9 @@ BIT_ENCODED_DATA_LE_LSB = b''.join([
         0b10010001, 0b00000000,                             # fields 21 to 23
         0b00000001, 0b00000000, 0b00000000, 0b00000000,     # field_28 (uint32)
     ]),
-])
+]
+BIT_ENCODED_DATA_LE_LSB = b''.join(BIT_ENCODED_DATA_LE_LSB)
+# fmt: on
 
 
 @bpack.descriptor(
@@ -330,7 +342,8 @@ class ByteRecordBe:
     field_20: bytes = bpack.field(size=4, offset=70, default=b"1234")
 
 
-BYTE_ENCODED_DATA_BE = bytes([
+# fmt: off
+BYTE_ENCODED_DATA_BE = [
     False,                                              # bool (8 bit)
 
     0b00000001,                                         # +1    sint8
@@ -365,7 +378,9 @@ BYTE_ENCODED_DATA_BE = bytes([
 
     # field_20
     0b00110001, 0b00110010, 0b00110011, 0b00110100,     # b'1234'   bytes
-])
+]
+BYTE_ENCODED_DATA_BE = bytes(BYTE_ENCODED_DATA_BE)
+# fmt: on
 
 
 @bpack.descriptor(
@@ -404,7 +419,8 @@ class ByteRecordLe:
     field_20: bytes = bpack.field(size=4, offset=70, default=b"1234")
 
 
-BYTE_ENCODED_DATA_LE = bytes([
+# fmt: off
+BYTE_ENCODED_DATA_LE = [
     False,                                              # bool (8 bit)
 
     0b00000001,                                         # +1    sint8
@@ -439,7 +455,9 @@ BYTE_ENCODED_DATA_LE = bytes([
 
     # field_20
     0b00110001, 0b00110010, 0b00110011, 0b00110100,     # b'1234'   bytes
-])
+]
+BYTE_ENCODED_DATA_LE = bytes(BYTE_ENCODED_DATA_LE)
+# fmt: on
 
 
 def _fix_padding(data, refdata):
@@ -1219,14 +1237,17 @@ class TestNestedRecord:
     def get_encoded_data(baseunits):
         if baseunits is bpack.EBaseUnits.BYTES:
             # TODO: use the default byte order
-            encoded_data = bytes([
+            # fmt: off
+            encoded_data = [
                 0b00000000, 0b00000000, 0b00000000, 0b00000000,
                 0b00000001, 0b00000000, 0b00000000, 0b00000000,
                 0b00000010, 0b00000000, 0b00000000, 0b00000000,
                 0b00000011, 0b00000000, 0b00000000, 0b00000000,
                 0b00000001, 0b00000000, 0b00000000, 0b00000000,
                 0b00000010, 0b00000000, 0b00000000, 0b00000000,
-            ])
+            ]
+            encoded_data = bytes(encoded_data)
+            # fmt: on
 
         else:  # baseunits is bpack.EBaseUnits.BITS:
             encoded_data = bytes([0b00000001, 0b00100011, 0b000010010])

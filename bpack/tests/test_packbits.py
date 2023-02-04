@@ -31,6 +31,7 @@ def _sample_data(
     bits_per_sample: int, nsamples: int = 256
 ) -> Tuple[bytes, Sequence[int]]:
     """Generate a packed data block having spb samples bps bits each."""
+    # fmt: off
     elementary_range = {
         2: bytes([0b00011011]),
         3: bytes([0b00000101, 0b00111001, 0b01110111]),
@@ -75,6 +76,7 @@ def _sample_data(
                   0b01111111, 0b01111111]),
         8: bytes(range(2 ** 8)),
     }
+    # fmt: on
     assert (nsamples * bits_per_sample) % 8 == 0
     base_range = elementary_range[bits_per_sample]
     nreplica = math.ceil(nsamples / 2**bits_per_sample)

@@ -12,10 +12,12 @@ bpack_ba = pytest.importorskip("bpack.ba")
 @pytest.mark.parametrize(
     "size, data",
     [
+        # fmt: off
         (16, bytes([0b00111100, 0b00000000])),
         (32, bytes([0b00111111, 0b10000000, 0b00000000, 0b00000000])),
         (64, bytes([0b00111111, 0b11110000, 0b00000000, 0b00000000,
                     0b00000000, 0b00000000, 0b00000000, 0b00000000])),
+        # fmt: on
     ],
     ids=["float16", "float32", "float64"],
 )
