@@ -108,7 +108,7 @@ BIT_ENCODED_DATA_BE_MSB = [
         0b00111111, 0b10000000, 0b00000000, 0b00000000,     # field_4 (float32)
     ]),
     b'abc',                                                 # field_5 (bytes)
-    'ABC'.encode('ascii'),                                  # field_6 (str)
+    b'ABC',                                                 # field_6 (str)
     bytes([                                         # 4 padding bits + field_8
         0b00000111, 0b11111111, 0b11111111, 0b11111111,
     ]),
@@ -167,7 +167,7 @@ BIT_ENCODED_DATA_LE_MSB = [
         0b00000000, 0b00000000, 0b10000000, 0b00111111,     # field_4 (float32)
     ]),
     b'abc',                                                 # field_5 (bytes)
-    'ABC'.encode('ascii'),                                  # field_6 (str)
+    b'ABC',                                  # field_6 (str)
     bytes([                                         # 4 padding bits + field_8
         0b00001111, 0b11111111, 0b11111111, 0b01111111,
     ]),

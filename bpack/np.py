@@ -262,7 +262,7 @@ class _BitUnpackParams(NamedTuple):
     mask: np.ndarray
 
 
-@functools.lru_cache()  # COPMPATIBILITY with Python3.7
+@functools.lru_cache()  # @COPMPATIBILITY with Python 3.7
 def _unpackbits_params(
     nbits: int,
     bits_per_sample: int,

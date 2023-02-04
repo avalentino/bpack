@@ -196,7 +196,7 @@ Decoder = Encoder = Codec
 decoder = encoder = codec
 
 
-@functools.lru_cache()
+@functools.lru_cache()  # @COPMPATIBILITY with Python 3.7
 def _get_sequence_codec(
     nsamples: int, bits_per_sample, signed=False, byteorder: str = ""
 ) -> BitStruct:

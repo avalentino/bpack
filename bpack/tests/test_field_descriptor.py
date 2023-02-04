@@ -476,10 +476,10 @@ class TestAnnotatedType:
             field_4: bpack.T[f"{byteorder}c4"]  # noqa: F821
             field_5: bpack.T[f"{byteorder}S4"]  # noqa: F821
 
-        fields = dict(
-            (field.name, get_field_descriptor(field))
+        fields = {
+            field.name: get_field_descriptor(field)
             for field in bpack.fields(Record)
-        )
+        }
 
         assert fields["field_1"].type == int
         assert fields["field_1"].size == 4
