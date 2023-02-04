@@ -1,7 +1,7 @@
 Binary data structures (un-)Packing library
 ===========================================
 
-:Copyright: 2020-2021, Antonio Valentino <antonio.valentino@tiscali.it>
+:Copyright: 2020-2023, Antonio Valentino <antonio.valentino@tiscali.it>
 
 .. badges
 

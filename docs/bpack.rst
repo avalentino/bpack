@@ -5,7 +5,7 @@ Binary data structures (un-)Packing library
 :HomePage:  https://github.com/avalentino/bpack
 :Author:    Antonio Valentino
 :Contact:   antonio.valentino@tiscali.it
-:Copyright: 2020-2022, Antonio Valentino <antonio.valentino@tiscali.it>
+:Copyright: 2020-2023, Antonio Valentino <antonio.valentino@tiscali.it>
 :Version:   |release|
 
 
