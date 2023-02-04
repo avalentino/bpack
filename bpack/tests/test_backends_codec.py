@@ -3,6 +3,7 @@
 import sys
 import enum
 import struct
+import functools
 
 from typing import List, Sequence
 
@@ -1036,9 +1037,9 @@ class TestNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: Record = Record()
+            field_2: Record = bpack.field(default_factory=Record)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: Record = Record()
+            field_4: Record = bpack.field(default_factory=Record)
 
         assert NestedRecord.frombytes(encoded_data) == NestedRecord()
 
@@ -1055,9 +1056,9 @@ class TestNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: Record = Record()
+            field_2: Record = bpack.field(default_factory=Record)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: Record = Record()
+            field_4: Record = bpack.field(default_factory=Record)
 
         record = NestedRecord()
         assert record.tobytes() == encoded_data
@@ -1075,9 +1076,9 @@ class TestNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: Record = Record()
+            field_2: Record = bpack.field(default_factory=Record)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: Record = Record()
+            field_4: Record = bpack.field(default_factory=Record)
 
         assert NestedRecord.frombytes(encoded_data) == NestedRecord()
 
@@ -1094,9 +1095,9 @@ class TestNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: Record = Record()
+            field_2: Record = bpack.field(default_factory=Record)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: Record = Record()
+            field_4: Record = bpack.field(default_factory=Record)
 
         record = NestedRecord()
         assert record.tobytes() == encoded_data
@@ -1119,9 +1120,9 @@ class TestNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits, **kwargs)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: Record = Record()
+            field_2: Record = bpack.field(default_factory=Record)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: Record = Record()
+            field_4: Record = bpack.field(default_factory=Record)
 
         assert NestedRecord.frombytes(encoded_data) == NestedRecord()
 
@@ -1143,9 +1144,9 @@ class TestNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits, **kwargs)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: Record = Record()
+            field_2: Record = bpack.field(default_factory=Record)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: Record = Record()
+            field_4: Record = bpack.field(default_factory=Record)
 
         record = NestedRecord()
         assert record.tobytes() == encoded_data
@@ -1214,9 +1215,13 @@ class TestMultiNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: RecordLevel02 = RecordLevel02()
+            field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: RecordLevel02 = RecordLevel02(EEnum.FOUR, 5)
+            field_4: RecordLevel02 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel02, EEnum.FOUR, 5
+                )
+            )
 
         record = NestedRecord()
         encoded_data = self._record_to_data(record)
@@ -1236,9 +1241,13 @@ class TestMultiNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: RecordLevel02 = RecordLevel02()
+            field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=3)
-            field_4: RecordLevel02 = RecordLevel02(EEnum.FOUR, 5)
+            field_4: RecordLevel02 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel02, EEnum.FOUR, 5
+                )
+            )
 
         record = NestedRecord()
         encoded_data = self._record_to_data(record)
@@ -1258,17 +1267,21 @@ class TestMultiNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class RecordLevel02:
             field_01: int = bpack.field(size=4, default=1)
-            field_02: RecordLevel03 = RecordLevel03(EEnum.TWO, 3)
+            field_02: RecordLevel03 = bpack.field(
+                default_factory=functools.partial(RecordLevel03, EEnum.TWO, 3))
             field_03: int = bpack.field(size=4, default=4)
 
         @backend.decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: RecordLevel02 = RecordLevel02()
+            field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=5)
-            field_4: RecordLevel02 = RecordLevel02(
-                6, RecordLevel03(EEnum.SEVEN, 8), 9)
+            field_4: RecordLevel02 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel02, 6, RecordLevel03(EEnum.SEVEN, 8), 9
+                )
+            )
 
         record = NestedRecord()
         encoded_data = self._record_to_data(record)
@@ -1288,17 +1301,22 @@ class TestMultiNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class RecordLevel02:
             field_01: int = bpack.field(size=4, default=1)
-            field_02: RecordLevel03 = RecordLevel03(EEnum.TWO, 3)
+            field_02: RecordLevel03 = bpack.field(
+                default_factory=functools.partial(RecordLevel03, EEnum.TWO, 3)
+            )
             field_03: int = bpack.field(size=4, default=4)
 
         @backend.codec
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: RecordLevel02 = RecordLevel02()
+            field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=5)
-            field_4: RecordLevel02 = RecordLevel02(
-                6, RecordLevel03(EEnum.SEVEN, 8), 9)
+            field_4: RecordLevel02 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel02, 6, RecordLevel03(EEnum.SEVEN, 8), 9
+                )
+            )
 
         record = NestedRecord()
         encoded_data = self._record_to_data(record)
@@ -1318,24 +1336,34 @@ class TestMultiNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class RecordLevel03:
             field_001: int = bpack.field(size=4, default=1)
-            field_002: RecordLevel04 = RecordLevel04()
+            field_002: RecordLevel04 = bpack.field(
+                default_factory=RecordLevel04)
             field_003: int = bpack.field(size=4, default=3)
 
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class RecordLevel02:
             field_01: int = bpack.field(size=4, default=1)
-            field_02: RecordLevel03 = RecordLevel03(
-                2, RecordLevel04(EEnum.THREE, 4), 5)
+            field_02: RecordLevel03 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel03, 2, RecordLevel04(EEnum.THREE, 4), 5
+                )
+            )
             field_03: int = bpack.field(size=4, default=6)
 
         @backend.decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: RecordLevel02 = RecordLevel02()
+            field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=7)
-            field_4: RecordLevel02 = RecordLevel02(
-                8, RecordLevel03(9, RecordLevel04(EEnum.TEN, 11), 12), 13)
+            field_4: RecordLevel02 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel02,
+                    8,
+                    RecordLevel03(9, RecordLevel04(EEnum.TEN, 11), 12),
+                    13,
+                )
+            )
 
         record = NestedRecord()
         encoded_data = self._record_to_data(record)
@@ -1355,24 +1383,34 @@ class TestMultiNestedRecord:
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class RecordLevel03:
             field_001: int = bpack.field(size=4, default=1)
-            field_002: RecordLevel04 = RecordLevel04()
+            field_002: RecordLevel04 = bpack.field(
+                default_factory=RecordLevel04)
             field_003: int = bpack.field(size=4, default=3)
 
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class RecordLevel02:
             field_01: int = bpack.field(size=4, default=1)
-            field_02: RecordLevel03 = RecordLevel03(
-                2, RecordLevel04(EEnum.THREE, 4), 5)
+            field_02: RecordLevel03 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel03, 2, RecordLevel04(EEnum.THREE, 4), 5
+                )
+            )
             field_03: int = bpack.field(size=4, default=6)
 
         @backend.codec
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
         class NestedRecord:
             field_1: int = bpack.field(size=4, default=0)
-            field_2: RecordLevel02 = RecordLevel02()
+            field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=7)
-            field_4: RecordLevel02 = RecordLevel02(
-                8, RecordLevel03(9, RecordLevel04(EEnum.TEN, 11), 12), 13)
+            field_4: RecordLevel02 = bpack.field(
+                default_factory=functools.partial(
+                    RecordLevel02,
+                    8,
+                    RecordLevel03(9, RecordLevel04(EEnum.TEN, 11), 12),
+                    13,
+                )
+            )
 
         record = NestedRecord()
         encoded_data = self._record_to_data(record)

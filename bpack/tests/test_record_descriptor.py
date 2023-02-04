@@ -423,7 +423,7 @@ def test_nested_records():
     class NestedRecord:
         field_1: str = bpack.field(size=10, default='0123456789')
         field_2: Record = bpack.field(size=bpack.calcsize(Record),
-                                      default=Record())
+                                      default_factory=Record)
         field_3: int = bpack.field(size=4, default=3)
 
     record = Record()
@@ -440,7 +440,7 @@ def test_nested_records():
         class NestedRecord:                                             # noqa
             field_1: str = bpack.field(size=10, default='0123456789')
             field_2: Record = bpack.field(size=bpack.calcsize(Record) + 1,
-                                          default=Record())
+                                          default_factory=Record)
             field_3: int = bpack.field(size=4, default=3)
 
 
@@ -455,7 +455,7 @@ def test_nested_records_autosize(baseunits):
     @bpack.descriptor(baseunits=baseunits)
     class NestedRecord:
         field_1: int = bpack.field(size=4, default=1)
-        field_2: Record = Record()  # auto-size (bytes)
+        field_2: Record = bpack.field(default_factory=Record)  # autosize bytes
         field_3: int = bpack.field(size=4, default=4)
 
     nested_record_size = bpack.calcsize(NestedRecord, baseunits)

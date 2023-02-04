@@ -4,7 +4,7 @@ Release Notes
 bpack v0.8.3 (UNRELEASED)
 -------------------------
 
-* TBW
+* Fix compatibility with Python 3.11.
 
 
 bpack v0.8.2 (20/03/2022)

@@ -427,7 +427,7 @@ def test_astuple():
     @bpack.descriptor
     class Record:
         field_1: str = bpack.field(size=20, default='field_3_value')
-        field_2: SubRecord = SubRecord()
+        field_2: SubRecord = bpack.field(default_factory=SubRecord)
 
     record = Record()
     values = (
