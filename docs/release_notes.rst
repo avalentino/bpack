@@ -4,7 +4,8 @@ Release Notes
 bpack v0.8.3 (UNRELEASED)
 -------------------------
 
-* Fix compatibility with Python 3.11.
+* Fix compatibility with Python v3.11.
+* Move setup configuration form `setup.cfg` to `pyproject.toml`.
 
 
 bpack v0.8.2 (20/03/2022)

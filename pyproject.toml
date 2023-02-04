@@ -1,11 +1,74 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = 'setuptools.build_meta'
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "bpack"
+authors = [
+    {name = "Antonio Valentino", email = "antonio.valentino@tiscali.it"},
+]
+description = "Binary data structures (un-)packing library"
+readme = {file = "README.rst", content-type = "text/x-rst"}
+requires-python = ">=3.7"
+keywords = [
+    "binary",
+    "struct",
+    "descriptor",
+    "declarative",
+    "bit",
+    "unpack",
+    "pack"
+]
+license = {text = "Apache-2.0"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Utilities",
+]
+dependencies = [
+    'typing-extensions; python_version < "3.9"',
+]
+dynamic = ["version"]
+
+
+[project.optional-dependencies]
+test = ["pytest", "bitarray>=1.5.1", "bitstruct", "numpy"]
+bs = ["bitstruct"]
+ba = ["bitarray>=1.5.1"]
+np = ["numpy"]
+docs = ["sphinx", "sphinx_rtd_theme"]
+
+
+[project.urls]
+homepage = "https://github.com/avalentino/bpack"
+documentation = "https://bpack.readthedocs.io"
+repository = "https://github.com/avalentino/bpack.git"
+changelog = "https://github.com/avalentino/bpack/blob/main/docs/release_notes.rst"
+
+
+[tool.setuptools]
+packages = ["bpack", "bpack.tests"]
+zip-safe = true
+# license-files = ["LICENSE"]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "bpack.__version__"}
+
+
+[tool.pytest.ini_options]
+addopts = "--ignore=examples/"
 
 
 [tool.black]
 line-length = 79
 # target-version = ['py311']
+
 
 [tool.isort]
 profile = "black"

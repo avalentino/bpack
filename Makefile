@@ -2,7 +2,7 @@
 
 PYTHON=python3
 
-.PHONY: default help sdist wheel check clean distclean api lint
+.PHONY: default help dist check clean distclean api lint
 
 default: help
 
@@ -10,8 +10,6 @@ help:
 	@echo "Usage: make <TARGET>"
 	@echo "Available targets:"
 	@echo "  help      - print this help message"
-	@echo "  sdist     - generate the source distribution"
-	@echo "  wheel     - generate the (binary) wheel distribution"
 	@echo "  dist      - generate the distribution packages (source and wheel)"
 	@echo "  check     - run a full test (using tox)"
 	@echo "  clean     - clean build artifacts"
@@ -19,13 +17,8 @@ help:
 	@echo "  api       - update the API source files in the documentation"
 	@echo "  lint      - perform check with code linter (flake8, black)"
 
-sdist:
-	$(PYTHON) -m build --sdist --no-isolation
-
-wheel: sdist
-	$(PYTHON) -m pip wheel --wheel-dir dist dist/bpack*.tar.gz
-
-dist: sdist wheel
+dist:
+	$(PYTHON) -m build
 	$(PYTHON) -m twine check dist/*
 
 check:
