@@ -129,7 +129,7 @@ intersphinx_mapping = {
 # -- Options for extlinks extension ------------------------------------------
 
 extlinks = {
-    'issue': ('https://github.com/avalentino/bpack/issues/%s', 'gh-'),
+    'issue': ('https://github.com/avalentino/bpack/issues/%s', 'gh-%s'),
 }
 
 # -- Options for todo extension ----------------------------------------------
