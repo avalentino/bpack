@@ -1,7 +1,6 @@
 """Struct based codec for binary data structures."""
 
 import struct
-
 from typing import Optional
 
 import bpack
@@ -11,7 +10,6 @@ import bpack.codecs
 from .enums import EBaseUnits
 from .codecs import has_codec, get_codec
 from .descriptors import field_descriptors
-
 
 __all__ = [
     "Decoder",

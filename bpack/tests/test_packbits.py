@@ -12,6 +12,7 @@ except ImportError:  # pragma: no cover
 
 try:
     import bitstruct
+
     import bpack.bs as bpack_bs
 except ImportError:  # pragma: no cover
     bitstruct = None
@@ -19,6 +20,7 @@ except ImportError:  # pragma: no cover
 
 try:
     import numpy as np
+
     import bpack.np as bpack_np
 except ImportError:  # pragma: no cover
     np = None

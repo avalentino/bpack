@@ -1,9 +1,10 @@
 """Specific tests for the bitarray based decoder."""
 
 from typing import List, Sequence
-import pytest
-import bpack
 
+import pytest
+
+import bpack
 
 bpack_np = pytest.importorskip("bpack.np")
 

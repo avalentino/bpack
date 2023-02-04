@@ -6,7 +6,6 @@ import pytest
 
 import bpack.typing
 
-
 TYPE_CODES = "iufcS"
 UNSUPPORTED_TYPE_CODES = "?bBOatmMUV"
 INVALID_TYPE_CODES = set(string.printable) - set(

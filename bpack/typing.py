@@ -12,16 +12,17 @@ except ImportError:
 
 
 try:  # pragma: no cover
-    # @COMPATIBILITY: with Python < 3.9
-    from typing_extensions import Annotated
-
-    # @COMPATIBILITY: with Python < 3.7 (and Python < 3.8.3)
-    from typing_extensions import get_origin, get_args
+    from typing_extensions import (  # isort:skip
+        # @COMPATIBILITY: Python < 3.9
+        Annotated,
+        # @COMPATIBILITY: Python < 3.7 (and Python < 3.8.3)
+        get_args,
+        get_origin,
+    )
 except ImportError:  # pragma: no cover
     from typing import Annotated, get_origin, get_args
 
 from .enums import EByteOrder
-
 
 __all__ = ["T", "TypeParams", "is_annotated"]
 

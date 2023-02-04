@@ -17,7 +17,6 @@ from .descriptors import (
     BinFieldDescriptor,
 )
 
-
 __all__ = [
     "Decoder",
     "decoder",

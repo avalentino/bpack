@@ -9,7 +9,6 @@ import bpack.descriptors
 from .enums import EBaseUnits
 from .descriptors import field_descriptors
 
-
 __all__ = [
     "Codec",
     "Encoder",

@@ -7,8 +7,7 @@ import dataclasses
 import collections.abc
 from typing import Type, Union
 
-from .typing import is_annotated
-from .typing import get_origin, get_args, Annotated
+from .typing import is_annotated, get_origin, get_args, Annotated
 
 
 def classdecorator(func):

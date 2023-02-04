@@ -4,7 +4,6 @@ import pytest
 
 import bpack
 import bpack.st
-
 from bpack.codecs import has_codec, get_codec, get_codec_type
 
 try:

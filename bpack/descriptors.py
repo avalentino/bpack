@@ -8,10 +8,11 @@ import warnings
 import dataclasses
 from typing import Iterable, Optional, Sequence, Type, Union
 
-import bpack.typing
 import bpack.utils
-from .utils import classdecorator
+import bpack.typing
+
 from .enums import EBaseUnits, EByteOrder, EBitOrder
+from .utils import classdecorator
 
 __all__ = [
     "descriptor",

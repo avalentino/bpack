@@ -4,7 +4,6 @@ import sys
 import enum
 import struct
 import functools
-
 from typing import List, Sequence
 
 import pytest
@@ -1402,6 +1401,7 @@ class TestMultiNestedRecord:
     def _bits_record_to_data(self, record):
         # TODO: check
         import bitstruct
+
         from bpack import bs as _bs
 
         values = self._record_to_list(record)

@@ -2,7 +2,6 @@
 
 import sys
 import enum
-
 from typing import List
 
 import pytest

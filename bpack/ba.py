@@ -14,7 +14,6 @@ import bpack.codecs
 from .enums import EBaseUnits, EBitOrder, EByteOrder
 from .descriptors import field_descriptors
 
-
 __all__ = ["Decoder", "decoder", "BACKEND_NAME", "BACKEND_TYPE"]
 
 

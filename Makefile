@@ -49,5 +49,5 @@ api:
 lint:
 	$(PYTHON) -m flake8 --count --statistics bpack
 	$(PYTHON) -m pydocstyle --count bpack
-	# $(PYTHON) -m isort --check bpack
+	$(PYTHON) -m isort --check bpack
 	$(PYTHON) -m black --check bpack

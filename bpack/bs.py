@@ -5,7 +5,6 @@ import warnings
 import functools
 from typing import Optional
 
-
 try:
     import cbitstruct as bitstruct
 except ImportError:
@@ -23,7 +22,6 @@ import bpack.codecs
 from .enums import EBaseUnits, EByteOrder
 from .codecs import has_codec, get_codec
 from .descriptors import field_descriptors
-
 
 __all__ = [
     "Decoder",
