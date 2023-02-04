@@ -195,7 +195,7 @@ class Codec(bpack.codecs.Codec):
 
     @property
     def dtype(self):
-        """Return the numpy dtype corresponding to the `codec.descriptor`."""
+        """Return the numpy `dtype` corresponding to the `codec.descriptor`."""
         return self._dtype
 
     def decode(self, data: bytes, count: int = 1):

@@ -161,15 +161,15 @@ class BinFieldDescriptor:
             )
 
     def is_int_type(self) -> bool:
-        """Return True if the field is an integer or an integet subtype."""
+        """Return True if the field is an integer or a sub-type of integer."""
         return bpack.utils.is_int_type(self.type)
 
     def is_sequence_type(self) -> bool:
-        """Return True if the fiels is a sequence."""
+        """Return True if the field is a sequence."""
         return bpack.utils.is_sequence_type(self.type, error=True)
 
     def is_enum_type(self) -> bool:
-        """Return True if the fiels is an enum."""
+        """Return True if the field is an enum."""
         return bpack.utils.is_enum_type(self.type)
 
     @property
