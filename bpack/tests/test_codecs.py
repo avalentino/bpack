@@ -9,16 +9,21 @@ from bpack.codecs import has_codec, get_codec, get_codec_type
 
 try:
     import bpack.bs as bpack_bs
-except ImportError:                                         # pragma: no cover
+except ImportError:  # pragma: no cover
     bpack_bs = None
 
 
-@pytest.mark.parametrize('backend',
-                         [pytest.param(bpack.st, id='st'),
-                          pytest.param(bpack_bs, id='bs',
-                                       marks=pytest.mark.skipif(
-                                           not bpack_bs,
-                                           reason='not available'))])
+@pytest.mark.parametrize(
+    "backend",
+    [
+        pytest.param(bpack.st, id="st"),
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+    ],
+)
 def test_codec_helpers(backend):
     @backend.codec
     @bpack.descriptor(baseunits=backend.Decoder.baseunits)

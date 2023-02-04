@@ -12,18 +12,27 @@ import bpack.codecs
 
 from .enums import EBaseUnits
 from .descriptors import (
-    field_descriptors, get_field_descriptor, BinFieldDescriptor,
+    field_descriptors,
+    get_field_descriptor,
+    BinFieldDescriptor,
 )
 
 
 __all__ = [
-    'Decoder', 'decoder', 'Encoder', 'encoder', 'Codec', 'codec',
-    'BACKEND_NAME', 'BACKEND_TYPE',
-    'descriptor_to_dtype', 'unpackbits',
+    "Decoder",
+    "decoder",
+    "Encoder",
+    "encoder",
+    "Codec",
+    "codec",
+    "BACKEND_NAME",
+    "BACKEND_TYPE",
+    "descriptor_to_dtype",
+    "unpackbits",
 ]
 
 
-BACKEND_NAME = 'numpy'
+BACKEND_NAME = "numpy"
 BACKEND_TYPE = EBaseUnits.BYTES
 
 
@@ -38,17 +47,17 @@ def bin_field_descripor_to_dtype(field_descr: BinFieldDescriptor) -> np.dtype:
     typecode = np.dtype(etype).kind
 
     if etype in (bytes, str):
-        typecode = 'S'
+        typecode = "S"
     elif etype is int and not field_descr.signed:
-        typecode = 'u'
+        typecode = "u"
 
-    if typecode == 'O':
-        raise TypeError(f'unsupported type: {field_descr.type:!r}')
+    if typecode == "O":
+        raise TypeError(f"unsupported type: {field_descr.type:!r}")
 
     repeat = field_descr.repeat
-    repeat = repeat if repeat and repeat > 1 else ''
+    repeat = repeat if repeat and repeat > 1 else ""
 
-    return np.dtype(f'{repeat}{typecode}{size}')
+    return np.dtype(f"{repeat}{typecode}{size}")
 
 
 def descriptor_to_dtype(descriptor) -> np.dtype:
@@ -70,13 +79,13 @@ def descriptor_to_dtype(descriptor) -> np.dtype:
             dtype = descriptor_to_dtype(field_descr.type)
         else:
             dtype = bin_field_descripor_to_dtype(field_descr)
-        params['names'].append(field.name)
-        params['formats'].append(dtype)
-        params['offsets'].append(field_descr.offset)
+        params["names"].append(field.name)
+        params["formats"].append(dtype)
+        params["offsets"].append(field_descr.offset)
         # params['titles'].append('...')
 
     params = dict(params)  # numpy do not accept defaultdict
-    params['itemsize'] = bpack.calcsize(descriptor)
+    params["itemsize"] = bpack.calcsize(descriptor)
 
     dt = np.dtype(dict(params))
 
@@ -91,19 +100,27 @@ def _decode_converter_factory(type_):
     etype = bpack.utils.effective_type(type_)
     if bpack.utils.is_enum_type(type_):
         if etype is str:
+
             def converter(x, cls=type_):
                 # TODO: harmonize with other backends that use 'ascii'
-                return cls(x.tobytes().decode('utf-8'))
+                return cls(x.tobytes().decode("utf-8"))
+
         else:
+
             def converter(x, cls=type_):
                 return cls(x)
+
     elif etype is str:
+
         def converter(x):
             # TODO: harmonize with other backends that use 'ascii'
-            return x.tobytes().decode('utf-8')
+            return x.tobytes().decode("utf-8")
+
     elif bpack.is_descriptor(type_):
+
         def converter(x, cls=type_):
             return cls(*x)
+
     else:
         converter = None
 
@@ -115,16 +132,22 @@ def _encode_converter_factory(type_):
     etype = bpack.utils.effective_type(type_)
     if bpack.utils.is_enum_type(type_):
         if etype is str:
+
             def converter(x):
                 # TODO: harmonize with other backends that use 'ascii'
-                return x.value.encode('utf-8')
+                return x.value.encode("utf-8")
+
         elif not issubclass(type_, int):
+
             def converter(x):
                 return x.value
+
     elif etype is str:
+
         def converter(x):
             # TODO: harmonize with other backends that use 'ascii'
-            return x.encode('utf-8')
+            return x.encode("utf-8")
+
     # TODO: cleanup
     # elif bpack.is_descriptor(type_):
     #     # astuple works recursively so nested descriptors have been
@@ -162,7 +185,6 @@ class Codec(bpack.codecs.Codec):
         encode_converters = [
             (idx, _encode_converter_factory(field_descr.type))
             for idx, field_descr in enumerate(field_descriptors(descriptor))
-
         ]
         self._dtype = descriptor_to_dtype(descriptor)
         self._decode_converters = [
@@ -212,11 +234,11 @@ decoder = encoder = codec
 def _get_item_size(bits_per_sample: int) -> int:
     """Item size of the integer type that can take requested bits."""
     if bits_per_sample > 64 or bits_per_sample < 1:
-        raise ValueError(f'bits_per_sample: {bits_per_sample}')
+        raise ValueError(f"bits_per_sample: {bits_per_sample}")
     elif bits_per_sample <= 8:
         return 1
     else:
-        return 2**int(np.ceil(np.log2(bits_per_sample))-3)
+        return 2 ** int(np.ceil(np.log2(bits_per_sample)) - 3)
 
 
 def _get_buffer_size(bits_per_sample: int) -> int:
@@ -227,7 +249,7 @@ def _get_buffer_size(bits_per_sample: int) -> int:
 def _get_mask(nbits: int, dtype: str) -> np.ndarray:
     """Return a mask for dtype to select the nbits least significant bits."""
     shift = np.array(64 - nbits, dtype=np.uint32)
-    mask = np.array(0xffffffffffffffff) >> shift
+    mask = np.array(0xFFFFFFFFFFFFFFFF) >> shift
     return mask.astype(dtype)
 
 
@@ -242,16 +264,22 @@ class _BitUnpackParams(NamedTuple):
 
 
 @functools.lru_cache()  # COPMPATIBILITY with Python3.7
-def _unpackbits_params(nbits: int, bits_per_sample: int,
-                       samples_per_block: int, bit_offset: int,
-                       blockstride: int, signed: bool = False,
-                       byteorder: str = '>') -> _BitUnpackParams:
+def _unpackbits_params(
+    nbits: int,
+    bits_per_sample: int,
+    samples_per_block: int,
+    bit_offset: int,
+    blockstride: int,
+    signed: bool = False,
+    byteorder: str = ">",
+) -> _BitUnpackParams:
     assert nbits >= bit_offset
     if samples_per_block is None:
         if blockstride is not None:
             raise ValueError(
-                '"samples_per_block" cannot be computed automatically '
-                'when "blockstride" is provided')
+                "'samples_per_block' cannot be computed automatically "
+                "when 'blockstride' is provided"
+            )
         samples_per_block = (nbits - bit_offset) // bits_per_sample
     blocksize = bits_per_sample * samples_per_block
     if blockstride is None:
@@ -272,9 +300,8 @@ def _unpackbits_params(nbits: int, bits_per_sample: int,
     sizes = [bit_offset]
     if nblocks > 0:
         sizes.extend([bits_per_sample] * (samples_per_block - 1))
-        block_sizes = (
-                [bits_per_sample + pad] +
-                [bits_per_sample] * (samples_per_block - 1)
+        block_sizes = [bits_per_sample + pad] + [bits_per_sample] * (
+            samples_per_block - 1
         )
         sizes.extend(block_sizes * (nblocks - 1))
     if extra_samples:
@@ -294,22 +321,29 @@ def _unpackbits_params(nbits: int, bits_per_sample: int,
     index = np.clip(index, 0, nbits // 8 - 1)
 
     mask = _get_mask(bits_per_sample, buf_dtype)
-    shifts = (bit_offsets - byte_offsets * 8 + bits_per_sample)
+    shifts = bit_offsets - byte_offsets * 8 + bits_per_sample
     shifts = buf_itemsize * 8 - shifts
 
-    return _BitUnpackParams(samples=samples,
-                            dtype=dtype,
-                            buf_itemsize=buf_itemsize,
-                            buf_dtype=buf_dtype,
-                            index_map=index,
-                            shifts=shifts,
-                            mask=mask)
+    return _BitUnpackParams(
+        samples=samples,
+        dtype=dtype,
+        buf_itemsize=buf_itemsize,
+        buf_dtype=buf_dtype,
+        index_map=index,
+        shifts=shifts,
+        mask=mask,
+    )
 
 
-def unpackbits(data: bytes, bits_per_sample: int,
-               samples_per_block: Optional[int] = None, bit_offset: int = 0,
-               blockstride: Optional[int] = None, signed: bool = False,
-               byteorder: str = '>') -> np.ndarray:
+def unpackbits(
+    data: bytes,
+    bits_per_sample: int,
+    samples_per_block: Optional[int] = None,
+    bit_offset: int = 0,
+    blockstride: Optional[int] = None,
+    signed: bool = False,
+    byteorder: str = ">",
+) -> np.ndarray:
     """Unpack packed (integer) values form a string of bytes.
 
     Takes in input a string of bytes in which (integer) samples have been
@@ -329,22 +363,29 @@ def unpackbits(data: bytes, bits_per_sample: int,
     """
     if bit_offset == 0 and blockstride is None:
         if bits_per_sample == 1:
-            return np.unpackbits(np.frombuffer(data, dtype='uint8'))
+            return np.unpackbits(np.frombuffer(data, dtype="uint8"))
         elif bits_per_sample in {8, 16, 32, 64}:
             size = bits_per_sample // 8
             kind = "i" if signed else "u"
-            typestr = f'{byteorder}{kind}{size}'
+            typestr = f"{byteorder}{kind}{size}"
             return np.frombuffer(data, dtype=np.dtype(typestr))
 
     nbits = len(data) * 8
 
-    params = _unpackbits_params(nbits, bits_per_sample, samples_per_block,
-                                bit_offset, blockstride, signed, byteorder)
+    params = _unpackbits_params(
+        nbits,
+        bits_per_sample,
+        samples_per_block,
+        bit_offset,
+        blockstride,
+        signed,
+        byteorder,
+    )
     samples, dtype, buf_itemsize, buf_dtype, index_map, shifts, mask = params
 
-    npdata = np.frombuffer(data, dtype='u1')
+    npdata = np.frombuffer(data, dtype="u1")
     buf = np.empty(samples, dtype=buf_dtype)
-    bytesview = buf.view(dtype='u1').reshape(samples, buf_itemsize)
+    bytesview = buf.view(dtype="u1").reshape(samples, buf_itemsize)
     bytesview[...] = npdata[index_map]
     outdata = ((buf >> shifts) & mask).astype(dtype)
 

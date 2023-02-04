@@ -11,7 +11,7 @@ import bpack.utils
 
 class TestEnumType:
     @staticmethod
-    @pytest.mark.parametrize('value', [1, 1.1, None, 'a', b'a'])
+    @pytest.mark.parametrize("value", [1, 1.1, None, "a", b"a"])
     def test_enum_type(value):
         class EEnumType(enum.Enum):
             A = value
@@ -21,7 +21,7 @@ class TestEnumType:
     @staticmethod
     def test_invalid_enum_type():
         class EInvalidEnumType:
-            A = 'a'
+            A = "a"
 
         with pytest.raises(TypeError):
             assert bpack.utils.enum_item_type(EInvalidEnumType)
@@ -29,8 +29,8 @@ class TestEnumType:
     @staticmethod
     def test_unsupported_enum_type():
         class EEnumType(enum.Enum):
-            A = 'a'
-            B = 'b'
+            A = "a"
+            B = "b"
             c = 1
 
         with pytest.raises(TypeError):
@@ -72,21 +72,24 @@ def test_effective_type():
     assert bpack.utils.effective_type(float) is float
     assert bpack.utils.effective_type(None) is None
 
-    for type_ in (typing.Type[typing.Any], typing.Tuple[int, float],
-                  typing.Tuple[int]):
+    for type_ in (
+        typing.Type[typing.Any],
+        typing.Tuple[int, float],
+        typing.Tuple[int],
+    ):
         assert bpack.utils.effective_type(type_) == type_
 
 
 def test_effective_enum():
     class EStrEnumType(enum.Enum):
-        A = 'a'
-        B = 'b'
+        A = "a"
+        B = "b"
 
     assert bpack.utils.effective_type(EStrEnumType) is str
 
     class EBytesEnumType(enum.Enum):
-        A = b'a'
-        B = b'b'
+        A = b"a"
+        B = b"b"
 
     assert bpack.utils.effective_type(EBytesEnumType) is bytes
 
@@ -112,20 +115,20 @@ def test_effective_type_from_seq():
 
 
 def test_effective_type_from_annotated_type():
-    assert bpack.utils.effective_type(bpack.T['i']) is int
-    assert bpack.utils.effective_type(bpack.T['u']) is int
-    assert bpack.utils.effective_type(bpack.T['f']) is float
-    assert bpack.utils.effective_type(bpack.T['c']) is complex
-    assert bpack.utils.effective_type(bpack.T['S']) is bytes
+    assert bpack.utils.effective_type(bpack.T["i"]) is int
+    assert bpack.utils.effective_type(bpack.T["u"]) is int
+    assert bpack.utils.effective_type(bpack.T["f"]) is float
+    assert bpack.utils.effective_type(bpack.T["c"]) is complex
+    assert bpack.utils.effective_type(bpack.T["S"]) is bytes
 
 
 def test_invalid_effective_type():
     with pytest.raises(TypeError):
-        bpack.utils.effective_type('i8')
+        bpack.utils.effective_type("i8")
 
 
 def test_effective_type_keep_annotations():
-    atype = bpack.T['i8']
+    atype = bpack.T["i8"]
     etype = bpack.utils.effective_type(atype, keep_annotations=True)
     assert etype == atype
 
@@ -150,7 +153,7 @@ def test_get_sequence_type():
 
 
 def test_get_sequence_type_from_annotated_type():
-    typestr = 'i8'
+    typestr = "i8"
 
     type_ = typing.List[bpack.T[typestr]]
     assert bpack.utils.sequence_type(type_) is list
@@ -178,7 +181,7 @@ def test_is_sequence_type():
 
 
 def test_is_sequence_type_from_annotated_type():
-    typestr = 'i8'
+    typestr = "i8"
 
     type_ = typing.List[bpack.T[typestr]]
     assert bpack.utils.is_sequence_type(type_)

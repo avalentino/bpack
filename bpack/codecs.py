@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-CODEC_ATTR_NAME = '__bpack_decoder__'
+CODEC_ATTR_NAME = "__bpack_decoder__"
 
 
 class BaseCodec:
@@ -30,9 +30,10 @@ class BaseCodec:
     def _check_descriptor(cls, descriptor):
         if bpack.baseunits(descriptor) is not cls.baseunits:
             raise ValueError(
-                f'{cls.__module__}.{cls.__name__} '
-                f'only accepts descriptors with base units '
-                f'"{cls.baseunits.value}"')
+                f"{cls.__module__}.{cls.__name__} "
+                f"only accepts descriptors with base units "
+                f"'{cls.baseunits.value}'"
+            )
 
     def __init__(self, descriptor):
         self._check_descriptor(descriptor)
@@ -73,6 +74,7 @@ CodecType = Union[Decoder, Encoder, Codec]
 
 def make_codec_decorator(codec_type: Type[CodecType]):
     """Generate a codec decorator for the input decoder class."""
+
     @bpack.utils.classdecorator
     def codec(cls):
         """Class decorator to add (de)coding methods to a descriptor class.
@@ -86,28 +88,29 @@ def make_codec_decorator(codec_type: Type[CodecType]):
 
         if isinstance(codec_, Decoder):
             decode_func = bpack.utils.create_fn(
-                name='frombytes',
-                args=('cls', 'data'),
-                body=[f'return cls.{CODEC_ATTR_NAME}.decode(data)'],
+                name="frombytes",
+                args=("cls", "data"),
+                body=[f"return cls.{CODEC_ATTR_NAME}.decode(data)"],
             )
             decode_func = classmethod(decode_func)
-            bpack.utils.set_new_attribute(cls, 'frombytes', decode_func)
+            bpack.utils.set_new_attribute(cls, "frombytes", decode_func)
 
         if isinstance(codec_, Encoder):
             encode_func = bpack.utils.create_fn(
-                name='tobytes',
-                args=('self',),
-                body=[f'return self.{CODEC_ATTR_NAME}.encode(self)'],
+                name="tobytes",
+                args=("self",),
+                body=[f"return self.{CODEC_ATTR_NAME}.encode(self)"],
             )
-            bpack.utils.set_new_attribute(cls, 'tobytes', encode_func)
+            bpack.utils.set_new_attribute(cls, "tobytes", encode_func)
 
         return cls
 
     return codec
 
 
-def has_codec(descriptor,
-              codec_type: Optional[Type[CodecType]] = None) -> bool:
+def has_codec(
+    descriptor, codec_type: Optional[Type[CodecType]] = None
+) -> bool:
     """Return True if the input descriptor has a codec attached.
 
     A descriptor decorated with a *codec* decorator has an attached codec
@@ -130,12 +133,13 @@ def has_codec(descriptor,
         if codec_type is None:
             return True
         elif issubclass(codec_type, Codec):
-            return (hasattr(descriptor, 'frombytes') and
-                    hasattr(descriptor, 'tobytes'))
+            return hasattr(descriptor, "frombytes") and hasattr(
+                descriptor, "tobytes"
+            )
         elif issubclass(codec_type, Decoder):
-            return hasattr(descriptor, 'frombytes')
+            return hasattr(descriptor, "frombytes")
         elif issubclass(codec_type, Encoder):
-            return hasattr(descriptor, 'tobytes')
+            return hasattr(descriptor, "tobytes")
     return False
 
 
@@ -178,8 +182,13 @@ class BaseStructCodec(Codec):
     def _get_base_codec(descriptor):
         pass
 
-    def __init__(self, descriptor, codec=None,
-                 decode_converters=None, encode_converters=None):
+    def __init__(
+        self,
+        descriptor,
+        codec=None,
+        decode_converters=None,
+        encode_converters=None,
+    ):
         """Initialize the BaseStructCodec.
 
         The *descriptor* parameter* is a bpack record descriptor.
@@ -205,8 +214,10 @@ class BaseStructCodec(Codec):
 
     @classmethod
     def _get_decoder(cls, descr):
-        assert (bpack.is_descriptor(descr) and
-                bpack.baseunits(descr) is cls.baseunits)
+        assert (
+            bpack.is_descriptor(descr)
+            and bpack.baseunits(descr) is cls.baseunits
+        )
 
         if has_codec(descr, Decoder):
             decoder_ = get_codec(descr)
@@ -235,8 +246,9 @@ class BaseStructCodec(Codec):
                 func = decoder_._from_flat_list
                 converters.append(ConverterInfo(func, src, idx))
             elif field_descr.repeat is not None:
-                sequence_type = bpack.utils.sequence_type(field_descr.type,
-                                                          error=True)
+                sequence_type = bpack.utils.sequence_type(
+                    field_descr.type, error=True
+                )
                 src = slice(idx, idx + field_descr.repeat)
                 converters.append(ConverterInfo(sequence_type, src, idx))
 
@@ -259,8 +271,10 @@ class BaseStructCodec(Codec):
 
     @classmethod
     def _get_encoder(cls, descr):
-        assert (bpack.is_descriptor(descr) and
-                bpack.baseunits(descr) is cls.baseunits)
+        assert (
+            bpack.is_descriptor(descr)
+            and bpack.baseunits(descr) is cls.baseunits
+        )
 
         if has_codec(descr, Encoder):
             encoder_ = get_codec(descr)

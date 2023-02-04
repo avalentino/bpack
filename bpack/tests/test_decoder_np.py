@@ -5,7 +5,7 @@ import pytest
 import bpack
 
 
-bpack_np = pytest.importorskip('bpack.np')
+bpack_np = pytest.importorskip("bpack.np")
 
 
 def test_decode_sequence():
@@ -26,8 +26,9 @@ def test_decode_sequence():
     assert list(record.field_1) == list(ref_record.field_1)
     assert list(record.field_2) == list(ref_record.field_2)
 
-    for field, sequence_type in zip(bpack.fields(Record),
-                                    (List[int], Sequence[int])):
+    for field, sequence_type in zip(
+        bpack.fields(Record), (List[int], Sequence[int])
+    ):
         assert field.type == sequence_type
 
 

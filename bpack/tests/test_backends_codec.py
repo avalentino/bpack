@@ -15,45 +15,48 @@ import bpack.codecs
 
 try:
     import bpack.bs as bpack_bs
-except ImportError:                                         # pragma: no cover
+except ImportError:  # pragma: no cover
     bpack_bs = None
 
 try:
     import bpack.ba as bpack_ba
-except ImportError:                                         # pragma: no cover
+except ImportError:  # pragma: no cover
     bpack_ba = None
 
 try:
     import bpack.np as bpack_np
-except ImportError:                                         # pragma: no cover
+except ImportError:  # pragma: no cover
     bpack_np = None
 
 
 skipif = pytest.mark.skipif
 
 BITS_BACKENDS = [
-    pytest.param(bpack_bs, id='bs',
-                 marks=skipif(not bpack_bs, reason='not available')),
-    pytest.param(bpack_ba, id='ba',
-                 marks=skipif(not bpack_ba, reason='not available')),
+    pytest.param(
+        bpack_bs, id="bs", marks=skipif(not bpack_bs, reason="not available")
+    ),
+    pytest.param(
+        bpack_ba, id="ba", marks=skipif(not bpack_ba, reason="not available")
+    ),
 ]
 BYTES_BACKENDS = [
-    pytest.param(bpack.st, id='st'),
-    pytest.param(bpack_np, id='np',
-                 marks=skipif(not bpack_np, reason='not available')),
+    pytest.param(bpack.st, id="st"),
+    pytest.param(
+        bpack_np, id="np", marks=skipif(not bpack_np, reason="not available")
+    ),
 ]
 ALL_BACKENDS = BITS_BACKENDS + BYTES_BACKENDS
 
 
-@pytest.mark.parametrize('backend', ALL_BACKENDS)
+@pytest.mark.parametrize("backend", ALL_BACKENDS)
 def test_backend(backend):
-    assert hasattr(backend, 'BACKEND_NAME')
-    assert hasattr(backend, 'BACKEND_TYPE')
+    assert hasattr(backend, "BACKEND_NAME")
+    assert hasattr(backend, "BACKEND_TYPE")
 
 
-@pytest.mark.parametrize('backend', ALL_BACKENDS)
+@pytest.mark.parametrize("backend", ALL_BACKENDS)
 def test_attrs(backend):
-    codec = getattr(backend, 'codec', backend.decoder)
+    codec = getattr(backend, "codec", backend.decoder)
 
     @codec
     @bpack.descriptor(baseunits=backend.BACKEND_TYPE)
@@ -68,18 +71,20 @@ def test_attrs(backend):
     assert hasattr(Record, bpack.codecs.CODEC_ATTR_NAME)
 
 
-@bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.BE,
-                  bitorder=bpack.EBitOrder.MSB,
-                  frozen=True)
+@bpack.descriptor(
+    baseunits=bpack.EBaseUnits.BITS,
+    byteorder=bpack.EByteOrder.BE,
+    bitorder=bpack.EBitOrder.MSB,
+    frozen=True,
+)
 class BitRecordBeMsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
     field_02: int = bpack.field(size=3, default=4)
     field_03: int = bpack.field(size=12, default=2048)
-    field_04: float = bpack.field(size=32, default=1.)
-    field_05: bytes = bpack.field(size=24, default=b'abc')
-    field_06: str = bpack.field(size=24, default='ABC')
+    field_04: float = bpack.field(size=32, default=1.0)
+    field_05: bytes = bpack.field(size=24, default=b"abc")
+    field_06: str = bpack.field(size=24, default="ABC")
     # 4 padding bits ([96:100])
     field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
@@ -87,7 +92,7 @@ class BitRecordBeMsb:
     field_11: bool = bpack.field(size=1, default=False)
     field_12: int = bpack.field(size=3, default=-4, signed=True)
     field_13: int = bpack.field(size=12, default=-2048, signed=True)
-    field_18: int = bpack.field(size=32, default=-2**31, signed=True)
+    field_18: int = bpack.field(size=32, default=-(2**31), signed=True)
 
     # unsigned
     field_21: bool = bpack.field(size=1, default=True)
@@ -122,18 +127,20 @@ BIT_ENCODED_DATA_BE_MSB = b''.join([
 ])
 
 
-@bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.LE,
-                  bitorder=bpack.EBitOrder.MSB,
-                  frozen=True)
+@bpack.descriptor(
+    baseunits=bpack.EBaseUnits.BITS,
+    byteorder=bpack.EByteOrder.LE,
+    bitorder=bpack.EBitOrder.MSB,
+    frozen=True,
+)
 class BitRecordLeMsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
     field_02: int = bpack.field(size=3, default=4)
     field_03: int = bpack.field(size=12, default=2048)
-    field_04: float = bpack.field(size=32, default=1.)
-    field_05: bytes = bpack.field(size=24, default=b'abc')
-    field_06: str = bpack.field(size=24, default='ABC')
+    field_04: float = bpack.field(size=32, default=1.0)
+    field_05: bytes = bpack.field(size=24, default=b"abc")
+    field_06: str = bpack.field(size=24, default="ABC")
     # 4 padding bits ([96:100])
     field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
@@ -141,7 +148,7 @@ class BitRecordLeMsb:
     field_11: bool = bpack.field(size=1, default=False)
     field_12: int = bpack.field(size=3, default=-4, signed=True)
     field_13: int = bpack.field(size=12, default=-2048, signed=True)
-    field_18: int = bpack.field(size=32, default=-2**31, signed=True)
+    field_18: int = bpack.field(size=32, default=-(2**31), signed=True)
 
     # unsigned
     field_21: bool = bpack.field(size=1, default=True)
@@ -176,18 +183,20 @@ BIT_ENCODED_DATA_LE_MSB = b''.join([
 ])
 
 
-@bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.BE,
-                  bitorder=bpack.EBitOrder.LSB,
-                  frozen=True)
+@bpack.descriptor(
+    baseunits=bpack.EBaseUnits.BITS,
+    byteorder=bpack.EByteOrder.BE,
+    bitorder=bpack.EBitOrder.LSB,
+    frozen=True,
+)
 class BitRecordBeLsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
     field_02: int = bpack.field(size=3, default=4)
     field_03: int = bpack.field(size=12, default=2048)
-    field_04: float = bpack.field(size=32, default=1.)
-    field_05: bytes = bpack.field(size=24, default=b'abc')
-    field_06: str = bpack.field(size=24, default='ABC')
+    field_04: float = bpack.field(size=32, default=1.0)
+    field_05: bytes = bpack.field(size=24, default=b"abc")
+    field_06: str = bpack.field(size=24, default="ABC")
     # 4 padding bits ([96:100])
     field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
@@ -195,7 +204,7 @@ class BitRecordBeLsb:
     field_11: bool = bpack.field(size=1, default=False)
     field_12: int = bpack.field(size=3, default=-4, signed=True)
     field_13: int = bpack.field(size=12, default=-2048, signed=True)
-    field_18: int = bpack.field(size=32, default=-2**31, signed=True)
+    field_18: int = bpack.field(size=32, default=-(2**31), signed=True)
 
     # unsigned
     field_21: bool = bpack.field(size=1, default=True)
@@ -230,18 +239,20 @@ BIT_ENCODED_DATA_BE_LSB = b''.join([
 ])
 
 
-@bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                  byteorder=bpack.EByteOrder.LE,
-                  bitorder=bpack.EBitOrder.LSB,
-                  frozen=True)
+@bpack.descriptor(
+    baseunits=bpack.EBaseUnits.BITS,
+    byteorder=bpack.EByteOrder.LE,
+    bitorder=bpack.EBitOrder.LSB,
+    frozen=True,
+)
 class BitRecordLeLsb:
     # default (unsigned)
     field_01: bool = bpack.field(size=1, default=True)
     field_02: int = bpack.field(size=3, default=4)
     field_03: int = bpack.field(size=12, default=2048)
-    field_04: float = bpack.field(size=32, default=1.)
-    field_05: bytes = bpack.field(size=24, default=b'abc')
-    field_06: str = bpack.field(size=24, default='ABC')
+    field_04: float = bpack.field(size=32, default=1.0)
+    field_05: bytes = bpack.field(size=24, default=b"abc")
+    field_06: str = bpack.field(size=24, default="ABC")
     # 4 padding bits ([96:100])
     field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
@@ -249,7 +260,7 @@ class BitRecordLeLsb:
     field_11: bool = bpack.field(size=1, default=False)
     field_12: int = bpack.field(size=3, default=-4, signed=True)
     field_13: int = bpack.field(size=12, default=-2048, signed=True)
-    field_18: int = bpack.field(size=32, default=-2**31, signed=True)
+    field_18: int = bpack.field(size=32, default=-(2**31), signed=True)
 
     # unsigned
     field_21: bool = bpack.field(size=1, default=True)
@@ -284,9 +295,11 @@ BIT_ENCODED_DATA_LE_LSB = b''.join([
 ])
 
 
-@bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EByteOrder.BE,
-                  frozen=True)
+@bpack.descriptor(
+    baseunits=bpack.EBaseUnits.BYTES,
+    byteorder=bpack.EByteOrder.BE,
+    frozen=True,
+)
 class ByteRecordBe:
     field_01: bool = bpack.field(size=1, default=False)
 
@@ -306,16 +319,16 @@ class ByteRecordBe:
     field_12: int = bpack.field(size=8, default=-8, signed=True)
     field_13: int = bpack.field(size=8, default=+8, signed=False)
 
-    field_14: float = bpack.field(size=2, default=10.)
-    field_15: float = bpack.field(size=4, default=100.)
-    field_16: float = bpack.field(size=8, default=1000.)
+    field_14: float = bpack.field(size=2, default=10.0)
+    field_15: float = bpack.field(size=4, default=100.0)
+    field_16: float = bpack.field(size=8, default=1000.0)
 
-    field_17: bytes = bpack.field(size=3, default=b'abc')
-    field_18: str = bpack.field(size=3, default='ABC')
+    field_17: bytes = bpack.field(size=3, default=b"abc")
+    field_18: str = bpack.field(size=3, default="ABC")
 
     # 4 padding bytes ([66:70]) b'xxxx'
 
-    field_20: bytes = bpack.field(size=4, offset=70, default=b'1234')
+    field_20: bytes = bpack.field(size=4, offset=70, default=b"1234")
 
 
 BYTE_ENCODED_DATA_BE = bytes([
@@ -356,9 +369,11 @@ BYTE_ENCODED_DATA_BE = bytes([
 ])
 
 
-@bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                  byteorder=bpack.EByteOrder.LE,
-                  frozen=True)
+@bpack.descriptor(
+    baseunits=bpack.EBaseUnits.BYTES,
+    byteorder=bpack.EByteOrder.LE,
+    frozen=True,
+)
 class ByteRecordLe:
     field_01: bool = bpack.field(size=1, default=False)
 
@@ -378,16 +393,16 @@ class ByteRecordLe:
     field_12: int = bpack.field(size=8, default=-8, signed=True)
     field_13: int = bpack.field(size=8, default=+8, signed=False)
 
-    field_14: float = bpack.field(size=2, default=10.)
-    field_15: float = bpack.field(size=4, default=100.)
-    field_16: float = bpack.field(size=8, default=1000.)
+    field_14: float = bpack.field(size=2, default=10.0)
+    field_15: float = bpack.field(size=4, default=100.0)
+    field_16: float = bpack.field(size=8, default=1000.0)
 
-    field_17: bytes = bpack.field(size=3, default=b'abc')
-    field_18: str = bpack.field(size=3, default='ABC')
+    field_17: bytes = bpack.field(size=3, default=b"abc")
+    field_18: str = bpack.field(size=3, default="ABC")
 
     # 4 padding bytes ([66:70]) b'xxxx'
 
-    field_20: bytes = bpack.field(size=4, offset=70, default=b'1234')
+    field_20: bytes = bpack.field(size=4, offset=70, default=b"1234")
 
 
 BYTE_ENCODED_DATA_LE = bytes([
@@ -430,77 +445,139 @@ BYTE_ENCODED_DATA_LE = bytes([
 
 def _fix_padding(data, refdata):
     if refdata in {BYTE_ENCODED_DATA_BE, BYTE_ENCODED_DATA_LE}:
-        return data[:66] + b'xxxx' + data[70:]
+        return data[:66] + b"xxxx" + data[70:]
     return refdata
 
 
 @pytest.mark.parametrize(
-    'backend, Record, encoded_data',
-    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
-     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
-     pytest.param(
-         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, id='bs LE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, id='bs BE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='ba BE MSB',
-         marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
+    "backend, Record, encoded_data",
+    [
+        pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id="st BE"),
+        pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id="st LE"),
+        pytest.param(
+            bpack_np,
+            ByteRecordBe,
+            BYTE_ENCODED_DATA_BE,
+            id="np BE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_np,
+            ByteRecordLe,
+            BYTE_ENCODED_DATA_LE,
+            id="np LE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeMsb,
+            BIT_ENCODED_DATA_BE_MSB,
+            id="bs BE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeMsb,
+            BIT_ENCODED_DATA_LE_MSB,
+            id="bs LE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeLsb,
+            BIT_ENCODED_DATA_BE_LSB,
+            id="bs BE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeLsb,
+            BIT_ENCODED_DATA_LE_LSB,
+            id="bs LE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_ba,
+            BitRecordBeMsb,
+            BIT_ENCODED_DATA_BE_MSB,
+            id="ba BE MSB",
+            marks=pytest.mark.skipif(not bpack_ba, reason="not available"),
+        ),
+    ],
+)
 def test_decoder(backend, Record, encoded_data):  # noqa: N803
     decoded_data = Record()
 
     decoder = backend.Decoder(Record)
-    assert hasattr(decoder, 'baseunits')
+    assert hasattr(decoder, "baseunits")
     assert decoder.baseunits is bpack.baseunits(Record)
     record = decoder.decode(encoded_data)
     assert record == decoded_data
 
-    if hasattr(backend, 'Codec'):
+    if hasattr(backend, "Codec"):
         codec = backend.Codec(Record)
-        assert hasattr(codec, 'baseunits')
+        assert hasattr(codec, "baseunits")
         assert codec.baseunits is bpack.baseunits(Record)
         record = codec.decode(encoded_data)
         assert record == decoded_data
 
 
 @pytest.mark.parametrize(
-    'backend, Record, encoded_data',
-    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
-     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
-     pytest.param(
-         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, id='bs LE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, id='bs BE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='ba BE MSB',
-         marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
+    "backend, Record, encoded_data",
+    [
+        pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id="st BE"),
+        pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id="st LE"),
+        pytest.param(
+            bpack_np,
+            ByteRecordBe,
+            BYTE_ENCODED_DATA_BE,
+            id="np BE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_np,
+            ByteRecordLe,
+            BYTE_ENCODED_DATA_LE,
+            id="np LE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeMsb,
+            BIT_ENCODED_DATA_BE_MSB,
+            id="bs BE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeMsb,
+            BIT_ENCODED_DATA_LE_MSB,
+            id="bs LE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeLsb,
+            BIT_ENCODED_DATA_BE_LSB,
+            id="bs BE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeLsb,
+            BIT_ENCODED_DATA_LE_LSB,
+            id="bs LE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_ba,
+            BitRecordBeMsb,
+            BIT_ENCODED_DATA_BE_MSB,
+            id="ba BE MSB",
+            marks=pytest.mark.skipif(not bpack_ba, reason="not available"),
+        ),
+    ],
+)
 def test_decoder_func(backend, Record, encoded_data):  # noqa: N803
     decoded_data = Record()
 
@@ -508,39 +585,66 @@ def test_decoder_func(backend, Record, encoded_data):  # noqa: N803
     record = record_type.frombytes(encoded_data)
     assert record == decoded_data
 
-    if hasattr(backend, 'codec'):
+    if hasattr(backend, "codec"):
         record_type = backend.codec(Record)
         record = record_type.frombytes(encoded_data)
         assert record == decoded_data
 
 
 @pytest.mark.parametrize(
-    'backend, Record, encoded_data',
-    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
-     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
-     pytest.param(
-         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, id='bs LE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, id='bs BE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available'))])
+    "backend, Record, encoded_data",
+    [
+        pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id="st BE"),
+        pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id="st LE"),
+        pytest.param(
+            bpack_np,
+            ByteRecordBe,
+            BYTE_ENCODED_DATA_BE,
+            id="np BE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_np,
+            ByteRecordLe,
+            BYTE_ENCODED_DATA_LE,
+            id="np LE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeMsb,
+            BIT_ENCODED_DATA_BE_MSB,
+            id="bs BE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeMsb,
+            BIT_ENCODED_DATA_LE_MSB,
+            id="bs LE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeLsb,
+            BIT_ENCODED_DATA_BE_LSB,
+            id="bs BE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeLsb,
+            BIT_ENCODED_DATA_LE_LSB,
+            id="bs LE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+    ],
+)
 def test_encoder(backend, Record, encoded_data):  # noqa: N803
     record = Record()
 
     encoder = backend.Encoder(Record)
-    assert hasattr(encoder, 'baseunits')
+    assert hasattr(encoder, "baseunits")
     assert encoder.baseunits is bpack.baseunits(Record)
     data = encoder.encode(record)
     if backend.BACKEND_TYPE is bpack.EBaseUnits.BYTES:
@@ -548,7 +652,7 @@ def test_encoder(backend, Record, encoded_data):  # noqa: N803
     assert data == encoded_data
 
     codec = backend.Codec(Record)
-    assert hasattr(codec, 'baseunits')
+    assert hasattr(codec, "baseunits")
     assert codec.baseunits is bpack.baseunits(Record)
     data = codec.encode(record)
     if backend.BACKEND_TYPE is bpack.EBaseUnits.BYTES:
@@ -557,27 +661,54 @@ def test_encoder(backend, Record, encoded_data):  # noqa: N803
 
 
 @pytest.mark.parametrize(
-    'backend, Record, encoded_data',
-    [pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='st BE'),
-     pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='st LE'),
-     pytest.param(
-         bpack_np, ByteRecordBe, BYTE_ENCODED_DATA_BE, id='np BE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_np, ByteRecordLe, BYTE_ENCODED_DATA_LE, id='np LE',
-         marks=pytest.mark.skipif(not bpack_np, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='bs BE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeMsb, BIT_ENCODED_DATA_LE_MSB, id='bs LE MSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordBeLsb, BIT_ENCODED_DATA_BE_LSB, id='bs BE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available')),
-     pytest.param(
-         bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
-         marks=pytest.mark.skipif(not bpack_bs, reason='not available'))])
+    "backend, Record, encoded_data",
+    [
+        pytest.param(bpack.st, ByteRecordBe, BYTE_ENCODED_DATA_BE, id="st BE"),
+        pytest.param(bpack.st, ByteRecordLe, BYTE_ENCODED_DATA_LE, id="st LE"),
+        pytest.param(
+            bpack_np,
+            ByteRecordBe,
+            BYTE_ENCODED_DATA_BE,
+            id="np BE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_np,
+            ByteRecordLe,
+            BYTE_ENCODED_DATA_LE,
+            id="np LE",
+            marks=pytest.mark.skipif(not bpack_np, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeMsb,
+            BIT_ENCODED_DATA_BE_MSB,
+            id="bs BE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeMsb,
+            BIT_ENCODED_DATA_LE_MSB,
+            id="bs LE MSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordBeLsb,
+            BIT_ENCODED_DATA_BE_LSB,
+            id="bs BE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_bs,
+            BitRecordLeLsb,
+            BIT_ENCODED_DATA_LE_LSB,
+            id="bs LE LSB",
+            marks=pytest.mark.skipif(not bpack_bs, reason="not available"),
+        ),
+    ],
+)
 def test_encoder_func(backend, Record, encoded_data):  # noqa: N803
     record = Record()
 
@@ -594,7 +725,7 @@ def test_encoder_func(backend, Record, encoded_data):  # noqa: N803
     assert data == encoded_data
 
 
-@pytest.mark.parametrize('backend', BITS_BACKENDS)
+@pytest.mark.parametrize("backend", BITS_BACKENDS)
 def test_bit_decoder_decorator_frombytes(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS, frozen=True)
@@ -602,14 +733,14 @@ def test_bit_decoder_decorator_frombytes(backend):
         field_01: bool = bpack.field(size=1, default=True)
         field_02: int = bpack.field(size=3, default=4)
         field_03: int = bpack.field(size=12, default=2048)
-        field_04: float = bpack.field(size=32, default=1.)
-        field_05: bytes = bpack.field(size=24, default=b'abc')
-        field_06: str = bpack.field(size=24, default='ABC')
+        field_04: float = bpack.field(size=32, default=1.0)
+        field_05: bytes = bpack.field(size=24, default=b"abc")
+        field_06: str = bpack.field(size=24, default="ABC")
         # 4 padding bits ([96:100])  0b1111
         field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
     decoded_data = Record()
-    encoded_data = BIT_ENCODED_DATA_BE_MSB[:bpack.calcsize(Record)]
+    encoded_data = BIT_ENCODED_DATA_BE_MSB[: bpack.calcsize(Record)]
     record = Record.frombytes(encoded_data)
 
     assert record.field_01 == decoded_data.field_01
@@ -622,10 +753,15 @@ def test_bit_decoder_decorator_frombytes(backend):
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(
-        bpack_bs, id='bs', marks=skipif(not bpack_bs,
-                                        reason='not available'))])
+    "backend",
+    [
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        )
+    ],
+)
 def test_bit_encoder_decorator_tobytes(backend):
     @backend.encoder
     @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS, frozen=True)
@@ -633,13 +769,13 @@ def test_bit_encoder_decorator_tobytes(backend):
         field_01: bool = bpack.field(size=1, default=True)
         field_02: int = bpack.field(size=3, default=4)
         field_03: int = bpack.field(size=12, default=2048)
-        field_04: float = bpack.field(size=32, default=1.)
-        field_05: bytes = bpack.field(size=24, default=b'abc')
-        field_06: str = bpack.field(size=24, default='ABC')
+        field_04: float = bpack.field(size=32, default=1.0)
+        field_05: bytes = bpack.field(size=24, default=b"abc")
+        field_06: str = bpack.field(size=24, default="ABC")
         # 4 padding bits ([96:100])  0b1111
         field_08: int = bpack.field(size=28, default=134217727, offset=100)
 
-    encoded_data = BIT_ENCODED_DATA_BE_MSB[:bpack.calcsize(Record)]
+    encoded_data = BIT_ENCODED_DATA_BE_MSB[: bpack.calcsize(Record)]
     record = Record()
     data = record.tobytes()
     data = _fix_padding(data, encoded_data)
@@ -647,12 +783,14 @@ def test_bit_encoder_decorator_tobytes(backend):
     assert data == encoded_data
 
 
-@pytest.mark.parametrize('backend', BYTES_BACKENDS)
+@pytest.mark.parametrize("backend", BYTES_BACKENDS)
 def test_byte_decoder_decorator_frombytes(backend):
     @backend.decoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                      byteorder=bpack.EByteOrder.BE,
-                      frozen=True)
+    @bpack.descriptor(
+        baseunits=bpack.EBaseUnits.BYTES,
+        byteorder=bpack.EByteOrder.BE,
+        frozen=True,
+    )
     class Record:
         field_1: int = bpack.field(size=1, default=1)
         field_2: int = bpack.field(size=2, default=2)
@@ -665,12 +803,14 @@ def test_byte_decoder_decorator_frombytes(backend):
     assert record.field_2 == decoded_data.field_2
 
 
-@pytest.mark.parametrize('backend', BYTES_BACKENDS)
+@pytest.mark.parametrize("backend", BYTES_BACKENDS)
 def test_byte_encoder_decorator_tobytes(backend):
     @backend.encoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES,
-                      byteorder=bpack.EByteOrder.BE,
-                      frozen=True)
+    @bpack.descriptor(
+        baseunits=bpack.EBaseUnits.BYTES,
+        byteorder=bpack.EByteOrder.BE,
+        frozen=True,
+    )
     class Record:
         field_1: int = bpack.field(size=1, default=1)
         field_2: int = bpack.field(size=2, default=2)
@@ -682,21 +822,22 @@ def test_byte_encoder_decorator_tobytes(backend):
     assert data == encoded_data
 
 
-@pytest.mark.parametrize('backend', ALL_BACKENDS)
+@pytest.mark.parametrize("backend", ALL_BACKENDS)
 def test_unsupported_type(backend):
     class CustomType:
         pass
 
-    codec = getattr(backend, 'codec', backend.decoder)
+    codec = getattr(backend, "codec", backend.decoder)
 
     with pytest.raises(TypeError):
+
         @codec
         @bpack.descriptor(baseunits=backend.Decoder.baseunits, frozen=True)
         class Record:
             field_1: CustomType = bpack.field(size=8)
 
 
-@pytest.mark.parametrize('backend', BYTES_BACKENDS)
+@pytest.mark.parametrize("backend", BYTES_BACKENDS)
 def test_byte_decoder_native_byteorder_frombytes(backend):
     size = 4
     value = 1
@@ -710,7 +851,7 @@ def test_byte_decoder_native_byteorder_frombytes(backend):
     assert Record.frombytes(data) == Record()
 
 
-@pytest.mark.parametrize('backend', BYTES_BACKENDS)
+@pytest.mark.parametrize("backend", BYTES_BACKENDS)
 def test_byte_encoder_native_byteorder_tobytes(backend):
     size = 4
     value = 1
@@ -726,17 +867,25 @@ def test_byte_encoder_native_byteorder_tobytes(backend):
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available'))])
+    "backend",
+    [
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        )
+    ],
+)
 def test_bit_decoder_native_byteorder_frombytes(backend):
     size = 64
     value = 1
 
     @backend.decoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                      byteorder=bpack.EByteOrder.NATIVE,
-                      frozen=True)
+    @bpack.descriptor(
+        baseunits=bpack.EBaseUnits.BITS,
+        byteorder=bpack.EByteOrder.NATIVE,
+        frozen=True,
+    )
     class Record:
         field_1: int = bpack.field(size=size, default=value)
 
@@ -745,17 +894,25 @@ def test_bit_decoder_native_byteorder_frombytes(backend):
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available'))])
+    "backend",
+    [
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        )
+    ],
+)
 def test_bit_encoder_native_byteorder_tobytes(backend):
     size = 64
     value = 1
 
     @backend.encoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                      byteorder=bpack.EByteOrder.NATIVE,
-                      frozen=True)
+    @bpack.descriptor(
+        baseunits=bpack.EBaseUnits.BITS,
+        byteorder=bpack.EByteOrder.NATIVE,
+        frozen=True,
+    )
     class Record:
         field_1: int = bpack.field(size=size, default=value)
 
@@ -764,75 +921,87 @@ def test_bit_encoder_native_byteorder_tobytes(backend):
     assert record.tobytes() == data
 
 
-@pytest.mark.parametrize('backend', BITS_BACKENDS)
+@pytest.mark.parametrize("backend", BITS_BACKENDS)
 def test_bit_decoder_default_byteorder_frombytes(backend):
     size = 64
     value = 1
 
     @backend.decoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                      byteorder=bpack.EByteOrder.DEFAULT,
-                      frozen=True)
+    @bpack.descriptor(
+        baseunits=bpack.EBaseUnits.BITS,
+        byteorder=bpack.EByteOrder.DEFAULT,
+        frozen=True,
+    )
     class Record:
         field_1: int = bpack.field(size=size, default=value)
 
     # default byte order is big for bit descriptors
-    data = value.to_bytes(size // 8, 'big')
+    data = value.to_bytes(size // 8, "big")
     assert Record.frombytes(data) == Record()
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available'))])
+    "backend",
+    [
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        )
+    ],
+)
 def test_bit_encoder_default_byteorder_tobytes(backend):
     size = 64
     value = 1
 
     @backend.encoder
-    @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
-                      byteorder=bpack.EByteOrder.DEFAULT,
-                      frozen=True)
+    @bpack.descriptor(
+        baseunits=bpack.EBaseUnits.BITS,
+        byteorder=bpack.EByteOrder.DEFAULT,
+        frozen=True,
+    )
     class Record:
         field_1: int = bpack.field(size=size, default=value)
 
     record = Record()
     # default byte order is big for bit descriptors
-    data = value.to_bytes(size // 8, 'big')  # default is "big" for bits
+    data = value.to_bytes(size // 8, "big")  # default is "big" for bits
     assert record.tobytes() == data
 
 
-@pytest.mark.parametrize('backend', BITS_BACKENDS)
+@pytest.mark.parametrize("backend", BITS_BACKENDS)
 def test_wrong_baseunits_bit(backend):
-    codec = getattr(backend, 'codec', backend.decoder)
+    codec = getattr(backend, "codec", backend.decoder)
 
     with pytest.raises(ValueError):
+
         @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
         class Record:
             field_1: int = bpack.field(size=8, default=1)
 
 
-@pytest.mark.parametrize('backend', BYTES_BACKENDS)
+@pytest.mark.parametrize("backend", BYTES_BACKENDS)
 def test_wrong_baseunits_byte(backend):
-    codec = getattr(backend, 'codec', backend.decoder)
+    codec = getattr(backend, "codec", backend.decoder)
 
     with pytest.raises(ValueError):
+
         @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         class Record:
             field_1: int = bpack.field(size=8, default=1)
 
 
-@pytest.mark.parametrize('backend', ALL_BACKENDS)
+@pytest.mark.parametrize("backend", ALL_BACKENDS)
 def test_enum_decoding_bytes(backend):
     class EStrEnumType(enum.Enum):
-        A = 'a'
-        B = 'b'
+        A = "a"
+        B = "b"
 
     class EBytesEnumType(enum.Enum):
-        A = b'a'
-        B = b'b'
+        A = b"a"
+        B = b"b"
 
     class EIntEnumType(enum.Enum):
         A = 1
@@ -846,51 +1015,66 @@ def test_enum_decoding_bytes(backend):
         bitorder = None
         ssize = 1
         isize = 1
-        encoded_data = b''.join([
-            EStrEnumType.A.value.encode('ascii'),
-            EBytesEnumType.A.value,
-            EIntEnumType.A.value.to_bytes(1, 'little', signed=False),
-            EFlagEnumType.A.value.to_bytes(1, 'little', signed=False),
-        ])
+        encoded_data = b"".join(
+            [
+                EStrEnumType.A.value.encode("ascii"),
+                EBytesEnumType.A.value,
+                EIntEnumType.A.value.to_bytes(1, "little", signed=False),
+                EFlagEnumType.A.value.to_bytes(1, "little", signed=False),
+            ]
+        )
     else:
         bitorder = bpack.EBitOrder.MSB
         ssize = 8
         isize = 4
-        encoded_data = b''.join([
-            EStrEnumType.A.value.encode('ascii'),
-            EBytesEnumType.A.value,
-            bytes([0b00010001])
-        ])
+        encoded_data = b"".join(
+            [
+                EStrEnumType.A.value.encode("ascii"),
+                EBytesEnumType.A.value,
+                bytes([0b00010001]),
+            ]
+        )
 
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
     class Record:
         field_1: EStrEnumType = bpack.field(size=ssize, default=EStrEnumType.A)
-        field_2: EBytesEnumType = bpack.field(size=ssize,
-                                              default=EBytesEnumType.A)
+        field_2: EBytesEnumType = bpack.field(
+            size=ssize, default=EBytesEnumType.A
+        )
         field_3: EIntEnumType = bpack.field(size=isize, default=EIntEnumType.A)
-        field_4: EFlagEnumType = bpack.field(size=isize,
-                                             default=EFlagEnumType.A)
+        field_4: EFlagEnumType = bpack.field(
+            size=isize, default=EFlagEnumType.A
+        )
 
     record = Record.frombytes(encoded_data)
     assert record == Record()
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack.st, id='st'),
-     pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available')),
-     pytest.param(bpack_np, id='np',
-                  marks=skipif(not bpack_np, reason='not available'))])
+    "backend",
+    [
+        pytest.param(bpack.st, id="st"),
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_np,
+            id="np",
+            marks=skipif(not bpack_np, reason="not available"),
+        ),
+    ],
+)
 def test_enum_encoding_bytes(backend):
     class EStrEnumType(enum.Enum):
-        A = 'a'
-        B = 'b'
+        A = "a"
+        B = "b"
 
     class EBytesEnumType(enum.Enum):
-        A = b'a'
-        B = b'b'
+        A = b"a"
+        B = b"b"
 
     class EIntEnumType(enum.Enum):
         A = 1
@@ -904,31 +1088,35 @@ def test_enum_encoding_bytes(backend):
         bitorder = None
         ssize = 1
         isize = 1
-        encoded_data = b''.join([
-            EStrEnumType.A.value.encode('ascii'),
+        encoded_data = [
+            EStrEnumType.A.value.encode("ascii"),
             EBytesEnumType.A.value,
-            EIntEnumType.A.value.to_bytes(1, 'little', signed=False),
-            EFlagEnumType.A.value.to_bytes(1, 'little', signed=False),
-        ])
+            EIntEnumType.A.value.to_bytes(1, "little", signed=False),
+            EFlagEnumType.A.value.to_bytes(1, "little", signed=False),
+        ]
+        encoded_data = b"".join(encoded_data)
     else:
         bitorder = bpack.EBitOrder.MSB
         ssize = 8
         isize = 4
-        encoded_data = b''.join([
-            EStrEnumType.A.value.encode('ascii'),
+        encoded_data = [
+            EStrEnumType.A.value.encode("ascii"),
             EBytesEnumType.A.value,
-            bytes([0b00010001])
-        ])
+            bytes([0b00010001]),
+        ]
+        encoded_data = b"".join(encoded_data)
 
     @backend.encoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
     class Record:
         field_1: EStrEnumType = bpack.field(size=ssize, default=EStrEnumType.A)
-        field_2: EBytesEnumType = bpack.field(size=ssize,
-                                              default=EBytesEnumType.A)
+        field_2: EBytesEnumType = bpack.field(
+            size=ssize, default=EBytesEnumType.A
+        )
         field_3: EIntEnumType = bpack.field(size=isize, default=EIntEnumType.A)
-        field_4: EFlagEnumType = bpack.field(size=isize,
-                                             default=EFlagEnumType.A)
+        field_4: EFlagEnumType = bpack.field(
+            size=isize, default=EFlagEnumType.A
+        )
 
     record = Record()
     data = record.tobytes()
@@ -936,10 +1124,16 @@ def test_enum_encoding_bytes(backend):
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack.st, id='st'),
-     pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available'))])
+    "backend",
+    [
+        pytest.param(bpack.st, id="st"),
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        ),
+    ],
+)
 def test_decode_sequence(backend):
     if backend.Decoder.baseunits is bpack.EBaseUnits.BYTES:
         bitorder = None
@@ -965,16 +1159,23 @@ def test_decode_sequence(backend):
     assert type(record.field_1) is list
     assert type(record.field_2) is tuple
 
-    for field, sequence_type in zip(bpack.fields(Record),
-                                    (List[int], Sequence[int])):
+    for field, sequence_type in zip(
+        bpack.fields(Record), (List[int], Sequence[int])
+    ):
         assert field.type == sequence_type
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack.st, id='st'),
-     pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available'))])
+    "backend",
+    [
+        pytest.param(bpack.st, id="st"),
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        ),
+    ],
+)
 def test_encode_sequence(backend):
     if backend.Decoder.baseunits is bpack.EBaseUnits.BYTES:
         bitorder = None
@@ -999,12 +1200,21 @@ def test_encode_sequence(backend):
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack.st, id='st'),
-     pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available')),
-     pytest.param(bpack_np, id='np',
-                  marks=skipif(not bpack_np, reason='not available'))])
+    "backend",
+    [
+        pytest.param(bpack.st, id="st"),
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        ),
+        pytest.param(
+            bpack_np,
+            id="np",
+            marks=skipif(not bpack_np, reason="not available"),
+        ),
+    ],
+)
 class TestNestedRecord:
     @staticmethod
     def get_encoded_data(baseunits):
@@ -1105,7 +1315,7 @@ class TestNestedRecord:
     def test_nested_record_decoder_with_order(self, backend):
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
         if backend.Decoder.baseunits is bpack.EBaseUnits.BITS:
-            kwargs = dict(bitorder='>', byteorder='>')
+            kwargs = dict(bitorder=">", byteorder=">")
         else:
             # TODO: use the default byteorder (see get_encoded_data)
             kwargs = dict(byteorder=bpack.EByteOrder.LE)
@@ -1129,7 +1339,7 @@ class TestNestedRecord:
     def test_nested_record_encoder_with_order(self, backend):
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
         if backend.Decoder.baseunits is bpack.EBaseUnits.BITS:
-            kwargs = dict(bitorder='>', byteorder='>')
+            kwargs = dict(bitorder=">", byteorder=">")
         else:
             # TODO: use the default byteorder (see get_encoded_data)
             kwargs = dict(byteorder=bpack.EByteOrder.LE)
@@ -1153,15 +1363,22 @@ class TestNestedRecord:
 
 
 @pytest.mark.parametrize(
-    'backend',
-    [pytest.param(bpack.st, id='st'),
-     # pytest.param(bpack_np, id='np',
-     #              marks=skipif(not bpack_np, reason='not available'))
-     pytest.param(bpack_bs, id='bs',
-                  marks=skipif(not bpack_bs, reason='not available'))])
+    "backend",
+    [
+        pytest.param(bpack.st, id="st"),
+        # pytest.param(bpack_np, id='np',
+        #              marks=skipif(not bpack_np, reason='not available'))
+        pytest.param(
+            bpack_bs,
+            id="bs",
+            marks=skipif(not bpack_bs, reason="not available"),
+        ),
+    ],
+)
 class TestMultiNestedRecord:
     def _record_to_list(self, record):
         from bpack.utils import is_sequence_type
+
         out = []
         for filed in bpack.fields(record):
             value = getattr(record, filed.name)
@@ -1175,20 +1392,22 @@ class TestMultiNestedRecord:
 
     def _bytes_record_to_data(self, record):
         from bpack import st as _st
+
         values = self._record_to_list(record)
         decoder = _st.Decoder(type(record))
         fmt = decoder.format
-        values = [getattr(v, 'value', v) for v in values]
+        values = [getattr(v, "value", v) for v in values]
         return struct.pack(fmt, *values)
 
     def _bits_record_to_data(self, record):
         # TODO: check
         import bitstruct
         from bpack import bs as _bs
+
         values = self._record_to_list(record)
         decoder = _bs.Decoder(type(record))
         fmt = decoder.format
-        values = [getattr(v, 'value', v) for v in values]
+        values = [getattr(v, "value", v) for v in values]
         return bitstruct.pack(fmt, *values)
 
     def _record_to_data(self, record):
@@ -1218,9 +1437,7 @@ class TestMultiNestedRecord:
             field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=3)
             field_4: RecordLevel02 = bpack.field(
-                default_factory=functools.partial(
-                    RecordLevel02, EEnum.FOUR, 5
-                )
+                default_factory=functools.partial(RecordLevel02, EEnum.FOUR, 5)
             )
 
         record = NestedRecord()
@@ -1244,9 +1461,7 @@ class TestMultiNestedRecord:
             field_2: RecordLevel02 = bpack.field(default_factory=RecordLevel02)
             field_3: int = bpack.field(size=4, default=3)
             field_4: RecordLevel02 = bpack.field(
-                default_factory=functools.partial(
-                    RecordLevel02, EEnum.FOUR, 5
-                )
+                default_factory=functools.partial(RecordLevel02, EEnum.FOUR, 5)
             )
 
         record = NestedRecord()
@@ -1268,7 +1483,8 @@ class TestMultiNestedRecord:
         class RecordLevel02:
             field_01: int = bpack.field(size=4, default=1)
             field_02: RecordLevel03 = bpack.field(
-                default_factory=functools.partial(RecordLevel03, EEnum.TWO, 3))
+                default_factory=functools.partial(RecordLevel03, EEnum.TWO, 3)
+            )
             field_03: int = bpack.field(size=4, default=4)
 
         @backend.decoder
@@ -1337,7 +1553,8 @@ class TestMultiNestedRecord:
         class RecordLevel03:
             field_001: int = bpack.field(size=4, default=1)
             field_002: RecordLevel04 = bpack.field(
-                default_factory=RecordLevel04)
+                default_factory=RecordLevel04
+            )
             field_003: int = bpack.field(size=4, default=3)
 
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)
@@ -1384,7 +1601,8 @@ class TestMultiNestedRecord:
         class RecordLevel03:
             field_001: int = bpack.field(size=4, default=1)
             field_002: RecordLevel04 = bpack.field(
-                default_factory=RecordLevel04)
+                default_factory=RecordLevel04
+            )
             field_003: int = bpack.field(size=4, default=3)
 
         @bpack.descriptor(baseunits=backend.Decoder.baseunits)

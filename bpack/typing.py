@@ -6,27 +6,29 @@ from typing import NamedTuple, Optional, Type, Union
 try:
     from typing import _tp_cache
 except ImportError:
+
     def _tp_cache(x):
         return x
 
-try:                                                        # pragma: no cover
+
+try:  # pragma: no cover
     # @COMPATIBILITY: with Python < 3.9
     from typing_extensions import Annotated
+
     # @COMPATIBILITY: with Python < 3.7 (and Python < 3.8.3)
     from typing_extensions import get_origin, get_args
-except ImportError:                                         # pragma: no cover
+except ImportError:  # pragma: no cover
     from typing import Annotated, get_origin, get_args
 
 from .enums import EByteOrder
 
 
-__all__ = ['T', 'TypeParams', 'is_annotated']
+__all__ = ["T", "TypeParams", "is_annotated"]
 
 
 _DTYPE_RE = re.compile(
-    r'^(?P<byteorder>[<|>])?'
-    r'(?P<type>[?bBiufcmMUVOSat])'
-    r'(?P<size>\d+)?$')
+    r"^(?P<byteorder>[<|>])?" r"(?P<type>[?bBiufcmMUVOSat])" r"(?P<size>\d+)?$"
+)
 
 
 FieldTypes = Type[Union[bool, int, float, complex, bytes, str]]
@@ -46,8 +48,8 @@ class TypeParams(NamedTuple):
         byteorder = repr(byteorder) if byteorder is not None else byteorder
         size = str(self.size) if self.size is not None else self.size
         return (
-            f'{self.__class__.__name__}(byteorder={byteorder}, '
-            f'type={self.type.__name__!r}, size={size}, signed={self.signed})'
+            f"{self.__class__.__name__}(byteorder={byteorder}, "
+            f"type={self.type.__name__!r}, size={size}, signed={self.signed})"
         )
 
 
@@ -83,18 +85,18 @@ def str_to_type_params(typestr: str) -> TypeParams:
     """
     mobj = _DTYPE_RE.match(typestr)
     if mobj is None:
-        raise ValueError(f'invalid data type specifier: "{typestr}"')
-    byteorder = mobj.group('byteorder')
-    stype = mobj.group('type')
-    size = mobj.group('size')
+        raise ValueError(f"invalid data type specifier: '{typestr}'")
+    byteorder = mobj.group("byteorder")
+    stype = mobj.group("type")
+    size = mobj.group("size")
     signed = None
 
     if size is not None:
         size = int(size)
         if size <= 0:
-            raise ValueError(f'invalid size: "{size}"')
+            raise ValueError(f"invalid size: '{size}'")
 
-    if byteorder == '|':
+    if byteorder == "|":
         byteorder = None
     elif byteorder is not None:
         byteorder = EByteOrder(byteorder)
@@ -104,15 +106,15 @@ def str_to_type_params(typestr: str) -> TypeParams:
     # elif stype in 'bB':
     #     type_ = bytes
     # elif stype == 'i':
-    if stype == 'i':
+    if stype == "i":
         type_ = int
         signed = True
-    elif stype == 'u':
+    elif stype == "u":
         type_ = int
         signed = False
-    elif stype == 'f':
+    elif stype == "f":
         type_ = float
-    elif stype == 'c':
+    elif stype == "c":
         type_ = complex
     # elif stype == 'm':
     #     type_ = datetime.timedelta
@@ -120,7 +122,7 @@ def str_to_type_params(typestr: str) -> TypeParams:
     #     type_ = datetime.datetime
     # elif stype == 'U':
     #     type_ = str
-    elif stype == 'S':
+    elif stype == "S":
         type_ = bytes
     # elif stype == 'V':
     #     type_ = bytes
@@ -134,8 +136,9 @@ def str_to_type_params(typestr: str) -> TypeParams:
         # 'a' : null terminated strings
         # 'm', 'M': timedelta and datetime
         raise TypeError(
-            f'type specifier "{stype}" is valid for the "array protocol" but '
-            f'not supported by bpack')
+            f"type specifier '{stype}' is valid for the 'array protocol' but "
+            f"not supported by bpack"
+        )
 
     return TypeParams(byteorder, type_, size, signed)
 
@@ -186,14 +189,15 @@ class T:
 
     def __new__(cls, *args, **kwargs):
         """Initialize a new `T` descriptor."""
-        raise TypeError(f'Type "{cls.__name__}" cannot be instantiated.')
+        raise TypeError(f"Type '{cls.__name__}' cannot be instantiated.")
 
     @_tp_cache
     def __class_getitem__(cls, params):  # noqa: D105, N805
         if not isinstance(params, str):
             raise TypeError(
-                f'{cls.__name__}[...] should be used with a single argument '
-                f'(a string describing a basic numeric type).')
+                f"{cls.__name__}[...] should be used with a single argument "
+                f"(a string describing a basic numeric type)."
+            )
         typestr = params
         metadata = str_to_type_params(typestr)
         return Annotated[metadata.type, metadata]
@@ -203,7 +207,7 @@ class T:
 
         Alway raise a TypeError to prevent sub-classing.
         """
-        raise TypeError(f'Cannot subclass {cls.__module__}.{cls.__name__}')
+        raise TypeError(f"Cannot subclass {cls.__module__}.{cls.__name__}")
 
 
 def is_annotated(type_: Type) -> bool:

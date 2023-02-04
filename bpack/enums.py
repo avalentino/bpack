@@ -7,8 +7,8 @@ import enum
 class EBaseUnits(enum.Enum):
     """Base units used to specify size and offset parameters in descriptors."""
 
-    BITS = 'bits'
-    BYTES = 'bytes'
+    BITS = "bits"
+    BYTES = "bytes"
 
 
 class EByteOrder(enum.Enum):
@@ -22,20 +22,20 @@ class EByteOrder(enum.Enum):
         for binary structures having :data:`EBaseUnits.BIT` base units.
     """
 
-    BE = '>'
-    LE = '<'
-    NATIVE = '='
-    DEFAULT = ''
+    BE = ">"
+    LE = "<"
+    NATIVE = "="
+    DEFAULT = ""
 
     @classmethod
     def get_native(cls):
         """Return the native byte order."""
-        return cls.LE if sys.byteorder == 'little' else cls.BE
+        return cls.LE if sys.byteorder == "little" else cls.BE
 
 
 class EBitOrder(enum.Enum):
     """Enumeration for bit order."""
 
-    MSB = '>'
-    LSB = '<'
-    DEFAULT = ''
+    MSB = ">"
+    LSB = "<"
+    DEFAULT = ""

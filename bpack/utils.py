@@ -13,6 +13,7 @@ from .typing import get_origin, get_args, Annotated
 
 def classdecorator(func):
     """Class decorator that can be used with or without parameters."""
+
     @functools.wraps(func)
     def wrapper(cls=None, **kwargs):
         def wrap(klass):
@@ -29,12 +30,24 @@ def classdecorator(func):
     return wrapper
 
 
-def create_fn(name, args, body, *, globals=None, locals=None,  # noqa: A002
-              return_type=dataclasses.MISSING):
+def create_fn(
+    name,
+    args,
+    body,
+    *,
+    globals=None,
+    locals=None,  # noqa: A002
+    return_type=dataclasses.MISSING,
+):
     """Create a function object."""
-    return dataclasses._create_fn(name, args, body,
-                                  globals=globals, locals=locals,
-                                  return_type=return_type)
+    return dataclasses._create_fn(
+        name,
+        args,
+        body,
+        globals=globals,
+        locals=locals,
+        return_type=return_type,
+    )
 
 
 def set_new_attribute(cls, name, value):
@@ -62,14 +75,14 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
         return None
     if len(args) > 1:
         if error:
-            raise TypeError(f'{type_} is not supported')
+            raise TypeError(f"{type_} is not supported")
         else:
             return None
 
     if not is_annotated(args[0]) and not isinstance(args[0], type):
         # COMPATIBILITY: with typing_extensions and Python v3.7
         # need to be a concrete type
-        return None                                         # pragma: no cover
+        return None  # pragma: no cover
 
     if not issubclass(sequence_type_, collections.abc.MutableSequence):
         sequence_type_ = tuple
@@ -115,12 +128,14 @@ def enum_item_type(enum_cls: Type[enum.Enum]) -> Type:
                 type_ = item
             else:
                 raise TypeError(
-                    'only Enum with homogeneous values are supported')
+                    "only Enum with homogeneous values are supported"
+                )
         return type_
 
 
-def effective_type(type_: Union[Type, Type[enum.Enum], Type],
-                   keep_annotations: bool = False) -> Type:
+def effective_type(
+    type_: Union[Type, Type[enum.Enum], Type], keep_annotations: bool = False
+) -> Type:
     """Return the effective type.
 
     In case of enums or sequences return the item type.

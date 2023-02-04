@@ -2,7 +2,7 @@
 
 PYTHON=python3
 
-.PHONY: default help sdist wheel check clean distclean api
+.PHONY: default help sdist wheel check clean distclean api lint
 
 default: help
 
@@ -17,6 +17,7 @@ help:
 	@echo "  clean     - clean build artifacts"
 	@echo "  distclean - clean all generated and cache files"
 	@echo "  api       - update the API source files in the documentation"
+	@echo "  lint      - perform check with code linter (flake8, black)"
 
 sdist:
 	$(PYTHON) -m build --sdist --no-isolation
@@ -44,3 +45,9 @@ api:
 	$(RM) -r docs/api
 	sphinx-apidoc --module-first --separate --no-toc --doc-project "bpack API" \
 	  -o docs/api --templatedir docs/_templates/apidoc bpack bpack/tests
+
+lint:
+	$(PYTHON) -m flake8 --count --statistics bpack
+	$(PYTHON) -m pydocstyle --count bpack
+	# $(PYTHON) -m isort --check bpack
+	$(PYTHON) -m black --check bpack
