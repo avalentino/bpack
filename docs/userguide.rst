@@ -638,7 +638,7 @@ Example:
    @bpack.descriptor
    class Record:
        field_1: int = bpack.field(size=4, default=0)
-       field_2: SubRecord = SubRecord()
+       field_2: SubRecord = bpack.field(default_factory=SubRecord)
 
    print(Record())
 
