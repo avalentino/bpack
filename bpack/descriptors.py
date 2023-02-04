@@ -488,7 +488,7 @@ def asdict(obj, *, dict_factory=dict) -> dict:
 
 
 def astuple(obj, *, tuple_factory=tuple) -> Sequence:
-    """Return the fields of a dataclass instance as a new tuple of field values.
+    """Return the fields of a dataclass instance as new tuple of field values.
 
     If given, 'tuple_factory' will be used instead of built-in tuple.
     The function applies recursively to field values that are
