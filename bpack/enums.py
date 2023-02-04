@@ -29,6 +29,7 @@ class EByteOrder(enum.Enum):
 
     @classmethod
     def get_native(cls):
+        """Return the native byte order."""
         return cls.LE if sys.byteorder == 'little' else cls.BE
 
 

@@ -39,7 +39,7 @@ def test_dataclass():
     with pytest.warns(DeprecationWarning):
         @bpack.descriptor
         @dataclasses.dataclass
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
@@ -61,7 +61,7 @@ def test_byte_alignment_warning():
     with pytest.warns(UserWarning,
                       match='bit struct not aligned to bytes'):
         @bpack.descriptor(baseunits=EBaseUnits.BITS)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
@@ -82,7 +82,7 @@ def test_attrs():
 def test_invalid_baseunits(baseunits):
     with pytest.raises(ValueError):
         @bpack.descriptor(baseunits=baseunits)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3)
 
@@ -109,7 +109,7 @@ def test_byteorder(order):
 def test_invalid_byteorder(order):
     with pytest.raises(ValueError):
         @bpack.descriptor(byteorder=order)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=0)
 
 
@@ -143,7 +143,7 @@ def test_default_bitorder():
 def test_invalid_bitorder():
     with pytest.raises(ValueError):
         @bpack.descriptor(byteorder='invalid', baseunits=EBaseUnits.BITS)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=0)
 
 
@@ -158,14 +158,14 @@ def test_bitorder_in_byte_descriptors():
     with pytest.raises(ValueError):
         @bpack.descriptor(bitorder=EBitOrder.DEFAULT,
                           baseunits=EBaseUnits.BYTES)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=0)
 
 
 def test_invalid_field_class():
     with pytest.raises(TypeError, match='size not specified'):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = 0
             field_2: float = 1/3
 
@@ -173,14 +173,14 @@ def test_invalid_field_class():
 def test_no_field_type():
     with pytest.raises(TypeError):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1 = bpack.field(size=4, default=0)
 
 
 def test_invalid_field_size_type():
     with pytest.raises(TypeError):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=None, default=1/3)
 
@@ -188,7 +188,7 @@ def test_invalid_field_size_type():
 def test_inconsistent_field_offset_and_size():
     with pytest.raises(ValueError):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, offset=1, default=1/3)
 
@@ -196,7 +196,7 @@ def test_inconsistent_field_offset_and_size():
 def test_inconsistent_field_type_and_signed():
     with pytest.warns(UserWarning, match='ignore'):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1/3, signed=True)
 
@@ -213,7 +213,7 @@ def test_repeat():
 def test_no_repeat():
     with pytest.raises(TypeError):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: List[int] = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1 / 3)
 
@@ -221,7 +221,7 @@ def test_no_repeat():
 def test_inconsistent_field_type_and_repeat():
     with pytest.raises(TypeError):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=4, default=0, repeat=2)
             field_2: float = bpack.field(size=8, default=1/3, signed=True)
 
@@ -243,7 +243,7 @@ class TestExplicitSize:
     def test_invalid_explicit_size():
         with pytest.raises(ValueError):
             @bpack.descriptor(size=10)
-            class Record:                                               # noqa
+            class Record:
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: float = bpack.field(size=8, default=1/3)
 
@@ -251,7 +251,7 @@ class TestExplicitSize:
     def test_inconsistent_explicit_size_and_offset():
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor(size=16)
-            class Record:                                               # noqa
+            class Record:
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: float = bpack.field(size=8, default=1/3, offset=12)
 
@@ -259,7 +259,7 @@ class TestExplicitSize:
     def test_inconsistent_explicit_size_and_repeat():
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor(size=12)
-            class Record:                                               # noqa
+            class Record:
                 field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
                 field_2: float = bpack.field(size=8, default=1/3)
 
@@ -267,7 +267,7 @@ class TestExplicitSize:
     def test_inconsistent_explicit_size_offset_and_repeat():
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor(size=20)
-            class Record:                                               # noqa
+            class Record:
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: List[float] = bpack.field(size=8, default=1/3,
                                                    offset=8, repeat=2)
@@ -276,7 +276,7 @@ class TestExplicitSize:
     def test_invalid_explicit_size_type():
         with pytest.raises(TypeError):
             @bpack.descriptor(size=10.5)
-            class Record:                                               # noqa
+            class Record:
                 field_1: int = bpack.field(size=4, default=0)
                 field_2: float = bpack.field(size=8, default=1/3)
 
@@ -365,7 +365,7 @@ class TestSize:
     def test_len_with_repeat_and_offset_03():
         with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
             @bpack.descriptor
-            class Record:                                               # noqa
+            class Record:
                 field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
                 field_2: List[float] = bpack.field(size=8, default=1/3,
                                                    repeat=2, offset=6)
@@ -389,12 +389,12 @@ def test_sequence_type():
 
     with pytest.raises(TypeError):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: Tuple[int, int] = bpack.field(size=1, repeat=2)
 
     with pytest.raises(TypeError):
         @bpack.descriptor
-        class Record:                                                   # noqa
+        class Record:
             field_1: Sequence = bpack.field(size=1, repeat=2)
 
 
@@ -437,7 +437,7 @@ def test_nested_records():
 
     with pytest.raises(bpack.descriptors.DescriptorConsistencyError):
         @bpack.descriptor
-        class NestedRecord:                                             # noqa
+        class NestedRecord:
             field_1: str = bpack.field(size=10, default='0123456789')
             field_2: Record = bpack.field(size=bpack.calcsize(Record) + 1,
                                           default_factory=Record)

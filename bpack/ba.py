@@ -101,7 +101,7 @@ class Decoder(bpack.codecs.Decoder):
     baseunits = EBaseUnits.BITS
 
     def __init__(self, descriptor, converters=converter_factory):
-        """Initializer.
+        """Initialize the decoder.
 
         The *descriptor* parameter* is a bpack record descriptor.
         """

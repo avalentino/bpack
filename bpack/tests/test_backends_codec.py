@@ -459,8 +459,8 @@ def _fix_padding(data, refdata):
      pytest.param(
          bpack_ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='ba BE MSB',
          marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
-def test_decoder(backend, Record, encoded_data):                        # noqa
-    decoded_data = Record()                                             # noqa
+def test_decoder(backend, Record, encoded_data):  # noqa: N803
+    decoded_data = Record()
 
     decoder = backend.Decoder(Record)
     assert hasattr(decoder, 'baseunits')
@@ -501,8 +501,8 @@ def test_decoder(backend, Record, encoded_data):                        # noqa
      pytest.param(
          bpack_ba, BitRecordBeMsb, BIT_ENCODED_DATA_BE_MSB, id='ba BE MSB',
          marks=pytest.mark.skipif(not bpack_ba, reason='not available'))])
-def test_decoder_func(backend, Record, encoded_data):                   # noqa
-    decoded_data = Record()                                             # noqa
+def test_decoder_func(backend, Record, encoded_data):  # noqa: N803
+    decoded_data = Record()
 
     record_type = backend.decoder(Record)
     record = record_type.frombytes(encoded_data)
@@ -536,8 +536,8 @@ def test_decoder_func(backend, Record, encoded_data):                   # noqa
      pytest.param(
          bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
          marks=pytest.mark.skipif(not bpack_bs, reason='not available'))])
-def test_encoder(backend, Record, encoded_data):                        # noqa
-    record = Record()                                                   # noqa
+def test_encoder(backend, Record, encoded_data):  # noqa: N803
+    record = Record()
 
     encoder = backend.Encoder(Record)
     assert hasattr(encoder, 'baseunits')
@@ -578,8 +578,8 @@ def test_encoder(backend, Record, encoded_data):                        # noqa
      pytest.param(
          bpack_bs, BitRecordLeLsb, BIT_ENCODED_DATA_LE_LSB, id='bs LE LSB',
          marks=pytest.mark.skipif(not bpack_bs, reason='not available'))])
-def test_encoder_func(backend, Record, encoded_data):                   # noqa
-    record = Record()                                                   # noqa
+def test_encoder_func(backend, Record, encoded_data):  # noqa: N803
+    record = Record()
 
     record_type = backend.encoder(Record)
     data = record_type.tobytes(record)
@@ -692,7 +692,7 @@ def test_unsupported_type(backend):
     with pytest.raises(TypeError):
         @codec
         @bpack.descriptor(baseunits=backend.Decoder.baseunits, frozen=True)
-        class Record:                                                   # noqa
+        class Record:
             field_1: CustomType = bpack.field(size=8)
 
 
@@ -809,7 +809,7 @@ def test_wrong_baseunits_bit(backend):
     with pytest.raises(ValueError):
         @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BYTES)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=1)
 
 
@@ -820,7 +820,7 @@ def test_wrong_baseunits_byte(backend):
     with pytest.raises(ValueError):
         @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=1)
 
 

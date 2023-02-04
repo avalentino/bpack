@@ -4,7 +4,7 @@ import re
 from typing import NamedTuple, Optional, Type, Union
 
 try:
-    from typing import _tp_cache  # noqa
+    from typing import _tp_cache
 except ImportError:
     def _tp_cache(x):
         return x
@@ -33,12 +33,15 @@ FieldTypes = Type[Union[bool, int, float, complex, bytes, str]]
 
 
 class TypeParams(NamedTuple):
+    """Named tuple describing type parameters."""
+
     byteorder: Optional[EByteOrder]
-    type: FieldTypes
+    type: FieldTypes  # noqa: A003
     size: Optional[int]
     signed: Optional[bool]
 
     def __repr__(self):
+        """Return the string representation of the TypeParams object."""
         byteorder = self.byteorder
         byteorder = repr(byteorder) if byteorder is not None else byteorder
         size = str(self.size) if self.size is not None else self.size
@@ -182,10 +185,11 @@ class T:
     __slots__ = ()
 
     def __new__(cls, *args, **kwargs):
+        """Initialize a new `T` descriptor."""
         raise TypeError(f'Type "{cls.__name__}" cannot be instantiated.')
 
     @_tp_cache
-    def __class_getitem__(cls, params):
+    def __class_getitem__(cls, params):  # noqa: D105, N805
         if not isinstance(params, str):
             raise TypeError(
                 f'{cls.__name__}[...] should be used with a single argument '
@@ -195,6 +199,10 @@ class T:
         return Annotated[metadata.type, metadata]
 
     def __init_subclass__(cls, *args, **kwargs):
+        """Subclass initializer.
+
+        Alway raise a TypeError to prevent sub-classing.
+        """
         raise TypeError(f'Cannot subclass {cls.__module__}.{cls.__name__}')
 
 

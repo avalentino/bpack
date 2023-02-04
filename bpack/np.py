@@ -147,7 +147,7 @@ class Codec(bpack.codecs.Codec):
     baseunits = EBaseUnits.BYTES
 
     def __init__(self, descriptor):
-        """Initializer.
+        """Initialize the codec.
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
@@ -174,6 +174,7 @@ class Codec(bpack.codecs.Codec):
 
     @property
     def dtype(self):
+        """Return the numpy dtype corresponding to the `codec.descriptor`."""
         return self._dtype
 
     def decode(self, data: bytes, count: int = 1):
@@ -193,6 +194,7 @@ class Codec(bpack.codecs.Codec):
         return out
 
     def encode(self, record):
+        """Encode record (Python object) into binary data."""
         # exploit the recursive behaviour of astuple
         values = bpack.astuple(record)  # , tuple_factory=list)
         values = list(values)  # nested record and sequences stay tuples
@@ -223,7 +225,7 @@ def _get_buffer_size(bits_per_sample: int) -> int:
 
 
 def _get_mask(nbits: int, dtype: str) -> np.ndarray:
-    """Returns a mask for dtype to select the nbits least significant bits."""
+    """Return a mask for dtype to select the nbits least significant bits."""
     shift = np.array(64 - nbits, dtype=np.uint32)
     mask = np.array(0xffffffffffffffff) >> shift
     return mask.astype(dtype)

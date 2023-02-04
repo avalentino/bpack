@@ -8,7 +8,7 @@ import collections.abc
 from typing import Type, Union
 
 from .typing import is_annotated
-from .typing import get_origin, get_args, Annotated                     # noqa
+from .typing import get_origin, get_args, Annotated
 
 
 def classdecorator(func):
@@ -29,17 +29,17 @@ def classdecorator(func):
     return wrapper
 
 
-def create_fn(name, args, body, *, globals=None, locals=None,           # noqa
+def create_fn(name, args, body, *, globals=None, locals=None,  # noqa: A002
               return_type=dataclasses.MISSING):
     """Create a function object."""
-    return dataclasses._create_fn(name, args, body,                     # noqa
+    return dataclasses._create_fn(name, args, body,
                                   globals=globals, locals=locals,
                                   return_type=return_type)
 
 
 def set_new_attribute(cls, name, value):
     """Programmatically add a new attribute/method to a class."""
-    return dataclasses._set_new_attribute(cls, name, value)             # noqa
+    return dataclasses._set_new_attribute(cls, name, value)
 
 
 def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:

@@ -114,7 +114,7 @@ class TestStrToTypeParams:
      ('f', float, bpack.typing.TypeParams(None, float, None, None))],
     ids=['i4', 'u2', 'f8', 'c16', 'S128', '>i8', 'f'])
 def test_type_annotation(typestr, type_, params):
-    T = bpack.typing.T[typestr]                                         # noqa
+    T = bpack.typing.T[typestr]  # noqa: N806
     assert isinstance(T(), type_)
     atype, metadata = bpack.typing.get_args(T)
     assert metadata == params

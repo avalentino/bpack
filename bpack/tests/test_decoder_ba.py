@@ -35,7 +35,7 @@ def test_invalid_float_size():
     with pytest.raises(ValueError):
         @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-        class Record:                                                   # noqa
+        class Record:
             field_1: float = bpack.field(size=80)
 
 
@@ -48,7 +48,7 @@ def test_little_endian():
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                           byteorder=bpack.EByteOrder.LE,
                           frozen=True)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=1)
 
 
@@ -61,7 +61,7 @@ def test_invalid_bitorder():
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS,
                           bitorder=bpack.EBitOrder.LSB,
                           frozen=True)
-        class Record:                                                   # noqa
+        class Record:
             field_1: int = bpack.field(size=8, default=1)
 
 
@@ -72,7 +72,7 @@ def test_sequence():
     with pytest.raises(TypeError):
         @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
-        class Record:                                                   # noqa
+        class Record:
             field_1: List[int] = bpack.field(size=4, signed=False,
                                              repeat=2, default=3)
             field_2: Sequence[int] = bpack.field(size=4, signed=False,

@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'bpack'
-copyright = '2020-2023, Antonio Valentino'
+copyright = '2020-2023, Antonio Valentino'  # noqa: D100
 author = 'Antonio Valentino'
 
 # The full version, including alpha/beta/rc tags
@@ -46,7 +46,7 @@ extensions = [
 ]
 
 try:
-    import sphinxcontrib.spelling                               # noqa: F401
+    import sphinxcontrib.spelling  # noqa: F401
 except ImportError:
     pass
 else:

@@ -10,10 +10,20 @@ from .enums import EBaseUnits
 from .descriptors import field_descriptors
 
 
+__all__ = [
+    "Codec",
+    "Encoder",
+    "Decoder",
+    "has_codec",
+]
+
+
 CODEC_ATTR_NAME = '__bpack_decoder__'
 
 
 class BaseCodec:
+    """Base class for codecs, encoders and decoders."""
+
     baseunits: EBaseUnits
 
     @classmethod
@@ -30,22 +40,31 @@ class BaseCodec:
 
     @property
     def descriptor(self):
+        """Return the descriptor associated to the codec."""
         return self._descriptor
 
 
 class Decoder(BaseCodec, abc.ABC):
+    """Base class for decoders."""
+
     @abc.abstractmethod
     def decode(self, data: bytes):
+        """Decode binary data and return Python object."""
         pass
 
 
 class Encoder(BaseCodec, abc.ABC):
+    """Base class for encoders."""
+
     @abc.abstractmethod
     def encode(self, record) -> bytes:
+        """Encode python objects into binary data."""
         pass
 
 
 class Codec(Decoder, Encoder, abc.ABC):
+    """Base class for codecs."""
+
     pass
 
 
@@ -152,6 +171,8 @@ class ConverterInfo(NamedTuple):
 
 
 class BaseStructCodec(Codec):
+    """Base class for codecs base on struct like backends."""
+
     @staticmethod
     @abc.abstractmethod
     def _get_base_codec(descriptor):
@@ -159,7 +180,7 @@ class BaseStructCodec(Codec):
 
     def __init__(self, descriptor, codec=None,
                  decode_converters=None, encode_converters=None):
-        """Initializer.
+        """Initialize the BaseStructCodec.
 
         The *descriptor* parameter* is a bpack record descriptor.
         """
@@ -178,7 +199,7 @@ class BaseStructCodec(Codec):
         self._flat_len = _get_flat_len(descriptor)
 
     @property
-    def format(self) -> str:
+    def format(self) -> str:  # noqa: A003
         """Return the format string."""
         return self._codec.format
 
@@ -191,7 +212,7 @@ class BaseStructCodec(Codec):
             decoder_ = get_codec(descr)
             return decoder_
 
-        decoder_ = cls(descr)                               # noqa
+        decoder_ = cls(descr)
         return decoder_
 
     @staticmethod
@@ -245,7 +266,7 @@ class BaseStructCodec(Codec):
             encoder_ = get_codec(descr)
             return encoder_
 
-        encoder_ = cls(descr)                               # noqa
+        encoder_ = cls(descr)
         return encoder_
 
     @staticmethod

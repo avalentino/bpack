@@ -37,17 +37,17 @@ BACKEND_TYPE = EBaseUnits.BITS
 
 class BitStruct:
     @staticmethod
-    def _simplified_fmt(format: str) -> Optional[str]:
-        fmt = format.replace('>', '')
+    def _simplified_fmt(format_: str) -> Optional[str]:
+        fmt = format_.replace('>', '')
         if '<' in fmt:
             return None
         else:
             return fmt
 
-    def __init__(self, format: str, names=None):                        # noqa
+    def __init__(self, format_: str, names=None):
         codec_ = None
         if hasattr(bitstruct, 'c'):
-            fmt = self._simplified_fmt(format)
+            fmt = self._simplified_fmt(format_)
             if fmt is not None:
                 try:
                     codec_ = bitstruct.c.compile(fmt, names)
@@ -55,13 +55,13 @@ class BitStruct:
                     pass
 
         if codec_ is None:
-            codec_ = bitstruct.compile(format, names)
+            codec_ = bitstruct.compile(format_, names)
 
         self._bitstruct = codec_
-        self._format: str = format
+        self._format: str = format_
 
     @property
-    def format(self) -> str:
+    def format(self) -> str:  # noqa: A003
         return self._format
 
     def __getattr__(self, name):
@@ -110,7 +110,7 @@ def _to_fmt(type_, size: int, bitorder: str = '', byteorder: str = '',
     key = (etype, signed) if etype is int and signed is not None else etype
 
     try:
-        fmt = f'{bitorder}{_TYPE_TO_STR[key]}{size}' * repeat           # noqa
+        fmt = f'{bitorder}{_TYPE_TO_STR[key]}{size}' * repeat
     except KeyError:
         raise TypeError(f'unsupported type: {etype:!r}')
 

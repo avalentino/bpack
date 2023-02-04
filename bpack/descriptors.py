@@ -59,11 +59,11 @@ def _resolve_type(type_):
 class BinFieldDescriptor:
     """Descriptor for bpack fields."""
 
-    type: Optional[Type] = None
-    size: Optional[int] = None          # item size
+    type: Optional[Type] = None  # noqa: A003
+    size: Optional[int] = None  #: item size
     offset: Optional[int] = None
     signed: Optional[bool] = None
-    repeat: Optional[int] = None        # number of items
+    repeat: Optional[int] = None  #: number of items
     # converter: Optional[Callable] = None
 
     def _validate_type(self):
@@ -142,12 +142,15 @@ class BinFieldDescriptor:
                 f'{self.type}')
 
     def is_int_type(self) -> bool:
+        """Return True if the field is an integer or an integet subtype."""
         return bpack.utils.is_int_type(self.type)
 
     def is_sequence_type(self) -> bool:
+        """Return True if the fiels is a sequence."""
         return bpack.utils.is_sequence_type(self.type, error=True)
 
     def is_enum_type(self) -> bool:
+        """Return True if the fiels is an enum."""
         return bpack.utils.is_enum_type(self.type)
 
     @property
@@ -163,6 +166,7 @@ class BinFieldDescriptor:
         return True
 
     def update_from_type(self, type_: Type):
+        """Update the field descriptor according to the specified type."""
         if self.type is not None:
             raise TypeError('the type attribute is already set')
         if bpack.typing.is_annotated(type_):
@@ -222,7 +226,7 @@ def _update_field_metadata(field_, **kwargs):
     return field_
 
 
-def get_field_descriptor(field: Field,                                  # noqa
+def get_field_descriptor(field: Field,
                          validate: bool = True) -> BinFieldDescriptor:
     """Return the field descriptor attached to a :class:`Field`."""
     if not is_field(field):
@@ -234,7 +238,7 @@ def get_field_descriptor(field: Field,                                  # noqa
     return field_descr
 
 
-def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,  # noqa
+def set_field_descriptor(field: Field, descriptor: BinFieldDescriptor,
                          validate: bool = True) -> Field:
     """Set the field metadata according to the specified descriptor."""
     if validate:
@@ -274,7 +278,7 @@ _DEFAULT_SIZE_MAP = {
 
 
 def _get_default_size(type_,
-                      baseunits: EBaseUnits) -> Union[int, None]:       # noqa
+                      baseunits: EBaseUnits) -> Union[int, None]:
     if is_descriptor(type_):
         return calcsize(type_, baseunits)
 
@@ -304,12 +308,12 @@ def _get_default_size(type_,
     #     else:
     #         return None
 
-    return _DEFAULT_SIZE_MAP[baseunits].get(etype)                      # noqa
+    return _DEFAULT_SIZE_MAP[baseunits].get(etype)
 
 
-def _get_effective_byteorder(byteorder: EByteOrder,                     # noqa
-                             baseunits: EBaseUnits) -> EByteOrder:      # noqa
-    byteorder = EByteOrder(byteorder)                                   # noqa
+def _get_effective_byteorder(byteorder: EByteOrder,
+                             baseunits: EBaseUnits) -> EByteOrder:
+    byteorder = EByteOrder(byteorder)
     effective_byteorder = byteorder
     if baseunits is EBaseUnits.BYTES:
         if byteorder in {EByteOrder.NATIVE, EByteOrder.DEFAULT}:
@@ -324,9 +328,9 @@ def _get_effective_byteorder(byteorder: EByteOrder,                     # noqa
 
 @classdecorator
 def descriptor(cls, *, size: Optional[int] = None,
-               byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,  # noqa
-               bitorder: Optional[Union[str, EBitOrder]] = None,        # noqa
-               baseunits: EBaseUnits = EBaseUnits.BYTES,                # noqa
+               byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,
+               bitorder: Optional[Union[str, EBitOrder]] = None,
+               baseunits: EBaseUnits = EBaseUnits.BYTES,
                **kwargs):
     """Class decorator to define descriptors for binary records.
 
@@ -357,8 +361,8 @@ def descriptor(cls, *, size: Optional[int] = None,
     It is also possible to specify as additional keyword arguments all the
     parameters accepted by :func:`dataclasses.dataclass`.
     """
-    baseunits = EBaseUnits(baseunits)                                   # noqa
-    byteorder = EByteOrder(byteorder)                                   # noqa
+    baseunits = EBaseUnits(baseunits)
+    byteorder = EByteOrder(byteorder)
 
     if dataclasses.is_dataclass(cls):
         warnings.warn('the explicit use of dataclasses is deprecated',
@@ -445,7 +449,7 @@ def descriptor(cls, *, size: Optional[int] = None,
             'it is not possible to specify the "bitorder" '
             'if "baseunits" is not "BITS"')
     elif baseunits is EBaseUnits.BITS and bitorder is None:
-        bitorder = EBitOrder.DEFAULT                                    # noqa
+        bitorder = EBitOrder.DEFAULT
 
     setattr(cls, BASEUNITS_ATTR_NAME, baseunits)
     setattr(cls, BYTEORDER_ATTR_NAME, byteorder)
@@ -458,7 +462,7 @@ def descriptor(cls, *, size: Optional[int] = None,
 
 def fields(obj) -> Sequence[Field]:
     """Return a tuple describing the fields of this descriptor."""
-    return dataclasses.fields(obj)                                      # noqa
+    return dataclasses.fields(obj)
 
 
 def is_descriptor(obj) -> bool:
@@ -547,7 +551,7 @@ def bitorder(obj) -> Union[EBitOrder, None]:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def field_descriptors(descriptor,                                       # noqa
+def field_descriptors(descriptor,
                       pad: bool = False) -> Iterable[BinFieldDescriptor]:
     """Return the list of field descriptors for the input record descriptor.
 
