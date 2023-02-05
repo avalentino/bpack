@@ -1,7 +1,13 @@
 Release Notes
 =============
 
-bpack v1.0.0 (UNRELEASED)
+bpack v1.0.1 (UNRELEASED)
+-------------------------
+
+* TBW
+
+
+bpack v1.0.0 (05/02/2023)
 -------------------------
 
 * Fix compatibility with Python v3.11.
