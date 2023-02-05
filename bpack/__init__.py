@@ -20,4 +20,4 @@ from .descriptors import (  # noqa: F401
     calcsize,
 )
 
-__version__ = "0.8.3.dev0"
+__version__ = "1.0.0"

@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v0.8.3 (UNRELEASED)
+bpack v1.0.0 (UNRELEASED)
 -------------------------
 
 * Fix compatibility with Python v3.11.
