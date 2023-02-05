@@ -81,12 +81,36 @@ Test coverage
   $ python3 -m pytest --cov --cov-report=html --cov-report=term bpack
 
 
-Check formatting
-----------------
+Check code style and formatting
+-------------------------------
+
+The code style and formatting shall be checked with flake8_ as follows:
 
 .. code-block:: shell
 
   $ python3 -m flake8 --statistics --count bpack
+
+Moreover, also the correct formatting of "docstrings" shall be checked, using
+pydocstyle_ this time:
+
+.. code-block:: shell
+
+	$ python3 -m pydocstyle --count bpack
+
+A more strict check of formatting can be done using black_:
+
+.. code-block:: shell
+
+	$ python3 -m black --check bpack
+
+Finally the ordering of imports can be checked with isort_ as follows:
+
+.. code-block:: shell
+
+	$ python3 -m isort --check bpack
+
+Please note that all the relevant configuration for the above mentioned
+tools are in the `pyproject.toml` file.
 
 
 Build the documentation
@@ -135,3 +159,7 @@ Update the API documentation
 
 .. _Tox: https://tox.readthedocs.io
 .. _Python: https://www.python.org
+.. _flake8: https://flake8.pycqa.org
+.. _pydocstyle: http://www.pydocstyle.org
+.. _black: https://black.readthedocs.io
+.. _isort: https://pycqa.github.io/isort

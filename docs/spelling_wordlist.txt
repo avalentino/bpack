@@ -13,6 +13,8 @@ dataclass
 de
 dev
 dicts
+docstring
+docstrings
 endian
 endianess
 enum
