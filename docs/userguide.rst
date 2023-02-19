@@ -759,7 +759,7 @@ bitarray_ package.
 .. _numpy: https://numpy.org
 
 
-Coded objects
+Codec objects
 ~~~~~~~~~~~~~
 
 Each backend provides a ``Codec`` class that can be used to instantiate
