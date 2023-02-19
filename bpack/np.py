@@ -272,6 +272,9 @@ def _unpackbits_params(
     signed: bool = False,
     byteorder: str = ">",
 ) -> _BitUnpackParams:
+    if signed:
+        raise NotImplementedError("signed=True is not supported.")
+
     assert nbits >= bit_offset
     if samples_per_block is None:
         if blockstride is not None:

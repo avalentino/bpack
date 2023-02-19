@@ -296,8 +296,14 @@ def test_headers(
 @pytest.mark.parametrize("bits_per_sample", [3, 4, 5, 6, 12, 13, 14])
 @pytest.mark.parametrize("samples_per_block", [64, 128, 256])
 @pytest.mark.parametrize("nblocks", [1, 3, 20])
+@pytest.mark.parametrize("signed", [False])
 def test_data(
-    bit_offset, header_size, bits_per_sample, samples_per_block, nblocks
+    bit_offset,
+    header_size,
+    bits_per_sample,
+    samples_per_block,
+    nblocks,
+    signed,
 ):
     data, values = _make_sample_data_block(
         header_size,
@@ -305,6 +311,7 @@ def test_data(
         samples_per_block,
         bit_offset,
         nblocks=nblocks,
+        # signed=signed,
     )
 
     block_size = header_size + bits_per_sample * samples_per_block
@@ -315,6 +322,7 @@ def test_data(
         samples_per_block,
         bit_offset=bit_offset + header_size,
         blockstride=block_size,
+        signed=signed,
     )
 
     extra_bits = len(data) * 8 - bit_offset - block_size * nblocks
