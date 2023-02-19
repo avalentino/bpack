@@ -230,6 +230,26 @@ def field(
 
     Returned object is a :class:`Field` instance with metadata properly
     initialized to describe the field of a binary record.
+
+    :param size: int
+        size of the field in `baseunits`
+    :param offset: int
+        offset of the field w.r.t. the beginning of the record
+        (exptesed in `baseunits`)
+    :param signed: bool
+        True if an `int` field is signed, False otherwise.
+        This parameter must not be specified for non `int` fields.
+    :param repeat: int
+        length of the sequence for `sequence` fields, i.e. fields
+        consisting in multiple items having the same data type.
+        This parameter must not be specified if the data type is not a
+        sequence tyle (e.g. `List`).
+    :param metadata:
+        additional metadata to be attached the the field descriptor.
+    :param **kwargs`
+        additional keyword arguments for the :func:`dataclasses.field`
+        function.
+
     """
     field_descr = BinFieldDescriptor(
         size=size, offset=offset, signed=signed, repeat=repeat
