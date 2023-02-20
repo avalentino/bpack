@@ -65,7 +65,7 @@ Possible additional features still not implemented
 
 * user defined converters
 * support for complex and datetime data types
-* conversin to CSV, HDF5 and numpy dtype
+* conversion to CSV, HDF5 and :func:`numpy.dtype`
 
 
 .. _Python: https://www.python.org

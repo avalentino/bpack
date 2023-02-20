@@ -72,7 +72,10 @@ def _resolve_type(type_):
 
 @dataclasses.dataclass
 class BinFieldDescriptor:
-    """Descriptor for bpack fields."""
+    """Descriptor for bpack fields.
+
+    See also :func:`bpack.filed` for a description of the attributes.
+    """
 
     type: Optional[Type] = None  # noqa: A003
     size: Optional[int] = None  #: item size
@@ -83,7 +86,7 @@ class BinFieldDescriptor:
 
     def _validate_type(self):
         if self.type is None:
-            raise TypeError(f'invalid type "{self.type}"')
+            raise TypeError(f"invalid type '{self.type}'")
 
     def _validate_size(self):
         msg = f"invalid size: {self.size!r} (must be a positive integer)"
@@ -156,7 +159,7 @@ class BinFieldDescriptor:
             self._validate_enum_type()
         elif self.is_sequence_type() and self.repeat is None:
             raise TypeError(
-                f"no 'repeat? parameter specified for sequence type "
+                f"no 'repeat' parameter specified for sequence type "
                 f"{self.type}"
             )
 
@@ -232,10 +235,10 @@ def field(
     initialized to describe the field of a binary record.
 
     :param size: int
-        size of the field in `baseunits`
+        size of the field in :class:`EBaseUnits`
     :param offset: int
         offset of the field w.r.t. the beginning of the record
-        (exptesed in `baseunits`)
+        (expressed in :class:`EBaseUnits`)
     :param signed: bool
         True if an `int` field is signed, False otherwise.
         This parameter must not be specified for non `int` fields.
@@ -243,10 +246,10 @@ def field(
         length of the sequence for `sequence` fields, i.e. fields
         consisting in multiple items having the same data type.
         This parameter must not be specified if the data type is not a
-        sequence tyle (e.g. `List`).
+        sequence type (e.g. `List`).
     :param metadata:
         additional metadata to be attached the the field descriptor.
-    :param **kwargs`
+    :param kwargs:
         additional keyword arguments for the :func:`dataclasses.field`
         function.
 
