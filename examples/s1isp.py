@@ -21,57 +21,57 @@ class SyncMarkerException(RuntimeError):
 
 
 class EEccNumber(enum.IntEnum):
-    # TODO: check "not_set"
-    not_set = 0  # contingency: reserved for ground testing or mode upgrading
-    s1 = 1
-    s2 = 2
-    s3 = 3
-    s4 = 4
-    s5_n = 5
-    s6 = 6
-    iw = 8
-    wm = 9
-    s5_s = 10
-    s1_no_ical = 11
-    s2_no_ical = 12
-    s3_no_ical = 13
-    s4_no_ical = 14
-    rfc = 15
-    test = 16
-    en_s3 = 17
-    an_s1 = 18
-    an_s2 = 19
-    an_s3 = 20
-    an_s4 = 21
-    an_s5_n = 22
-    an_s5_s = 23
-    an_s6 = 24
-    s5_n_no_ical = 25
-    s5_s_no_ical = 26
-    s6_no_ical = 27
-    en_s3_no_ical = 31
-    en = 32
-    an_s1_no_ical = 33
-    an_s3_no_ical = 34
-    an_s6_no_ical = 35
-    nc_s1 = 37
-    nc_s2 = 38
-    nc_s3 = 39
-    nc_s4 = 40
-    nc_s5_n = 41
-    nc_s5_s = 42
-    nc_s6 = 43
-    nc_ew = 44
-    nc_iw = 45
-    nc_wm = 46
+    # TODO: check "NOT_SET"
+    NOT_SET = 0  # CONTINGENCY: RESERVED FOR GROUND TESTING OR MODE UPGRADING
+    S1 = 1
+    S2 = 2
+    S3 = 3
+    S4 = 4
+    S5_N = 5
+    S6 = 6
+    IW = 8
+    WM = 9
+    S5_S = 10
+    S1_NO_ICAL = 11
+    S2_NO_ICAL = 12
+    S3_NO_ICAL = 13
+    S4_NO_ICAL = 14
+    RFC = 15
+    TEST = 16
+    EN_S3 = 17
+    AN_S1 = 18
+    AN_S2 = 19
+    AN_S3 = 20
+    AN_S4 = 21
+    AN_S5_N = 22
+    AN_S5_S = 23
+    AN_S6 = 24
+    S5_N_NO_ICAL = 25
+    S5_S_NO_ICAL = 26
+    S6_NO_ICAL = 27
+    EN_S3_NO_ICAL = 31
+    EN = 32
+    AN_S1_NO_ICAL = 33
+    AN_S3_NO_ICAL = 34
+    AN_S6_NO_ICAL = 35
+    NC_S1 = 37
+    NC_S2 = 38
+    NC_S3 = 39
+    NC_S4 = 40
+    NC_S5_N = 41
+    NC_S5_S = 42
+    NC_S6 = 43
+    NC_EW = 44
+    NC_IW = 45
+    NC_WM = 46
 
 
 class ETestMode(enum.IntEnum):
-    default = 0
-    contingency_rxm_fully_operational = 4  # 100
-    contingency_rxm_fully_bypassed = 5  # 101
-    oper = 6  # 110
-    bypass = 7  # 111
+    DEFAULT = 0
+    CONTINGENCY_RXM_FULLY_OPERATIONAL = 4  # 100
+    CONTINGENCY_RXM_FULLY_BYPASSED = 5  # 101
+    OPER = 6  # 110
+    BYPASS = 7  # 111
 
 
 class ERxChannelId(enum.IntEnum):
@@ -80,27 +80,27 @@ class ERxChannelId(enum.IntEnum):
 
 
 class EBaqMode(enum.IntEnum):
-    bypass = 0
-    baq3 = 3
-    baq4 = 4
-    baq5 = 5
-    fdbaq_mode_0 = 12
-    fdbaq_mode_1 = 13
-    fdbaq_mode_2 = 14
+    BYPASS = 0
+    BAQ3 = 3
+    BAQ4 = 4
+    BAQ5 = 5
+    FDBAQ_MODE_0 = 12
+    FDBAQ_MODE_1 = 13
+    FDBAQ_MODE_2 = 14
 
 
 class ERangeDecimation(enum.IntEnum):
-    x3_on_4 = 0
-    x2_on_3 = 1
-    x5_on_9 = 3
-    x4_on_9 = 4
-    x3_on_8 = 5
-    x1_on_3 = 6
-    x1_on_6 = 7
-    x3_on_7 = 8
-    x5_on_16 = 9
-    x3_on_26 = 10
-    x4_on_11 = 11
+    X3_ON_4 = 0
+    X2_ON_3 = 1
+    X5_ON_9 = 3
+    X4_ON_9 = 4
+    X3_ON_8 = 5
+    X1_ON_3 = 6
+    X1_ON_6 = 7
+    X3_ON_7 = 8
+    X5_ON_16 = 9
+    X3_ON_26 = 10
+    X4_ON_11 = 11
 
 
 @bpack.bs.decoder
@@ -128,10 +128,10 @@ class DatationService:
 class FixedAncillaryDataService:
     sync_marker: T["u32"] = SYNK_MARKER
     data_take_id: T["u32"] = 0
-    ecc_num: EEccNumber = bpack.field(size=8, default=EEccNumber.not_set)
+    ecc_num: EEccNumber = bpack.field(size=8, default=EEccNumber.NOT_SET)
     # n. 1 bit n/a
     test_mode: ETestMode = bpack.field(
-        size=3, offset=73, default=ETestMode.default
+        size=3, offset=73, default=ETestMode.DEFAULT
     )
     rx_channel_id: ERxChannelId = bpack.field(size=4, default=ERxChannelId.V)
     instrument_configuration_id: T["u32"] = 0  # NOTE: the data type is TBD
@@ -155,7 +155,7 @@ class CounterService:
 @bpack.descriptor(baseunits=BITS, byteorder=BE)
 class RadarConfigurationSupportService:
     error_flag: bool = False
-    baq_mode: EBaqMode = bpack.field(size=5, offset=3, default=EBaqMode.bypass)
+    baq_mode: EBaqMode = bpack.field(size=5, offset=3, default=EBaqMode.BYPASS)
     baq_block_len: T["u8"] = 0
     # n. 8 bits padding
     range_decimation: ERangeDecimation = bpack.field(
