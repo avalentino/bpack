@@ -59,7 +59,7 @@ class TestEnumType:
         class EEnumType(enum.Enum):
             A = EFlagEnumType.A
             B = 0
-            c = EFlagEnumType.B
+            C = EFlagEnumType.B
 
         assert bpack.utils.enum_item_type(EEnumType) is int
 
