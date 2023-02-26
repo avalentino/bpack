@@ -3,6 +3,7 @@
 import re
 from typing import NamedTuple, Optional, Type, Union
 
+# @COMPATIBILITY: available in Python 3.7 ... 3.11
 try:
     from typing import _tp_cache
 except ImportError:
