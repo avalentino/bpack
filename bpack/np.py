@@ -377,6 +377,8 @@ class ESignMode(enum.IntEnum):
     SIGNED = 1
     SIGN_AND_MOD = 2
 
+_LUTS = {}
+
 
 def unpackbits(
     data: bytes,
@@ -386,6 +388,7 @@ def unpackbits(
     blockstride: Optional[int] = None,
     sign_mode: ESignMode = ESignMode.UNSIGNED,
     byteorder: str = ">",
+    use_lut=False,
 ) -> np.ndarray:
     """Unpack packed (integer) values form a string of bytes.
 
@@ -439,12 +442,23 @@ def unpackbits(
         pass
     elif sign_mode == ESignMode.SIGNED:
         # TODO: try also the LUT approach
-        cmask = make_bitmask(
-            bits_per_sample - 1, dtype, mode=EMaskMode.COMPLEMENT
-        )
-        sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
-        is_negative = (outdata & sign_mask).astype(bool)
-        outdata[is_negative] = outdata[is_negative] | cmask
+        if not use_lut:
+            cmask = make_bitmask(
+                bits_per_sample - 1, dtype, mode=EMaskMode.COMPLEMENT
+            )
+            sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
+            is_negative = (outdata & sign_mask).astype(bool)
+            outdata[is_negative] = outdata[is_negative] | cmask
+        else:
+            key = (bits_per_sample, sign_mode)
+            if not key in _LUTS:
+                lut = np.arange(2**bits_per_sample, dtype=dtype)
+                n = 2**(bits_per_sample - 1)
+                lut[n:] = np.arange(-n, 0, dtype=dtype)
+                _LUTS[key] = lut
+            else:
+                lut = _LUTS[key]
+            outdata = lut[outdata]
     elif sign_mode == ESignMode.SIGN_AND_MOD:
         # TODO: try also the LUT approach
         mask = make_bitmask(bits_per_sample - 1, dtype)
