@@ -1,5 +1,6 @@
 """Numpy based codec for binary data structures."""
 
+import enum
 import functools
 import collections
 from typing import NamedTuple, Optional
@@ -28,6 +29,7 @@ __all__ = [
     "BACKEND_TYPE",
     "descriptor_to_dtype",
     "unpackbits",
+    "ESignMode",
 ]
 
 
@@ -230,6 +232,23 @@ decoder = encoder = codec
 
 
 # --- bits packing/unpacking --------------------------------------------------
+class EMaskMode(enum.Enum):
+    """Mask mode.
+
+    :STANDARD:
+        mask the lower nbits, e.g. 0b00001111 for nbit=4
+    :COMPLEMENT:
+        mask the upper bits by complementing the STANDARD mask,
+        e.g. 0b11110000 for nbit=4 and dtype"unit8"
+    :SINGLE_BIT:
+        mask only the n-th bit (conunting form zero),
+        e.g. 0b00001000 form nbit=4
+    """
+    STANDARD = 0
+    COMPLEMENT = 1
+    SINGLE_BIT = 2
+
+
 def _get_item_size(bits_per_sample: int) -> int:
     """Item size of the integer type that can take requested bits."""
     if bits_per_sample > 64 or bits_per_sample < 1:
@@ -245,14 +264,33 @@ def _get_buffer_size(bits_per_sample: int) -> int:
     return _get_item_size(bits_per_sample + 7)
 
 
-def _get_mask(nbits: int, dtype: str) -> np.ndarray:
-    """Return a mask for dtype to select the nbits least significant bits."""
-    shift = np.array(64 - nbits, dtype=np.uint32)
-    mask = np.array(0xFFFFFFFFFFFFFFFF) >> shift
+# @COMPATIBILITY: lru_cache without parenteses requires Python > 3.7
+@functools.lru_cache()
+def make_bitmask(
+    nbits: int,
+    dtype: Optional[str] = None,
+    mode: EMaskMode = EMaskMode.STANDARD,
+) -> np.ndarray:
+    """Return a mask for dtype according to the specified nbits and mask mode.
+    
+    .. sealso:: :class:`EMaskMode`.
+    """
+    mode = EMaskMode(mode)
+    assert 0 < nbits <= 64
+    if dtype is None:
+        dtype = f"u{_get_item_size(nbits)}"
+
+    if mode == EMaskMode.SINGLE_BIT:
+        mask = np.asarray(2**(nbits - 1)) if nbits > 0 else 0
+    else:
+        shift = np.array(64 - nbits, dtype=np.uint32)
+        mask = np.array(0xFFFFFFFFFFFFFFFF) >> shift
+        if mode == EMaskMode.COMPLEMENT:
+            mask = np.invert(mask)
     return mask.astype(dtype)
 
 
-class _BitUnpackParams(NamedTuple):
+class BitUnpackParams(NamedTuple):
     samples: int
     dtype: str
     buf_itemsize: int
@@ -271,10 +309,7 @@ def _unpackbits_params(
     blockstride: int,
     signed: bool = False,
     byteorder: str = ">",
-) -> _BitUnpackParams:
-    if signed:
-        raise NotImplementedError("signed=True is not supported.")
-
+) -> BitUnpackParams:
     assert nbits >= bit_offset
     if samples_per_block is None:
         if blockstride is not None:
@@ -316,17 +351,17 @@ def _unpackbits_params(
 
     itemsize = _get_item_size(bits_per_sample)
     buf_itemsize = _get_buffer_size(bits_per_sample)
-    dtype = f'{byteorder}{"i" if signed else "u"}{itemsize}'
-    buf_dtype = f'{byteorder}{"i" if signed else "u"}{buf_itemsize}'
+    dtype = f"{byteorder}{'i' if signed else 'u'}{itemsize}"
+    buf_dtype = f"{byteorder}u{buf_itemsize}"
 
     index = np.arange(buf_itemsize) + byte_offsets[:, None]
     index = np.clip(index, 0, nbits // 8 - 1)
 
-    mask = _get_mask(bits_per_sample, buf_dtype)
+    mask = make_bitmask(bits_per_sample, buf_dtype)
     shifts = bit_offsets - byte_offsets * 8 + bits_per_sample
     shifts = buf_itemsize * 8 - shifts
 
-    return _BitUnpackParams(
+    return BitUnpackParams(
         samples=samples,
         dtype=dtype,
         buf_itemsize=buf_itemsize,
@@ -337,13 +372,19 @@ def _unpackbits_params(
     )
 
 
+class ESignMode(enum.IntEnum):
+    UNSIGNED = 0
+    SIGNED = 1
+    SIGN_AND_MOD = 2
+
+
 def unpackbits(
     data: bytes,
     bits_per_sample: int,
     samples_per_block: Optional[int] = None,
     bit_offset: int = 0,
     blockstride: Optional[int] = None,
-    signed: bool = False,
+    sign_mode: ESignMode = ESignMode.UNSIGNED,
     byteorder: str = ">",
 ) -> np.ndarray:
     """Unpack packed (integer) values form a string of bytes.
@@ -363,10 +404,14 @@ def unpackbits(
     If ``signed`` is set to True integers are assumed to be stored as
     signed integers.
     """
+    signed = bool(sign_mode in {ESignMode.SIGNED, ESignMode.SIGN_AND_MOD})
     if bit_offset == 0 and blockstride is None:
-        if bits_per_sample == 1:
+        if bits_per_sample == 1 and sign_mode == ESignMode.UNSIGNED:
             return np.unpackbits(np.frombuffer(data, dtype="uint8"))
-        elif bits_per_sample in {8, 16, 32, 64}:
+        elif (
+            bits_per_sample in {8, 16, 32, 64} and
+            sign_mode != ESignMode.SIGN_AND_MOD
+        ):
             size = bits_per_sample // 8
             kind = "i" if signed else "u"
             typestr = f"{byteorder}{kind}{size}"
@@ -390,5 +435,23 @@ def unpackbits(
     bytesview = buf.view(dtype="u1").reshape(samples, buf_itemsize)
     bytesview[...] = npdata[index_map]
     outdata = ((buf >> shifts) & mask).astype(dtype)
+    if sign_mode == ESignMode.UNSIGNED:
+        pass
+    elif sign_mode == ESignMode.SIGNED:
+        # TODO: try also the LUT approach
+        cmask = make_bitmask(
+            bits_per_sample - 1, dtype, mode=EMaskMode.COMPLEMENT
+        )
+        sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
+        is_negative = (outdata & sign_mask).astype(bool)
+        outdata[is_negative] = outdata[is_negative] | cmask
+    elif sign_mode == ESignMode.SIGN_AND_MOD:
+        # TODO: try also the LUT approach
+        mask = make_bitmask(bits_per_sample - 1, dtype)
+        sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
+        sign = (-1)**((outdata & sign_mask) >> (bits_per_sample - 1))
+        outdata = sign * (outdata & mask)
+    else:
+        raise ValueError(f"Invalid 'sign_mode' parameter: '{sign_mode}'")
 
     return outdata

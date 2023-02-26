@@ -193,7 +193,7 @@ def test_unpackbits(backend, bits_per_sample, nsamples):
         ),
     ],
 )
-def test_unpackbits_1(backend):
+def test_unpackbits_1_bit_per_sample(backend):
     bits_per_sample = 1
     values = [1, 0, 1, 0, 1, 0, 1, 0]
     data = bytes([0b10101010])
@@ -232,12 +232,18 @@ def test_unpackbits_large(backend, bits_per_sample, nsamples):
 
 
 def _make_sample_data_block(
-    header_size, bits_per_sample, samples_per_block, bit_offset=0, nblocks=1
+    header_size,
+    bits_per_sample,
+    samples_per_block,
+    bit_offset=0,
+    nblocks=1,
+    sign_mode=0,
 ):
     bits_per_block = header_size + bits_per_sample * samples_per_block
     nbytes = math.ceil((bit_offset + bits_per_block) / 8)
 
-    block_fmt = f"u{bits_per_sample}" * samples_per_block
+    typechar = "s" if sign_mode == 1 else "u"
+    block_fmt = f"{typechar}{bits_per_sample}" * samples_per_block
     if header_size > 0:
         block_fmt = f"u{header_size}" + block_fmt
 
@@ -247,15 +253,33 @@ def _make_sample_data_block(
     fmt = f"{leading_pad}{block_fmt * nblocks}{trailing_pad}"
 
     n = 2**bits_per_sample
-
-    ramp_values = list(range(n)) * math.ceil(samples_per_block / n)
+    if sign_mode == 0:
+        ramp_values = list(range(n)) * math.ceil(samples_per_block / n)
+        out_values = ramp_values
+    elif sign_mode == 1:
+        hs = 2**(bits_per_sample - 1)
+        ramp_values = list(range(-hs, hs)) * math.ceil(samples_per_block / n)
+        out_values = ramp_values
+    elif sign_mode == 2:
+        hs = 2**(bits_per_sample - 1)
+        ramp_values = list(range(hs))
+        out_values = ramp_values + [-item for item in ramp_values]
+        out_values = out_values * math.ceil(samples_per_block / n)
+        sign_mask = 2**(bits_per_sample - 1)
+        ramp_values += [item | sign_mask for item in ramp_values]
+        ramp_values *= math.ceil(samples_per_block / n)
+    else:
+        raise ValueError(f"Unexpected 'sign_mode': {sign_mode}")
     values = ramp_values[:samples_per_block]
+    out_values = out_values[:samples_per_block]
     if header_size > 0:
         values = [113] + values
+        out_values = [113] + out_values
     values *= nblocks
+    out_values *= nblocks
     data = bitstruct.pack(fmt, *values)
 
-    return data, values
+    return data, out_values
 
 
 @pytest.mark.skipif(not bitstruct, reason="bitstruct not available")
@@ -293,17 +317,17 @@ def test_headers(
 @pytest.mark.skipif(not np, reason="numpy not available")
 @pytest.mark.parametrize("bit_offset", [0, 1, 2])
 @pytest.mark.parametrize("header_size", [0, 9, 13])
-@pytest.mark.parametrize("bits_per_sample", [3, 4, 5, 6, 12, 13, 14])
-@pytest.mark.parametrize("samples_per_block", [64, 128, 256])
+@pytest.mark.parametrize("bits_per_sample", [3, 4, 5, 8, 13])
+@pytest.mark.parametrize("samples_per_block", [64, 128])
 @pytest.mark.parametrize("nblocks", [1, 3, 20])
-@pytest.mark.parametrize("signed", [False])
+@pytest.mark.parametrize("sign_mode", [0, 1, 2])
 def test_data(
     bit_offset,
     header_size,
     bits_per_sample,
     samples_per_block,
     nblocks,
-    signed,
+    sign_mode,
 ):
     data, values = _make_sample_data_block(
         header_size,
@@ -311,7 +335,7 @@ def test_data(
         samples_per_block,
         bit_offset,
         nblocks=nblocks,
-        # signed=signed,
+        sign_mode=sign_mode,
     )
 
     block_size = header_size + bits_per_sample * samples_per_block
@@ -322,7 +346,7 @@ def test_data(
         samples_per_block,
         bit_offset=bit_offset + header_size,
         blockstride=block_size,
-        signed=signed,
+        sign_mode=sign_mode,
     )
 
     extra_bits = len(data) * 8 - bit_offset - block_size * nblocks
@@ -410,3 +434,18 @@ def test_auto_sample_per_block():
             bits_per_sample,
             blockstride=bits_per_sample * samples_per_block,
         )
+
+
+@pytest.mark.skipif(not np, reason="numpy not available")
+@pytest.mark.parametrize(
+    ["bits_per_sample", "mode", "ref_mask"],
+    [
+        (3, 0, 0b00000111),
+        (20, 0, 0b000011111111111111111111),
+        (34, 0, 0b0000001111111111111111111111111111111111),
+        (3, 1, 0b11111000),
+        (3, 2, 0b00000100),
+    ])
+def test_make_bitmask(bits_per_sample, mode, ref_mask):
+    mask = bpack_np.make_bitmask(bits_per_sample, mode=mode)
+    assert mask == ref_mask
