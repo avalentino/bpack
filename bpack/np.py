@@ -380,6 +380,59 @@ class ESignMode(enum.IntEnum):
 _LUTS = {}
 
 
+def unsigned_to_signed(
+    data,
+    bits_per_sample: int,
+    dtype = None,
+    sign_mode: ESignMode = ESignMode.SIGNED,
+    inplace: bool = False
+) -> np.ndarray:
+    if dtype is None:
+        dtype = f"i{_get_item_size(bits_per_sample)}"
+    
+    sign_mode = ESignMode(sign_mode)
+    
+    if inplace:
+        if not isinstance(data, np.ndarray):
+            raise TypeError(
+                f"The input 'data' ({data!r}) parameter is not a "
+                f"'numpy.ndarray'"
+            )
+        out = data
+    else:
+        out = np.array(data)
+
+    out = out.astype(dtype)
+
+    sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
+    
+    if sign_mode == ESignMode.SIGNED:
+        cmask = make_bitmask(
+            bits_per_sample - 1, dtype, mode=EMaskMode.COMPLEMENT
+        )
+        is_negative = (out & sign_mask).astype(bool)
+        out[is_negative] = out[is_negative] | cmask
+    elif sign_mode == ESignMode.SIGN_AND_MOD:
+        mask = make_bitmask(bits_per_sample - 1, dtype)
+        sign = (-1)**((out & sign_mask) >> (bits_per_sample - 1))
+        out = sign * (out & mask)
+    
+    return out
+
+
+def make_unsigned_to_signed_lut(
+    bits_per_sample: int,
+    dtype = None,
+    sign_mode: ESignMode = ESignMode.SIGNED,
+) -> np.ndarray:
+    assert bits_per_sample <= 16
+    idtype = f"u{_get_item_size(bits_per_sample)}"
+    data = np.arange(2**bits_per_sample, dtype=idtype)
+    return unsigned_to_signed(
+        data, bits_per_sample, dtype, sign_mode, inplace=True
+    )
+
+
 def unpackbits(
     data: bytes,
     bits_per_sample: int,
@@ -438,33 +491,24 @@ def unpackbits(
     bytesview = buf.view(dtype="u1").reshape(samples, buf_itemsize)
     bytesview[...] = npdata[index_map]
     outdata = ((buf >> shifts) & mask).astype(dtype)
+
     if sign_mode == ESignMode.UNSIGNED:
         pass
-    elif sign_mode == ESignMode.SIGNED:
-        # TODO: try also the LUT approach
+    elif sign_mode in {ESignMode.SIGNED, ESignMode.SIGN_AND_MOD}:
         if not use_lut:
-            cmask = make_bitmask(
-                bits_per_sample - 1, dtype, mode=EMaskMode.COMPLEMENT
+            outdata = unsigned_to_signed(
+                outdata, bits_per_sample, dtype, sign_mode, inplace=True
             )
-            sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
-            is_negative = (outdata & sign_mask).astype(bool)
-            outdata[is_negative] = outdata[is_negative] | cmask
         else:
-            key = (bits_per_sample, sign_mode)
+            key = (bits_per_sample, dtype, sign_mode)
             if not key in _LUTS:
-                lut = np.arange(2**bits_per_sample, dtype=dtype)
-                n = 2**(bits_per_sample - 1)
-                lut[n:] = np.arange(-n, 0, dtype=dtype)
+                lut = make_unsigned_to_signed_lut(
+                    bits_per_sample, dtype, sign_mode
+                )
                 _LUTS[key] = lut
             else:
                 lut = _LUTS[key]
             outdata = lut[outdata]
-    elif sign_mode == ESignMode.SIGN_AND_MOD:
-        # TODO: try also the LUT approach
-        mask = make_bitmask(bits_per_sample - 1, dtype)
-        sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
-        sign = (-1)**((outdata & sign_mask) >> (bits_per_sample - 1))
-        outdata = sign * (outdata & mask)
     else:
         raise ValueError(f"Invalid 'sign_mode' parameter: '{sign_mode}'")
 
