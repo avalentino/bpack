@@ -257,15 +257,15 @@ def _make_sample_data_block(
         ramp_values = list(range(n)) * math.ceil(samples_per_block / n)
         out_values = ramp_values
     elif sign_mode == 1:
-        hs = 2**(bits_per_sample - 1)
+        hs = 2 ** (bits_per_sample - 1)
         ramp_values = list(range(-hs, hs)) * math.ceil(samples_per_block / n)
         out_values = ramp_values
     elif sign_mode == 2:
-        hs = 2**(bits_per_sample - 1)
+        hs = 2 ** (bits_per_sample - 1)
         ramp_values = list(range(hs))
         out_values = ramp_values + [-item for item in ramp_values]
         out_values = out_values * math.ceil(samples_per_block / n)
-        sign_mask = 2**(bits_per_sample - 1)
+        sign_mask = 2 ** (bits_per_sample - 1)
         ramp_values += [item | sign_mask for item in ramp_values]
         ramp_values *= math.ceil(samples_per_block / n)
     else:
@@ -445,7 +445,8 @@ def test_auto_sample_per_block():
         (34, 0, 0b0000001111111111111111111111111111111111),
         (3, 1, 0b11111000),
         (3, 2, 0b00000100),
-    ])
+    ],
+)
 def test_make_bitmask(bits_per_sample, mode, ref_mask):
     mask = bpack_np.make_bitmask(bits_per_sample, mode=mode)
     assert mask == ref_mask

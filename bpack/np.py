@@ -244,6 +244,7 @@ class EMaskMode(enum.Enum):
         mask only the n-th bit (conunting form zero),
         e.g. 0b00001000 form nbit=4
     """
+
     STANDARD = 0
     COMPLEMENT = 1
     SINGLE_BIT = 2
@@ -267,23 +268,24 @@ def _get_buffer_size(bits_per_sample: int) -> int:
 # @COMPATIBILITY: lru_cache without parenteses requires Python > 3.7
 @functools.lru_cache()
 def make_bitmask(
-    nbits: int,
-    dtype: Optional[str] = None,
+    bits_per_sample: int,
+    dtype=None,
     mode: EMaskMode = EMaskMode.STANDARD,
 ) -> np.ndarray:
     """Return a mask for dtype according to the specified nbits and mask mode.
-    
+
     .. sealso:: :class:`EMaskMode`.
     """
     mode = EMaskMode(mode)
-    assert 0 < nbits <= 64
+    assert 0 < bits_per_sample <= 64
     if dtype is None:
-        dtype = f"u{_get_item_size(nbits)}"
+        dtype = f"u{_get_item_size(bits_per_sample)}"
 
     if mode == EMaskMode.SINGLE_BIT:
-        mask = np.asarray(2**(nbits - 1)) if nbits > 0 else 0
+        mask = 2 ** (bits_per_sample - 1) if bits_per_sample > 0 else 0
+        mask = np.asarray(mask)
     else:
-        shift = np.array(64 - nbits, dtype=np.uint32)
+        shift = np.array(64 - bits_per_sample, dtype=np.uint32)
         mask = np.array(0xFFFFFFFFFFFFFFFF) >> shift
         if mode == EMaskMode.COMPLEMENT:
             mask = np.invert(mask)
@@ -373,25 +375,29 @@ def _unpackbits_params(
 
 
 class ESignMode(enum.IntEnum):
+    """Enumeration for sign encoding convention."""
+
     UNSIGNED = 0
     SIGNED = 1
     SIGN_AND_MOD = 2
-
-_LUTS = {}
 
 
 def unsigned_to_signed(
     data,
     bits_per_sample: int,
-    dtype = None,
+    dtype=None,
     sign_mode: ESignMode = ESignMode.SIGNED,
-    inplace: bool = False
+    inplace: bool = False,
 ) -> np.ndarray:
+    """Convert unpacked unsigned integers into signed integers.
+
+    .. sealso:: :class:`ESignMode`.
+    """
     if dtype is None:
         dtype = f"i{_get_item_size(bits_per_sample)}"
-    
+
     sign_mode = ESignMode(sign_mode)
-    
+
     if inplace:
         if not isinstance(data, np.ndarray):
             raise TypeError(
@@ -405,7 +411,7 @@ def unsigned_to_signed(
     out = out.astype(dtype)
 
     sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
-    
+
     if sign_mode == ESignMode.SIGNED:
         cmask = make_bitmask(
             bits_per_sample - 1, dtype, mode=EMaskMode.COMPLEMENT
@@ -414,23 +420,42 @@ def unsigned_to_signed(
         out[is_negative] = out[is_negative] | cmask
     elif sign_mode == ESignMode.SIGN_AND_MOD:
         mask = make_bitmask(bits_per_sample - 1, dtype)
-        sign = (-1)**((out & sign_mask) >> (bits_per_sample - 1))
+        sign = (-1) ** ((out & sign_mask) >> (bits_per_sample - 1))
         out = sign * (out & mask)
-    
+
     return out
 
 
 def make_unsigned_to_signed_lut(
     bits_per_sample: int,
-    dtype = None,
+    dtype=None,
     sign_mode: ESignMode = ESignMode.SIGNED,
 ) -> np.ndarray:
+    """Build a look-up table (LUT) for unsigned to signed integer conversion.
+
+    .. sealso:: :class:`ESignMode`.
+    """
     assert bits_per_sample <= 16
     idtype = f"u{_get_item_size(bits_per_sample)}"
     data = np.arange(2**bits_per_sample, dtype=idtype)
     return unsigned_to_signed(
         data, bits_per_sample, dtype, sign_mode, inplace=True
     )
+
+
+_UNSIGNED_TO_SIGNED_LUTS = {}
+
+
+def _get_unsigned_to_signed_lut(
+    bits_per_sample: int, dtype, sign_mode: ESignMode
+) -> np.ndarray:
+    key = (bits_per_sample, dtype, sign_mode)
+    if key not in _UNSIGNED_TO_SIGNED_LUTS:
+        lut = make_unsigned_to_signed_lut(bits_per_sample, dtype, sign_mode)
+        _UNSIGNED_TO_SIGNED_LUTS[key] = lut
+    else:
+        lut = _UNSIGNED_TO_SIGNED_LUTS[key]
+    return lut
 
 
 def unpackbits(
@@ -441,7 +466,7 @@ def unpackbits(
     blockstride: Optional[int] = None,
     sign_mode: ESignMode = ESignMode.UNSIGNED,
     byteorder: str = ">",
-    use_lut=False,
+    use_lut: bool = True,
 ) -> np.ndarray:
     """Unpack packed (integer) values form a string of bytes.
 
@@ -465,8 +490,8 @@ def unpackbits(
         if bits_per_sample == 1 and sign_mode == ESignMode.UNSIGNED:
             return np.unpackbits(np.frombuffer(data, dtype="uint8"))
         elif (
-            bits_per_sample in {8, 16, 32, 64} and
-            sign_mode != ESignMode.SIGN_AND_MOD
+            bits_per_sample in {8, 16, 32, 64}
+            and sign_mode != ESignMode.SIGN_AND_MOD
         ):
             size = bits_per_sample // 8
             kind = "i" if signed else "u"
@@ -500,14 +525,9 @@ def unpackbits(
                 outdata, bits_per_sample, dtype, sign_mode, inplace=True
             )
         else:
-            key = (bits_per_sample, dtype, sign_mode)
-            if not key in _LUTS:
-                lut = make_unsigned_to_signed_lut(
-                    bits_per_sample, dtype, sign_mode
-                )
-                _LUTS[key] = lut
-            else:
-                lut = _LUTS[key]
+            lut = _get_unsigned_to_signed_lut(
+                bits_per_sample, dtype, sign_mode
+            )
             outdata = lut[outdata]
     else:
         raise ValueError(f"Invalid 'sign_mode' parameter: '{sign_mode}'")
