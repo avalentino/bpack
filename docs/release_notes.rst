@@ -1,10 +1,12 @@
 Release Notes
 =============
 
-bpack v1.0.1 (UNRELEASED)
+bpack v1.1.0 (UNRELEASED)
 -------------------------
 
-* TBW
+* Added support for signed integers to :func:`bpack.np.unpackbits`.
+  Both standard signed integers and integers encoded with sign and module
+  are now supported.
 
 
 bpack v1.0.0 (05/02/2023)
