@@ -264,7 +264,7 @@ def _make_sample_data_block(
         hs = 2 ** (bits_per_sample - 1)
         ramp_values = list(range(hs))
         out_values = ramp_values + [-item for item in ramp_values]
-        out_values = out_values * math.ceil(samples_per_block / n)
+        out_values *= math.ceil(samples_per_block / n)
         sign_mask = 2 ** (bits_per_sample - 1)
         ramp_values += [item | sign_mask for item in ramp_values]
         ramp_values *= math.ceil(samples_per_block / n)
@@ -336,6 +336,10 @@ def test_data(
         bit_offset,
         nblocks=nblocks,
         sign_mode=sign_mode,
+    )
+
+    assert len(values) == (
+        samples_per_block * nblocks + (nblocks if header_size else 0)
     )
 
     block_size = header_size + bits_per_sample * samples_per_block

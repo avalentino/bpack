@@ -411,16 +411,16 @@ def unsigned_to_signed(
     out = out.astype(dtype)
 
     sign_mask = make_bitmask(bits_per_sample, dtype, EMaskMode.SINGLE_BIT)
+    is_negative = (out & sign_mask).astype(bool)
 
     if sign_mode == ESignMode.SIGNED:
         cmask = make_bitmask(
             bits_per_sample - 1, dtype, mode=EMaskMode.COMPLEMENT
         )
-        is_negative = (out & sign_mask).astype(bool)
         out[is_negative] = out[is_negative] | cmask
     elif sign_mode == ESignMode.SIGN_AND_MOD:
         mask = make_bitmask(bits_per_sample - 1, dtype)
-        sign = (-1) ** ((out & sign_mask) >> (bits_per_sample - 1))
+        sign = (-1) ** is_negative
         out = sign * (out & mask)
 
     return out
