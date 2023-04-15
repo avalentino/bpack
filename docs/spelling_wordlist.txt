@@ -26,6 +26,7 @@ np
 numpy
 programmatically
 python
+seealso
 struct
 tobytes
 utils

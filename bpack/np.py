@@ -482,8 +482,45 @@ def unpackbits(
 
       4 samples (6 bits per sample)
 
-    If ``signed`` is set to True integers are assumed to be stored as
-    signed integers.
+    :param data: bytes
+        string of bytes containing the packed data
+    :param bits_per_sample: int
+        the number of bits used to encode each sample
+    :param samples_per_block: int, optional
+        the number of samples in each data block contained in the input
+        string of bytes.
+        This parameter is mostly relevant if the data block contains other
+        information (or padding bits) in addition to the data samples.
+        The number of blocks is deduced from the length of the input string
+        of bytes, the number of samples per block and the number of bits
+        per sample.
+        If `samples_per_block` is not provided it is assumed a single block,
+        and the number of samples is derived from the length of the input
+        string of bytes and the number of bits per sample.
+    :param bit_offset: int, optional
+        the number of bits after which the sequence of samples (data blocks)
+        starts (default: 0).
+        It can be used e.g. to take into account of a possible binary header
+        at the beginning of the sequence of samples.
+    :param blockstride: int, optional
+        the number of bits between the start of a data block and the start
+        of the following one.
+        This parameter is mostly relevant if the data block contains other
+        information (or padding bits) in addition to the data samples.
+        If not provided the `blockstride` is assumed to be equal to the
+        size of the data block i.e. `bits_per_sample * samples_per_block`.
+    :param sign_mode: ESignMode, optional
+        specifies how the sign of the integer samples shall is encoded.
+        Dy default unsigned samples are assumed.
+        .. seealso:: :class:`ESignMode`.
+    :param byteorder: str, optional
+        Byte order of the encoded integers.
+        Only relevant for multi byte samples.
+        Default: ">" (big endian).
+    :param use_lut: bool, optional
+        specifies whenever the decoding of signed samples shall exploit
+        look-up tables (typically faster).
+        Default: True.
     """
     signed = bool(sign_mode in {ESignMode.SIGNED, ESignMode.SIGN_AND_MOD})
     if bit_offset == 0 and blockstride is None:
