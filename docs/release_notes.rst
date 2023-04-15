@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v1.1.0 (UNRELEASED)
+bpack v1.1.0 (15/04/2023)
 -------------------------
 
 * Added support for signed integers to :func:`bpack.np.unpackbits`.
