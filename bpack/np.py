@@ -426,6 +426,7 @@ def unsigned_to_signed(
     return out
 
 
+@functools.lru_cache()  # @COMPATIBILITY: parenteses not needed in Python>=3.8
 def make_unsigned_to_signed_lut(
     bits_per_sample: int,
     dtype=None,
@@ -441,21 +442,6 @@ def make_unsigned_to_signed_lut(
     return unsigned_to_signed(
         data, bits_per_sample, dtype, sign_mode, inplace=True
     )
-
-
-_UNSIGNED_TO_SIGNED_LUTS = {}
-
-
-def _get_unsigned_to_signed_lut(
-    bits_per_sample: int, dtype, sign_mode: ESignMode
-) -> np.ndarray:
-    key = (bits_per_sample, dtype, sign_mode)
-    if key not in _UNSIGNED_TO_SIGNED_LUTS:
-        lut = make_unsigned_to_signed_lut(bits_per_sample, dtype, sign_mode)
-        _UNSIGNED_TO_SIGNED_LUTS[key] = lut
-    else:
-        lut = _UNSIGNED_TO_SIGNED_LUTS[key]
-    return lut
 
 
 def unpackbits(
@@ -562,7 +548,7 @@ def unpackbits(
                 outdata, bits_per_sample, dtype, sign_mode, inplace=True
             )
         else:
-            lut = _get_unsigned_to_signed_lut(
+            lut = make_unsigned_to_signed_lut(
                 bits_per_sample, dtype, sign_mode
             )
             outdata = lut[outdata]
