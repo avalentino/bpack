@@ -7,6 +7,9 @@ bpack v1.1.0 (UNRELEASED)
 * Added support for signed integers to :func:`bpack.np.unpackbits`.
   Both standard signed integers and integers encoded with sign and module
   are now supported.
+* Use uppercase enums in `s1isp.py` example.
+* Improved docstrings in  :mod:`bpack.np`.
+* Fixed several typos. 
 
 
 bpack v1.0.0 (05/02/2023)
