@@ -50,7 +50,6 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
-
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
@@ -71,7 +70,6 @@ html_context = {
 html_last_updated_fmt = ''
 
 
-
 # -- Options for LaTeX output ------------------------------------------------
 latex_documents = [
     # (startdocname, targetname, title, author, theme, toctree_only)
@@ -85,6 +83,7 @@ latex_elements = {
     # 'papersize': 'a4paper',
     'pointsize': '12pt',
 }
+
 
 # -- Extension configuration -------------------------------------------------
 
@@ -100,20 +99,19 @@ for module_name in ['bitarray', 'bitstruct', 'numpy']:
         autodoc_mock_imports.append(module_name)
 
 
-
 # -- Options for intersphinx extension ---------------------------------------
 
 intersphinx_mapping = {
-    'https://docs.python.org/3/': None,
-    'https://numpy.org/doc/stable/': None,
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
 }
+
 
 # -- Options for extlinks extension ------------------------------------------
 
 extlinks = {
     'issue': ('https://github.com/avalentino/bpack/issues/%s', 'gh-%s'),
 }
-
 
 
 # -- Options for todo extension ----------------------------------------------
