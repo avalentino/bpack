@@ -22,7 +22,7 @@ dist:
 	$(PYTHON) -m twine check dist/*
 
 check:
-	$(PYTHON) -m tox
+	$(PYTHON) -m tox run
 
 clean:
 	$(MAKE) -C docs clean
