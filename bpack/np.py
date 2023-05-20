@@ -88,7 +88,7 @@ def descriptor_to_dtype(descriptor) -> np.dtype:
     params = dict(params)  # numpy do not accept defaultdict
     params["itemsize"] = bpack.calcsize(descriptor)
 
-    dt = np.dtype(dict(params))
+    dt = np.dtype(params)
 
     byteorder = bpack.byteorder(descriptor).value
     if byteorder:
