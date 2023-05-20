@@ -7,7 +7,7 @@ Core concepts
 *bpack* is a lightweight Python package intended to help users to
 
 * describe binary data structures
-* encode/decode binary data to/form Python object
+* encode/decode binary data to/from Python object
 
 
 Descriptors
@@ -91,7 +91,7 @@ to convert binary data into a Python objects and vice versa:
     encoded_data: b'\x18-DT\xfb!\t@\x15\xcd[\x07'
 
 In the example above it has been used the :class:`bpack.st.Codec` class
-form the :mod:`bpack.st` module.
+from the :mod:`bpack.st` module.
 
 Please note that the decoder class (:class:`bpack.st.Codec`)
 
@@ -302,9 +302,9 @@ Currently supported data types are:
 .. note::
 
    The ``str`` type in Python is used to represent unicode strings.
-   The conversion of this kind of strings form/to binary format requires
+   The conversion of this kind of strings from/to binary format requires
    some form of decoding/encoding.
-   *Bpack* codecs (see `Data codecs`_) convert ``str`` data form/to
+   *Bpack* codecs (see `Data codecs`_) convert ``str`` data from/to
    ``bytes`` strings using the "UTF-8" encoding.
 
    Please note that the *size* of a ``str`` field still describes the
@@ -410,7 +410,7 @@ are stored contiguously and without holes.
                                            # field_4.offset + field_4.size
 
 Now suppose that the user is not interested in the field n. 2 and wants to
-remove it form the descriptor. This creates a *gap* in the binary data
+remove it from the descriptor. This creates a *gap* in the binary data
 which makes not possible to exploit the automatic offset computation
 mechanism:
 

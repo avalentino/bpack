@@ -3,7 +3,7 @@
 Miscellanea *To Do* list
 ------------------------
 
-* check alignment in bpack.st (native '@' and '' behaves differently form '=')
+* check alignment in bpack.st (native '@' and '' behaves differently from '=')
 * improve documentation
 * improve typing
 * benchmarks

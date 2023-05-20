@@ -16,9 +16,9 @@ Features
 
 * declarative description of binary data structures
 * specification of data structures up to *bit* level
-* automatic *codec* generation form data descriptors
-* decoding (form binary data to Python objects)
-* encoding (form Python objects to binary data)
+* automatic *codec* generation from data descriptors
+* decoding (from binary data to Python objects)
+* encoding (from Python objects to binary data)
 * backend:
 
   - :mod:`bpack.st` backend based on the :mod:`struct` module of

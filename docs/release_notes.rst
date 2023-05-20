@@ -22,7 +22,7 @@ bpack v1.0.0 (05/02/2023)
 -------------------------
 
 * Fix compatibility with Python v3.11.
-* Move setup configuration form `setup.cfg` to `pyproject.toml`.
+* Move setup configuration from `setup.cfg` to `pyproject.toml`.
 
 
 bpack v0.8.2 (20/03/2022)
@@ -99,7 +99,7 @@ bpack v0.6.0 (15/01/2021)
 
   - :class:`bpack.enums.EBaseUnits`, :class:`bpack.enums.EByteOrder` and
     :class:`bpack.enums.EBitOrder` enums moved to the new :mod:`bpack.enums`
-    module (the recommended way to access enums is directly form
+    module (the recommended way to access enums is directly from
     :mod:`bpack`, e.g. ``bpack.EByteOrder``)
   - :data:`bpack.enums.EByteOrder.BIG` and
     :data:`bpack.enums.EByteOrder.LITTLE` enumerates have been renamed into
