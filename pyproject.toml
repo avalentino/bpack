@@ -42,6 +42,7 @@ bs = ["bitstruct"]
 ba = ["bitarray>=1.5.1"]
 np = ["numpy"]
 docs = ["sphinx", "sphinx_rtd_theme"]
+full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[test]"]
 
 
 [project.urls]
