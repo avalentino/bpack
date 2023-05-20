@@ -14,7 +14,7 @@ Recommended:
 
 .. code-block:: shell
 
-  $ python3 -m pip install bpack[bs]
+  $ python3 -m pip install bpack[bs,np]
 
 to install also dependencies necessary to use the :mod:`bpack.bs` backend
 and (for binary structures defined up to the bit level).

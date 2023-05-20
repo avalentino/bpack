@@ -119,12 +119,12 @@ def has_codec(
     The *codec_type* parameter can be used to query for specific codec
     features:
 
-    * codec_type=None: return True for any king of codec
-    * codec_type=:class:`Decoder`: return True if the attached coded has
+    * codec_type = None: return True for any king of codec
+    * codec_type = :class:`Decoder`: return True if the attached coded has
       decoding capabilities
-    * codec_type=:class:`Encoder`: return True if the attached coded has
+    * codec_type = :class:`Encoder`: return True if the attached coded has
       encoding capabilities
-    * codec_type=:class:`Codec`: return True if the attached coded has
+    * codec_type = :class:`Codec`: return True if the attached coded has
       both encoding and decoding capabilities
     """
     if hasattr(descriptor, CODEC_ATTR_NAME):

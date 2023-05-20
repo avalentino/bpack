@@ -64,13 +64,13 @@ It is also recommended to use the ``-W=error`` option.
 Advanced testing
 ~~~~~~~~~~~~~~~~
 
-Tox_ is used to run a comprehensive test suite on multiple Python version.
-I also check formatting, coverage and checks that the documentation builds
+Tox_ (>4) is used to run a comprehensive test suite on multiple Python version.
+It also checks formatting, coverage and ensures that the documentation builds
 properly.
 
 .. code-block:: shell
 
-  $ tox
+  $ tox run
 
 
 Test coverage

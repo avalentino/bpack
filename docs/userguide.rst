@@ -39,13 +39,15 @@ In the above example the ``BinaryRecord`` has been defined to have two fields:
 :field_1:
     a double precision floating point (8 bytes)
 :field_2:
-    a 32bit signed integer (``size`` is expressed in bytes in this case)
+    a 32bit signed integer (4 bytes)
+
+``size`` is expressed in bytes in this case.
 
 The offset of the fields have not been explicitly specified so they are
 computed automatically.
 
 In the example ``field_1`` has ``offset=0``, while ``field_2`` has
-``offset=4`` i.e. data belonging to ``field_2`` immediately follow the ones
+``offset=8`` i.e. data belonging to ``field_2`` immediately follow the ones
 of the previous field.
 
 The design is strongly inspired to the one of the :mod:`dataclasses` package
@@ -63,7 +65,7 @@ to convert binary data into a Python objects and vice versa:
 
    import bpack.st
 
-   binary_data = b'\x18-DT\xfb!\t@\x15\xcd[\x07'
+   binary_data = b"\x18-DT\xfb!\t@\x15\xcd[\x07"
 
    codec = bpack.st.Codec(BinaryRecord)
    record = codec.decode(binary_data)
@@ -82,8 +84,8 @@ to convert binary data into a Python objects and vice versa:
     encoded_data = codec.encode(record)
     assert binary_data == encoded_data
 
-    print('binary_data: ', binary_data)
-    print('encoded_data:', encoded_data)
+    print("binary_data: ", binary_data)
+    print("encoded_data:", encoded_data)
 
 .. testoutput::
 
@@ -138,7 +140,6 @@ This is an important distinction for two reasons:
    Currently available *backends* do not support nested data structures
    (see `Record nesting`_) described using different *baseunits*
    (see :ref:`limitations-label`).
-   Anyway it is in the plans to overcome this limitation.
 
 *Baseunits* can be specified as follows:
 
@@ -173,7 +174,7 @@ Please note that the entire data structure of the above example is only
 
    .. testcode::
 
-      @bpack.descriptor(baseunits='bits')
+      @bpack.descriptor(baseunits="bits")
       class BitRecord:
           field_1: bool = bpack.field(size=1)
           field_2: int = bpack.field(size=3)
@@ -210,7 +211,7 @@ specify *explicitly* the overall size of the binary data structure:
 
 .. testcode::
 
-   @bpack.descriptor(baseunits='bits', size=8)
+   @bpack.descriptor(baseunits="bits", size=8)
    class BinaryRecord:
        field_1: bool = bpack.field(size=1)
        field_2: int = bpack.field(size=3)
@@ -233,7 +234,7 @@ use a descriptor like the one defined in the above example as field of
 a larger descriptor (see `Record nesting`_).
 In this case it is important tho know the correct size of each field in
 order to be able to automatically compute the *offset* of the following
-fields.
+ones.
 
 
 Fields specification
@@ -257,8 +258,8 @@ description of a binary data structure:
        field: int = bpack.field(size=4, offset=0)
 
 Please note, anyway, that in some case it is possible to infer some of the
-above information from the context so it is not always to specify all of them
-explicitly. More details will be provided in the following.
+above information from the context so it is not always necessary to specify
+all of them explicitly. More details will be provided in the following.
 
 As shown in the example above the main way to specify a field descriptor is
 to use the :func:`bpack.descriptors.field` factory function together with
@@ -270,8 +271,8 @@ Type
 
 The data type of a field is the only parameter that is always mandatory,
 and also it is the only parameter that is not specified by means of the
-:func:`bpack.descriptors.field` factory function, rather it is specified
-the standard Python syntax for type annotations.
+:func:`bpack.descriptors.field` factory function.
+Rather it is specified using the standard Python syntax for type annotations.
 
 Currently supported data types are:
 
@@ -308,7 +309,7 @@ Currently supported data types are:
    ``bytes`` strings using the "UTF-8" encoding.
 
    Please note that the *size* of a ``str`` field still describes the
-   number of bits/bytes if its binary representation, not the length
+   number of bits/bytes in its binary representation, not the length
    of the string (which in principle could require a number of bytes
    larger that the number of characters).
 
@@ -344,15 +345,15 @@ This is only possible in the following cases:
 
      @bpack.descriptor
      class BinaryRecord:
-         field: T['u3']
+         field: T["u3"]
 
-  The ``T['i3']`` type annotation specifier defines an unsigned integer type
-  (``u``) having size 3 (for the specific example this means 3 bytes)
+  The ``T["u3"]`` type annotation specifier defines an unsigned integer type
+  (``u``) having size 3 (for the specific example this means 3 bytes).
   Please refer to the `Special type annotations`_ section for more details.
 
 Please note that the size of the field must not necessarily correspond to
 the size of one of the data types supported by the platform.
-In the example above it has been specified a type ``T['i3']`` which
+In the example above it has been specified a type ``T["u3"]`` which
 corresponds to a 24 bits unsigned integer. It is represented using a standard
 Python ``int`` in the Python code but the binary representation will always
 take only 3 bytes.
@@ -363,7 +364,7 @@ Offset
 
 The field *offset* is specified as a not-negative integer in *baseunits*
 (see the `Bit vs byte structures`_ section), and it represent the amount
-of *baseunits* for the beginning pf the record to the beginning of the field.
+of *baseunits* from the beginning of the record to the beginning of the field.
 
 It is a fundamental information and it can be specified by means of the
 :func:`bpack.descriptors.field` factory function.
@@ -386,7 +387,7 @@ looks like the following:
        field_4: int = bpack.field(size=4, offset=12)
        field_5: int = bpack.field(size=4, offset=16)
 
-If not specified the offset of the first field is assumed to be ``0``,
+If not specified, the offset of the first field is assumed to be ``0``,
 and the offset of the following fields is assumed to be equal to the
 offset of the previous field plus the size of the previous field itself::
 
@@ -428,7 +429,7 @@ The automatic computation of the offset fails, in this case, because of the
 missing information about ``field_2``.
 Indeed, since ``field_2`` has not been specified, for the computation of
 the offset of ``field_3`` *bpack* assumes that the previous field is
-``field_1`` and performs the computation computes accordingly::
+``field_1`` and performs the computation accordingly::
 
    field_3.offest = fielf_1.offset + field_i.size == 4 != 8  # INCORRECT
 
@@ -467,7 +468,7 @@ to have this information when data have to be stored in binary form.
    class BinaryRecord:
        field: int = bpack.field(size=4, offset=0, signed=True)
 
-If *signed* is not specified for a field having and integer type, then it
+If *signed* is not specified for a field having an integer type, then it
 is assumed to be ``False`` (*unsigned*).
 
 The *signed* parameter is ignored if the data type is not ``int``.
@@ -502,7 +503,7 @@ direct assignment:
    @bpack.descriptor
    class BinaryRecord:
        field_1: bool = False
-       field_2: bpack.T['i4'] = 33
+       field_2: bpack.T["i4"] = 33
 
 .. note::
 
@@ -530,7 +531,7 @@ Example:
        BLACK = 10
        WHITE = 11
 
-   @bpack.descriptor(baseunits='bits')
+   @bpack.descriptor(baseunits="bits")
    class BinaryRecord:
        foreground: EColor = bpack.field(size=4, default=EColor.BLACK)
        background: EColor = bpack.field(size=4, default=EColor.WHITE)
@@ -549,9 +550,9 @@ In particular the binary representation of ``BLACK`` and ``WHITE`` is:
 
 .. doctest::
 
-   >>> format(EColor.BLACK, '04b')
+   >>> format(EColor.BLACK, "04b")
    '1010'
-   >>> format(EColor.WHITE, '04b')
+   >>> format(EColor.WHITE, "04b")
    '1011'
 
 and the binary string representing it is:
@@ -566,7 +567,7 @@ and the binary string representing it is:
    b'\xab'
 
 The data string can be decoded using the :mod:`bpack.bs` backend that is
-suitable to handle based binary data structures with ``bits`` as *baseunits*:
+suitable to handle binary data structures with ``bits`` as *baseunits*:
 
 .. testcode::
 
@@ -623,7 +624,7 @@ The :mod:`bpack.np` instead maps all kind of sequences onto
 Record nesting
 --------------
 
-Descriptors of binary structures (record types) can gave fields that are
+Descriptors of binary structures (record types) can have fields that are
 binary structure descriptors in their turn (sub-records).
 
 Example:
@@ -655,27 +656,29 @@ instance.
 Special type annotations
 ------------------------
 
-Using the :func:`bpack.descriptors.field` factory function to defile fields
+Using the :func:`bpack.descriptors.field` factory function to define fields
 can be sometime very verbose and boring.
 
-The *bpack* package provides an typing annotation helper,
-:class:`bpack.typing.T`, that allow to specify basic types annotated
+The *bpack* package provides a typing annotation helper,
+:class:`bpack.typing.T`, that allows to specify basic types annotated
 with additional information like the *size* or the *signed* attribute for
 integers.
 This helps to reduce the amount of typesetting required to specify a
 binary structure.
 
-The :class:`bpack.typing.T` type annotation class take in input a string
+The :class:`bpack.typing.T` type annotation class takes in input a string
 argument and converts it into an annotated basic type.
 
 .. doctest::
 
-   >>> T['u4']                           # doctest: +NORMALIZE_WHITESPACE
+   >>> T["u4"]                           # doctest: +NORMALIZE_WHITESPACE
    typing.Annotated[int, TypeParams(byteorder=None, type='int',
                                     size=4, signed=False)]
 
 The resulting type annotation is a :class:`typing.Annotated` basic type
 with attached a :class:`bpack.typing.TypeParams` instance.
+
+This allows `bpack` to retrieve the information necessary to specify a field.
 
 For example the following descriptor:
 
@@ -693,11 +696,11 @@ Can be specified in a more synthetic form as follows:
 
    @bpack.descriptor
    class BinaryRecord:
-       field_1: T['i4'] = 0
-       field_2: T['u4'] = 1
+       field_1: T["i4"] = 0
+       field_2: T["u4"] = 1
 
 String descriptors, or *typestr*, are compatible with numpy (a sub-set
-of one used in the numpy `array interface`_).
+of the one used in the numpy `array interface`_).
 
 The *typestr* string format consists of 3 parts:
 
@@ -708,14 +711,14 @@ The *typestr* string format consists of 3 parts:
   - ``|``: not-relevant
 
 * a character code giving the basic type of the array, and
-* an integer providing the number of bytes the type uses
+* an integer providing the number of bits/bytes used by the type
 
 The basic type character codes are:
 
 * ``i``: sighed integer
 * ``u``: unsigned integer
 * ``f``: float
-* ``c``: complex
+* ``c``: complex (**currently not supported**)
 * ``S``: bytes (string)
 
 .. note::
@@ -742,7 +745,7 @@ Backends
 Backends provide encoding/decoding capabilities for binary data
 *descriptors* exploiting external packages to do the low level job.
 
-Currently *bpack* provides the:
+Currently *bpack* provides the following backends:
 
 * :mod:`bpack.st` backend, based on the :mod:`struct` package, and
 * :mod:`bpack.bs` backend, based on the bitstruct_ package to decode
@@ -772,14 +775,14 @@ Decoders are instantiated passing to the ``Codec`` class a binary data
 record *descriptor*.
 Each *codec* has
 
-* a ``descriptor`` property by which it is possible to access the *descriptor*
-  associated to the ``Decoder`` instance
-* a ``baseunits`` property that indicates the kind of *descriptors* supported
+* a ``descriptor`` property, by which it is possible to access the *descriptor*
+  associated to the ``Codec`` instance
+* a ``baseunits`` property, that indicates the kind of *descriptors* supported
   by the ``Decoder`` class
-* a ``decode(data: bytes)`` method that takes in input a string of
+* a ``decode(data: bytes)`` method, that takes in input a string of
   :class:`bytes` and returns an instance of the record type specified
   at the instantiation of the *codec* object
-* a ``encode(record)`` method that takes in input an instance of the record
+* a ``encode(record)`` method, that takes in input an instance of the record
   type specified at the instantiation of the *codec* object (a Python object)
   and returns a string of :class:`bytes`
 
@@ -801,9 +804,9 @@ Codec decorator
 ~~~~~~~~~~~~~~~
 
 Each backend provides also a ``@codec`` decorator the can be used to
-add to a ^descriptor^ direct decoding capabilities.
+add to a *descriptor* direct decoding capabilities.
 In particular the ``frombytes(data: bytes)`` class method and the
-``tobytes()`` method are added to the descriptor to be able to write code
+``tobytes()`` method are added to the *descriptor* to be able to write code
 as the following:
 
 
@@ -818,7 +821,7 @@ as the following:
        field_1: float = bpack.field(size=8)
        field_2: int = bpack.field(size=4, signed=True)
 
-   binary_data = b'\x18-DT\xfb!\t@\x15\xcd[\x07'
+   binary_data = b"\x18-DT\xfb!\t@\x15\xcd[\x07"
    record = BinaryRecord.frombytes(binary_data)
 
    print(record)

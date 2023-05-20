@@ -235,10 +235,10 @@ def field(
     initialized to describe the field of a binary record.
 
     :param size: int
-        size of the field in :class:`EBaseUnits`
+        size of the field in :class:`bpack.enums.EBaseUnits`
     :param offset: int
         offset of the field w.r.t. the beginning of the record
-        (expressed in :class:`EBaseUnits`)
+        (expressed in :class:`bpack.enums.EBaseUnits`)
     :param signed: bool
         True if an `int` field is signed, False otherwise.
         This parameter must not be specified for non `int` fields.
@@ -246,7 +246,7 @@ def field(
         length of the sequence for `sequence` fields, i.e. fields
         consisting in multiple items having the same data type.
         This parameter must not be specified if the data type is not a
-        sequence type (e.g. `List`).
+        sequence type (e.g. :class:`typing.List`).
     :param metadata:
         additional metadata to be attached the the field descriptor.
     :param kwargs:

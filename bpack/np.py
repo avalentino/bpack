@@ -265,7 +265,7 @@ def _get_buffer_size(bits_per_sample: int) -> int:
     return _get_item_size(bits_per_sample + 7)
 
 
-# @COMPATIBILITY: lru_cache without parenteses requires Python > 3.7
+# @COMPATIBILITY: lru_cache without parenteses requires Python >= 3.8
 @functools.lru_cache()
 def make_bitmask(
     bits_per_sample: int,
