@@ -12,16 +12,11 @@ except ImportError:
         return x
 
 
+# @COMPATIBILITY: Python < 3.9
 try:  # pragma: no cover
-    from typing_extensions import (  # isort:skip
-        # @COMPATIBILITY: Python < 3.9
-        Annotated,
-        # @COMPATIBILITY: Python < 3.7 (and Python < 3.8.3)
-        get_args,
-        get_origin,
-    )
+    from typing_extensions import Annotated, get_args, get_origin
 except ImportError:  # pragma: no cover
-    from typing import Annotated, get_origin, get_args
+    from typing import Annotated, get_args, get_origin
 
 from .enums import EByteOrder
 

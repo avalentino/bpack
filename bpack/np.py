@@ -265,8 +265,7 @@ def _get_buffer_size(bits_per_sample: int) -> int:
     return _get_item_size(bits_per_sample + 7)
 
 
-# @COMPATIBILITY: lru_cache without parenteses requires Python >= 3.8
-@functools.lru_cache()
+@functools.lru_cache
 def make_bitmask(
     bits_per_sample: int,
     dtype=None,
@@ -302,7 +301,7 @@ class BitUnpackParams(NamedTuple):
     mask: np.ndarray
 
 
-@functools.lru_cache()  # @COPMPATIBILITY with Python 3.7
+@functools.lru_cache  # @COPMPATIBILITY with Python 3.7
 def _unpackbits_params(
     nbits: int,
     bits_per_sample: int,
@@ -426,7 +425,7 @@ def unsigned_to_signed(
     return out
 
 
-@functools.lru_cache()  # @COMPATIBILITY: parenteses not needed in Python>=3.8
+@functools.lru_cache  # @COMPATIBILITY: parenteses not needed in Python>=3.8
 def make_unsigned_to_signed_lut(
     bits_per_sample: int,
     dtype=None,

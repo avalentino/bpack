@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Binary data structures (un-)packing library"
 readme = {file = "README.rst", content-type = "text/x-rst"}
-requires-python = ">=3.7"
+requires-python = ">=3.8.3"
 keywords = [
     "binary",
     "struct",
@@ -37,11 +37,11 @@ dynamic = ["version"]
 
 
 [project.optional-dependencies]
-test = ["pytest", "bitarray>=1.5.1", "bitstruct", "numpy"]
 bs = ["bitstruct"]
 ba = ["bitarray>=1.5.1"]
 np = ["numpy"]
 docs = ["sphinx", "sphinx_rtd_theme"]
+test = ["pytest", "bpack[bs]", "bpack[ba]", "bpack[np]"]
 full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[test]"]
 
 

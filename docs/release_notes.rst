@@ -4,7 +4,8 @@ Release Notes
 bpack v1.2.0 (UNRELEASED)
 -------------------------
 
-* New 'full' installation option added.
+* Drop support to Python 3.7. Now `bpack` requires Python >= 3.8.3.
+* New 'full' installation option added to `pyproject.toml`.
 * No longer use deprecated syntax in sphinx configuration.
 * Improved documentation and fixed typos.
 * flake8_ configuration moved to a dedicated file.
