@@ -10,6 +10,7 @@ bpack v1.2.0 (UNRELEASED)
 * Improved documentation and fixed typos.
 * flake8_ configuration moved to a dedicated file.
 * Do not test the :mod:`bpack.ba` backend in PyPy3_.
+* New :func:`bpack.typing.type_params_to_str` function. 
 
 .. _flake8: https://github.com/pycqa/flake8
 .. _PyPy3: https://www.pypy.org

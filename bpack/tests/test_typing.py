@@ -122,3 +122,21 @@ def test_type_annotation(typestr, type_, params):
     atype, metadata = bpack.typing.get_args(T)
     assert metadata == params
     assert atype == type_ == metadata.type
+
+
+@pytest.mark.parametrize(
+    "typestr, params",
+    [
+        ("i4", TypeParams(None, int, 4, True)),
+        ("u2", TypeParams(None, int, 2, False)),
+        ("f8", TypeParams(None, float, 8, None)),
+        ("c16", TypeParams(None, complex, 16, None)),
+        ("S128", TypeParams(None, bytes, 128, None)),
+        (">i8", TypeParams(bpack.EByteOrder.BE, int, 8, True)),
+        ("f", TypeParams(None, float, None, None)),
+    ],
+    ids=["i4", "u2", "f8", "c16", "S128", ">i8", "f"],
+)
+def test_type_params_to_str(typestr, params):
+    s = bpack.typing.type_params_to_str(params)
+    assert typestr == s

@@ -140,6 +140,43 @@ def str_to_type_params(typestr: str) -> TypeParams:
     return TypeParams(byteorder, type_, size, signed)
 
 
+def type_params_to_str(params: TypeParams) -> str:
+    """Convert a ``TypeParams`` object into a ``typestr``.
+
+    The returned ``typestr`` is a string describing a data type.
+
+    .. seealso:: please refer to :func:`bpack.typing.str_to_typr_params`
+       for a detailed description of the *typestr* string format.
+    """
+    byteorder = params.byteorder
+    byteorder = "" if byteorder is None else EByteOrder(byteorder).value
+
+    if params.type is int:
+        if params.signed:
+            type_ = "i"
+        else:
+            type_ = "u"
+    elif params.type is float:
+        type_ = "f"
+    elif params.type is complex:
+        type_ = "c"
+    # elif params.type is datetime.timedelta:
+    #     type_ = "m"
+    # elif params.type is datetime.datetime:
+    #     type_ = "M"
+    # elif params.type is str:
+    #     type_ = "U"
+    elif params.type is bytes:
+        type_ = "S"
+        # type_ = "V"
+    else:
+        raise TypeError(f"data type '{params.type}' is not suported in bpack")
+
+    size = params.size if params.size is not None else ""
+
+    return f"{byteorder}{type_}{size}"
+
+
 class T:
     """Allow to specify numeric type annotations using string descriptors.
 
