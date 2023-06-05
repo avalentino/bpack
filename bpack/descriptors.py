@@ -6,7 +6,7 @@ import math
 import types
 import warnings
 import dataclasses
-from typing import Iterable, Optional, Sequence, Type, Union
+from typing import Iterator, Optional, Sequence, Type, Union
 
 import bpack.utils
 import bpack.typing
@@ -628,7 +628,7 @@ def bitorder(obj) -> Union[EBitOrder, None]:
 
 def field_descriptors(
     descriptor, pad: bool = False
-) -> Iterable[BinFieldDescriptor]:
+) -> Iterator[BinFieldDescriptor]:
     """Return the list of field descriptors for the input record descriptor.
 
     Items are instances of the :class:`BinFieldDescriptor` class describing
@@ -659,3 +659,35 @@ def field_descriptors(
     else:
         for field_ in fields(descriptor):
             yield get_field_descriptor(field_)
+
+
+def flat_fields_iterator(desctiptor, offset: int = 0) -> Iterator[Field]:
+    """Recursively iterate on fields of a descriptor.
+
+    The behaviour of this function is similar to the one of
+    :func:`bpack.descriptors.fileds` if the input descriptor do not contain
+    fileds that are desctipors (nested).
+    The main difference is that this one is an iterator while
+    :func:`bpack.descriptors.fileds` returns a tuple.
+
+    If the input desctiptor is nested (i.e. has fields that are descriptors),
+    then a the it is visited recursively to return oll the fields belonging
+    to the main decriptor and to the nested ones.
+
+    The nested descriptors are replaced by their fields and the returned
+    sequence of fields is *flat*.
+
+    .. note:: please note that in case of nested descriptors, the returned
+    fields are copy of the original ones, with the `offset` attribute
+    adjusted to the relative to the beginning of the root desctiptor.
+    """
+    for field_ in bpack.fields(desctiptor):
+        fd = get_field_descriptor(field_)
+        fd.offset += offset
+
+        if bpack.is_descriptor(field_.type):
+            yield from flat_fields_iterator(field_.type, offset=fd.offset)
+        else:
+            field_ = copy.copy(field_)
+            set_field_descriptor(field_, fd)
+            yield field_

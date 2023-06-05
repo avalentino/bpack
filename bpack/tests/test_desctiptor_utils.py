@@ -7,8 +7,13 @@ from typing import List
 import pytest
 
 import bpack
-from bpack import EBaseUnits, EByteOrder, EBitOrder
-from bpack.descriptors import BinFieldDescriptor, METADATA_KEY
+from bpack import EBaseUnits, EByteOrder, EBitOrder, T
+from bpack.descriptors import (
+    METADATA_KEY,
+    BinFieldDescriptor,
+    flat_fields_iterator,
+    get_field_descriptor,
+)
 
 
 def test_is_descriptor():
@@ -450,3 +455,33 @@ def test_astuple():
     assert bpack.astuple(record) == values
     assert type(bpack.astuple(record)) is tuple
     assert type(bpack.astuple(record, tuple_factory=list)) is list
+
+
+def test_flat_fields_iterator():
+    @bpack.descriptor(baseunits=EBaseUnits.BITS, size=8)
+    class Record:
+        x: T["u3"] = 0  # noqa: F821
+        y: T["u3"] = bpack.field(offset=4, default=3)  # noqa: F821
+
+    @bpack.descriptor(baseunits=EBaseUnits.BITS)
+    class NestedRecord:
+        a: T["u7"] = 32  # noqa: F821
+        b: Record = bpack.field(default_factory=Record, offset=8)
+        c: T["f16"] = -9999  # noqa: F821
+
+    @bpack.descriptor(baseunits=EBaseUnits.BITS)
+    class FlatRecord:
+        a: T["u7"] = 32  # noqa: F821
+        x: T["u3"] = bpack.field(offset=8, default=0)  # noqa: F821
+        y: T["u3"] = bpack.field(offset=12, default=3)  # noqa: F821
+        c: T["f16"] = bpack.field(offset=16, default=-9999)  # noqa: F821
+
+    for firld_, ref_field in zip(
+        flat_fields_iterator(NestedRecord),
+        flat_fields_iterator(FlatRecord),
+    ):
+        assert get_field_descriptor(firld_) == get_field_descriptor(ref_field)
+        assert firld_.name == ref_field.name
+        assert firld_.type == ref_field.type
+        assert firld_.default == ref_field.default
+        assert firld_.default_factory == ref_field.default_factory
