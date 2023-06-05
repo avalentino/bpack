@@ -1,6 +1,3 @@
-exclude .gitignore
-prune .github
-
 include requirements-dev.txt tox.ini
 include docs/conf.py docs/Makefile docs/make.bat docs/spelling_wordlist.txt
 recursive-include docs *.rst *.rst_t
