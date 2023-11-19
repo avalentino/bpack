@@ -1,8 +1,10 @@
 #!/usr/bin/make -f
 
 PYTHON=python3
+SPHINX_APIDOC=sphinx-apidoc
+TARGET=bpack
 
-.PHONY: default help dist check clean distclean api lint
+.PHONY: default help dist check fullcheck coverage lint api docs clean cleaner distclean
 
 default: help
 
@@ -11,36 +13,54 @@ help:
 	@echo "Available targets:"
 	@echo "  help      - print this help message"
 	@echo "  dist      - generate the distribution packages (source and wheel)"
-	@echo "  check     - run a full test (using tox)"
-	@echo "  clean     - clean build artifacts"
-	@echo "  distclean - clean all generated and cache files"
-	@echo "  api       - update the API source files in the documentation"
+	@echo "  check     - run a full test (using pytest)"
+	@echo "  fullcheck - run a full test (using tox)"
+	@echo "  coverage  - run tests and generate the coverage report"
 	@echo "  lint      - perform check with code linter (flake8, black)"
+	@echo "  api       - update the API source files in the documentation"
+	@echo "  docs      - generate the sphinx documentation"
+	@echo "  clean     - clean build artifacts"
+	@echo "  cleaner   - clean cache files and working directories of al tools"
+	@echo "  distclean - clean all the generated files"
 
 dist:
 	$(PYTHON) -m build
-	$(PYTHON) -m twine check dist/*
+	$(PYTHON) -m twine check dist/*.tar.gz dist/*.whl
 
 check:
+	$(PYTHON) -m pytest
+
+fullcheck:
 	$(PYTHON) -m tox run
 
-clean:
-	$(MAKE) -C docs clean
-	$(RM) -r build bpack.egg-info docs/_build
-	$(RM) -r __pycache__ */__pycache__ */*/__pycache__
+coverage:
+	$(PYTHON) -m pytest --cov=$(TARGET) --cov-report=html --cov-report=term
 
-distclean: clean
-	$(RM) -r dist .coverage htmlcov .pytest_cache .tox
-	@# $(RM) .DS_Store */.DS_Store */*/.DS_Store
-	@# $(RM) -r .idea
+lint:
+	$(PYTHON) -m flake8 --count --statistics $(TARGET)
+	$(PYTHON) -m pydocstyle --count $(TARGET)
+	$(PYTHON) -m isort --check $(TARGET)
+	$(PYTHON) -m black --check $(TARGET)
+	# $(PYTHON) -m mypy --check-untyped-defs --ignore-missing-imports $(TARGET)
 
 api:
 	$(RM) -r docs/api
-	sphinx-apidoc --module-first --separate --no-toc --doc-project "bpack API" \
-	  -o docs/api --templatedir docs/_templates/apidoc bpack bpack/tests
+	$(SPHINX_APIDOC) --module-first --separate --no-toc -o docs/api \
+	  --doc-project "$(TARGET) API" --templatedir docs/_templates/apidoc \
+	  $(TARGET) $(TARGET)/tests
 
-lint:
-	$(PYTHON) -m flake8 --count --statistics bpack
-	$(PYTHON) -m pydocstyle --count bpack
-	$(PYTHON) -m isort --check bpack
-	$(PYTHON) -m black --check bpack
+docs:
+	$(MAKE) -C docs html
+
+clean:
+	$(RM) -r *.*-info build
+	find . -name __pycache__ -type d -exec $(RM) -r {} +
+	# $(RM) -r __pycache__ */__pycache__ */*/__pycache__ */*/*/__pycache__
+	if [ -f docs/makefile ] ; then $(MAKE) -C docs clean; fi
+	$(RM) -r docs/_build
+
+cleaner: clean
+	$(RM) -r .coverage htmlcov .pytest_cache .mypy_cache .tox .ipynb_checkpoints
+
+distclean: cleaner
+	$(RM) -r dist
