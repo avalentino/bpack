@@ -1,4 +1,4 @@
-.. only:: html
+.. only:: html or linkcheck or spelling
 
    Indices and tables
    ==================

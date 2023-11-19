@@ -10,7 +10,7 @@ Binary data structures (un-)Packing library
 .. |PyPI Status| image:: https://img.shields.io/pypi/v/bpack.svg
     :target: https://pypi.org/project/bpack
     :alt: PyPI Status
-.. |GHA Status| image:: https://github.com/avalentino/bpack/workflows/Build/badge.svg
+.. |GHA Status| image:: https://github.com/avalentino/bpack/actions/workflows/ci.yml/badge.svg
     :target: https://github.com/avalentino/bpack/actions
     :alt: GitHub Actions Status
 .. |Documentation Status| image:: https://readthedocs.org/projects/bpack/badge/?version=latest
