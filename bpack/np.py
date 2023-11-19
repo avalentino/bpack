@@ -129,7 +129,6 @@ def _decode_converter_factory(type_):
 
 
 def _encode_converter_factory(type_):
-    converter = None
     etype = bpack.utils.effective_type(type_)
     if bpack.utils.is_enum_type(type_):
         if etype is str:
@@ -148,6 +147,9 @@ def _encode_converter_factory(type_):
         def converter(x):
             # TODO: harmonize with other backends that use 'ascii'
             return x.encode("utf-8")
+
+    else:
+        converter = None
 
     # TODO: cleanup
     # elif bpack.is_descriptor(type_):
