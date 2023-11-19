@@ -56,9 +56,6 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      # Only necessary if the test code is located outside the package
-      # - uses: actions/checkout@v4
-
       - name: Get distribution
         uses: actions/download-artifact@v3
         with:
@@ -73,8 +70,9 @@ jobs:
       - name: Install
         shell: bash
         run: |
+          VERSION=$(echo dist/*.whl | cut -d '-' -f 2)
           python -m pip install --upgrade pip
-          python -m pip install "dist/*.whl[full]"
+          python -m pip install dist/${PACKAGE}-${VERSION}-py3-none-any.whl[full]
 
       - name: Install test dependencies
         shell: bash
@@ -83,5 +81,6 @@ jobs:
           if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
 
       - name: Test
+        shell: bash
         run: |
-          python -m pytest --cov=${PACKAGE} --cov-report=html --cov-report=term
+          python -m pytest --cov=${PACKAGE} --cov-report=html --cov-report=term --pyargs ${PACKAGE}

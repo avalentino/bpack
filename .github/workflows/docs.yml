@@ -33,28 +33,32 @@ jobs:
 
       - name: Build docs
         run: |
+          mkdir -p _static
           python3 -m sphinx -W -b html . _build/html
         working-directory: docs
         env:
-          PYTHONPATH=..
+          PYTHONPATH: ..
 
       - name: Check links
         run: |
+          mkdir -p _static
           python3 -m sphinx -W -b linkcheck . _build/linkcheck
         working-directory: docs
         env:
-          PYTHONPATH=..
+          PYTHONPATH: ..
 
       - name: Doctest
         run: |
+          mkdir -p _static
           python3 -m sphinx -W -b doctest . _build/doctest
         working-directory: docs
         env:
-          PYTHONPATH=..
+          PYTHONPATH: ..
 
-      - name: Spell check
-          run: |
-            python3 -m sphinx -W -b spelling . _build/spelling
+      - name: Spellcheck
+        run: |
+          mkdir -p _static
+          python3 -m sphinx -W -b spelling . _build/spelling
         working-directory: docs
         env:
-          PYTHONPATH=..
+          PYTHONPATH: ..
