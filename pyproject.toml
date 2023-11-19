@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools>=61.0.0"]
 build-backend = "setuptools.build_meta"
 
 
@@ -46,15 +46,16 @@ full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[test]"]
 
 
 [project.urls]
-homepage = "https://github.com/avalentino/bpack"
-documentation = "https://bpack.readthedocs.io"
-repository = "https://github.com/avalentino/bpack.git"
-changelog = "https://github.com/avalentino/bpack/blob/main/docs/release_notes.rst"
+Homepage = "https://github.com/avalentino/bpack"
+Documentation = "https://bpack.readthedocs.io"
+Repository = "https://github.com/avalentino/bpack.git"
+Changelog = "https://github.com/avalentino/bpack/blob/main/docs/release_notes.rst"
+Issues = "https://github.com/avalentino/bpack/issues"
 
 
 [tool.setuptools]
 packages = ["bpack", "bpack.tests"]
-zip-safe = true
+# zip-safe = true
 # license-files = ["LICENSE"]
 
 
@@ -78,4 +79,3 @@ no_inline_sort = true
 include_trailing_comma = true
 use_parentheses = true
 line_length = 79
-
