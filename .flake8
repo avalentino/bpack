@@ -5,8 +5,7 @@ doctests = true
 extend-ignore = E203,W503,D107
 extend-select = W504
 per-file-ignores =
-    bpack/tests/test_*.py:D
-    bpack/utils.py:D103
+    */tests/test_*.py: D
+    bpack/utils.py: D103
 statistics = True
 count = True
-
