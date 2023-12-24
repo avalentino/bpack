@@ -40,8 +40,6 @@ Features
 * comprehensive test suite
 
 
-.. _limitations-label:
-
 Limitations
 -----------
 

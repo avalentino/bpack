@@ -1,6 +1,10 @@
-===========================================
-Binary data structures (un-)Packing library
-===========================================
+:orphan:
+
+======================================================
+Binary data structures (un-)Packing library for Python
+======================================================
+
+.. metadata
 
 :HomePage:  https://github.com/avalentino/bpack
 :Author:    Antonio Valentino

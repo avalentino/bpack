@@ -5,7 +5,12 @@
 
 .. title and metadata
 
+===========================================
+Binary data structures (un-)Packing library
+===========================================
+
 .. include:: bpack.rst
+   :start-after: .. metadata
    :end-before: .. toctree::
 
 .. description

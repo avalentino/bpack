@@ -139,7 +139,7 @@ This is an important distinction for two reasons:
 
    Currently available *backends* do not support nested data structures
    (see `Record nesting`_) described using different *baseunits*
-   (see :ref:`limitations-label`).
+   (see :ref:`Limitations`).
 
 *Baseunits* can be specified as follows:
 

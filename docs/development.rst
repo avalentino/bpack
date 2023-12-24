@@ -19,8 +19,8 @@ Project links
 Set-up the development environment
 ----------------------------------
 
-Pip
-~~~
+Pip based environment
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: shell
 
@@ -29,8 +29,8 @@ Pip
   (venv) $ python3 -m pip install -r requirements-dev-txt
 
 
-Conda
-~~~~~
+Conda based environment
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: shell
 
