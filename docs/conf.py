@@ -110,13 +110,23 @@ latex_elements = {
 # -- Options for autodoc extension -------------------------------------------
 # autoclass_content = 'both'
 autodoc_member_order = "groupwise"
-# autodoc_default_options = {}
+# autodoc_default_options = {
+#     "members": True,
+#     "undoc-members": True,
+#     "show-inheritance": True,
+# }
 autodoc_mock_imports = []
 for module_name in ["bitarray", "bitstruct", "numpy"]:
     try:
         __import__(module_name)
     except ImportError:
         autodoc_mock_imports.append(module_name)
+
+
+# -- Options for autosummary extension ---------------------------------------
+autosummary_generate = True
+# autosummary_mock_imports = []
+# autosummary_ignore_module_all = False
 
 
 # -- Options for intersphinx extension ---------------------------------------
