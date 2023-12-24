@@ -2,7 +2,7 @@
 # max_line_length = 79
 # max-complexity = 10
 doctests = true
-extend-ignore = E203,W503,D107
+extend-ignore = E203,W503
 extend-select = W504
 per-file-ignores =
     */tests/test_*.py: D

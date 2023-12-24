@@ -56,6 +56,7 @@ clean:
 	$(RM) -r *.*-info build
 	find . -name __pycache__ -type d -exec $(RM) -r {} +
 	# $(RM) -r __pycache__ */__pycache__ */*/__pycache__ */*/*/__pycache__
+	$(RM) $(TARGET)/_*.c $(TARGET)/*.so $(TARGET)/*.o
 	if [ -f docs/makefile ] ; then $(MAKE) -C docs clean; fi
 	$(RM) -r docs/_build
 

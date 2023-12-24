@@ -40,7 +40,6 @@ dynamic = ["version"]
 bs = ["bitstruct"]
 ba = ["bitarray>=1.5.1"]
 np = ["numpy"]
-docs = ["sphinx", "sphinx_rtd_theme"]
 test = ["pytest", "bpack[bs]", "bpack[ba]", "bpack[np]"]
 full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[test]"]
 
@@ -79,3 +78,7 @@ no_inline_sort = true
 include_trailing_comma = true
 use_parentheses = true
 line_length = 79
+
+
+# [tool.pydocstyle]
+# add-ignore = ["D105", "D107"]
