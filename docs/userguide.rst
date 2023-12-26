@@ -245,7 +245,7 @@ the *bpack* package need to know about fields in order to have a complete
 description of a binary data structure:
 
 * the field data **type**,
-* the filed **size** (expressed in *baseunits*,
+* the field **size** (expressed in *baseunits*,
   see `Bit vs byte structures`_), and
 * the field **offset** with respect to the beginning of the binary data
   structure (also in this case expressed in *baseunits*,
@@ -555,7 +555,7 @@ In particular the binary representation of ``BLACK`` and ``WHITE`` is:
    >>> format(EColor.WHITE, "04b")
    '1011'
 
-and the binary string representing it is:
+and the binary string representing the above defined binary record is:
 
 .. testcode::
 
@@ -586,9 +586,33 @@ The result is directly mapped into Python enum values: ``EColor:BLACK`` and
 
 .. note::
 
-   If the :class:`Enum` sub-classes are accepted as field type only if all
+   The :class:`Enum` sub-classes are accepted as field type only if all
    the enumeration values have the same type (``int``, ``bytes`` or ``str``).
 
+   Example::
+
+      import enum
+      import bpack
+
+
+      class EType(enum.Enum):
+         A = "A"
+         B = 2
+
+
+      @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
+      class Record:
+         field: EType = bpack.field(size=8, default=EType.A)  # ERROR!
+   
+   The above code will result in the following error::
+
+      1 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
+      2 class Record:
+      3     field: EType = bpack.field(size=8, default=EType.A)
+
+      [...]
+
+      TypeError: only Enum with homogeneous values are supported
 
 Sequence fields
 ---------------
@@ -649,7 +673,7 @@ Example:
 
 
 Decoding of the ``Record`` structure will automatically decode also data
-belonging to the sub-record and assign to ``filed_2`` a ``SubRecord``
+belonging to the sub-record and assign to ``field_2`` a ``SubRecord``
 instance.
 
 

@@ -1400,11 +1400,11 @@ class TestMultiNestedRecord:
         from bpack.utils import is_sequence_type
 
         out = []
-        for filed in bpack.fields(record):
-            value = getattr(record, filed.name)
+        for field in bpack.fields(record):
+            value = getattr(record, field.name)
             if bpack.is_descriptor(value):
                 out.extend(self._record_to_list(value))
-            elif is_sequence_type(filed.type):
+            elif is_sequence_type(field.type):
                 out.extend(value)
             else:
                 out.append(value)

@@ -16,7 +16,7 @@ dicts
 docstring
 docstrings
 endian
-endianess
+endianness
 enum
 enums
 frombytes

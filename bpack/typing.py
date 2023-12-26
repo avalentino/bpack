@@ -145,7 +145,7 @@ def type_params_to_str(params: TypeParams) -> str:
 
     The returned ``typestr`` is a string describing a data type.
 
-    .. seealso:: please refer to :func:`bpack.typing.str_to_typr_params`
+    .. seealso:: please refer to :func:`bpack.typing.str_to_type_params`
        for a detailed description of the *typestr* string format.
     """
     byteorder = params.byteorder
@@ -170,7 +170,7 @@ def type_params_to_str(params: TypeParams) -> str:
         type_ = "S"
         # type_ = "V"
     else:
-        raise TypeError(f"data type '{params.type}' is not suported in bpack")
+        raise TypeError(f"data type '{params.type}' is not supported in bpack")
 
     size = params.size if params.size is not None else ""
 

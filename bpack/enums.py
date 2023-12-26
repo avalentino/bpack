@@ -12,7 +12,7 @@ class EBaseUnits(enum.Enum):
 
 
 class EByteOrder(enum.Enum):
-    """Enumeration for byte order (endianess).
+    """Enumeration for byte order (endianness).
 
     .. note::
 

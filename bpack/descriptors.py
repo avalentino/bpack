@@ -31,6 +31,7 @@ __all__ = [
     "BinFieldDescriptor",
     "get_field_descriptor",
     "set_field_descriptor",
+    "flat_fields_iterator",
     "BASEUNITS_ATTR_NAME",
     "BYTEORDER_ATTR_NAME",
     "BITORDER_ATTR_NAME",
@@ -74,7 +75,10 @@ def _resolve_type(type_):
 class BinFieldDescriptor:
     """Descriptor for bpack fields.
 
-    See also :func:`bpack.filed` for a description of the attributes.
+    .. seealso::
+
+        :func:`bpack.descriptors.field` for a description of the attributes.
+
     """
 
     type: Optional[Type] = None  # noqa: A003
@@ -312,7 +316,7 @@ def set_field_descriptor(
     if type_ != _resolve_type(field_type):
         raise TypeError(
             f"type mismatch between BinFieldDescriptor.type ({type_!r}) and "
-            f"filed.type ({field.type!r})"
+            f"field.type ({field.type!r})"
         )
     new_metadata = {
         METADATA_KEY: types.MappingProxyType(field_descr_metadata),
@@ -344,7 +348,7 @@ def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
     # if bpack.utils.is_enum_type(type_):
     #     if bpack.utils.is_int_type(type_):
     #         signbit = 1 if any(item.value < 0 for item in type_) else 0
-    #         bits = signbit + max(item.value.bit_lenght() for item in type_)
+    #         bits = signbit + max(item.value.bit_length() for item in type_)
     #         if baseunits is EBaseUnits.BITS:
     #             if bits <= 8:
     #                 return 1
@@ -490,7 +494,7 @@ def descriptor(
             field_descr.offset = auto_offset
         elif field_descr.offset < auto_offset:
             raise DescriptorConsistencyError(
-                f"invalid offset for filed n. {idx}: {field_}"
+                f"invalid offset for field n. {idx}: {field_}"
             )
 
         set_field_descriptor(field_, field_descr)
@@ -611,7 +615,7 @@ def baseunits(obj) -> EBaseUnits:
 
 
 def byteorder(obj) -> EByteOrder:
-    """Return the byte order of a binary record descriptor (endianess)."""
+    """Return the byte order of a binary record descriptor (endianness)."""
     try:
         return getattr(obj, BYTEORDER_ATTR_NAME)
     except AttributeError:
@@ -629,10 +633,11 @@ def bitorder(obj) -> Union[EBitOrder, None]:
 def field_descriptors(
     descriptor, pad: bool = False
 ) -> Iterator[BinFieldDescriptor]:
-    """Return the list of field descriptors for the input record descriptor.
+    """Iterate the input record descriptor and return binary field descriptors.
 
-    Items are instances of the :class:`BinFieldDescriptor` class describing
-    characteristics of each field of the input binary record descriptor.
+    Returned items are instances of the :class:`BinFieldDescriptor` class
+    describing characteristics of each field of the input binary record
+    descriptor.
 
     If the ``pad`` parameter is set to True then also generate dummy field
     descriptors for padding elements necessary to take into account offsets
@@ -661,18 +666,18 @@ def field_descriptors(
             yield get_field_descriptor(field_)
 
 
-def flat_fields_iterator(desctiptor, offset: int = 0) -> Iterator[Field]:
-    """Recursively iterate on fields of a descriptor.
+def flat_fields_iterator(descriptor, offset: int = 0) -> Iterator[Field]:
+    """Recursively iterate on fields of a record descriptor.
 
-    The behaviour of this function is similar to the one of
-    :func:`bpack.descriptors.fileds` if the input descriptor do not
-    contain fileds that are desctipors (nested).
+    The behavior of this function is similar to the one of
+    :func:`bpack.descriptors.fields` if the input descriptor do not
+    contain fields that are descriptors (nested).
     The main difference is that this one is an iterator while
-    :func:`bpack.descriptors.fileds` returns a tuple.
+    :func:`bpack.descriptors.fields` returns a tuple.
 
-    If the input desctiptor is nested (i.e. has fields that are
-    descriptors), then a the it is visited recursively to return oll
-    the fields belonging to the main decriptor and to the nested ones.
+    If the input descriptor is nested (i.e. has fields that are
+    descriptors), then a the it is visited recursively to return all
+    the fields belonging to the main descriptor and to the nested ones.
 
     The nested descriptors are replaced by their fields and the
     returned sequence of fields is *flat*.
@@ -680,9 +685,9 @@ def flat_fields_iterator(desctiptor, offset: int = 0) -> Iterator[Field]:
     .. note:: please note that in case of nested descriptors, the
     returned fields are copy of the original ones, with the `offset`
     attribute adjusted to the relative to the beginning of the root
-    desctiptor.
+    descriptor.
     """
-    for field_ in bpack.fields(desctiptor):
+    for field_ in bpack.fields(descriptor):
         fd = get_field_descriptor(field_)
         fd.offset += offset
 
