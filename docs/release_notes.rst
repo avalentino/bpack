@@ -4,7 +4,7 @@ Release Notes
 bpack v1.2.0 (UNRELEASED)
 -------------------------
 
-* Drop support to Python 3.7. Now `bpack` requires Python >= 3.8.3.
+* Drop support to Python 3.7 and 3.8. Now `bpack` requires Python >= 3.9.
 * New 'full' installation option added to `pyproject.toml`.
 * No longer use deprecated syntax in sphinx configuration.
 * Improved documentation and fixed typos.
@@ -13,6 +13,8 @@ bpack v1.2.0 (UNRELEASED)
 * New functions:
   - :func:`bpack.typing.type_params_to_str`
   - :func:`bpack.descriptors.flat_fields_iterator`
+* New :mod:`bpack.tools.codegen` module. It includes tool to generate flat
+  binary record descriptors starting from nested ones.
 
 .. _flake8: https://github.com/pycqa/flake8
 .. _PyPy3: https://www.pypy.org
