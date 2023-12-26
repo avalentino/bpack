@@ -6,6 +6,7 @@ extend-ignore = E203,W503
 extend-select = W504
 per-file-ignores =
     */tests/test_*.py: D
+    */tests/data/*.py: D,F821
     bpack/utils.py: D103
 statistics = True
 count = True

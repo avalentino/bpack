@@ -31,7 +31,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    'typing-extensions; python_version < "3.9"',
+    "typing-extensions; python_version < '3.9'",
 ]
 dynamic = ["version"]
 
@@ -69,6 +69,7 @@ addopts = "--ignore=examples/"
 [tool.black]
 line-length = 79
 # target-version = ['py311']
+extend-exclude = "bpack/tests/data"
 
 
 [tool.isort]
@@ -80,5 +81,6 @@ use_parentheses = true
 line_length = 79
 
 
-# [tool.pydocstyle]
+[tool.pydocstyle]
+match-dir='[^\.d].*'
 # add-ignore = ["D105", "D107"]
