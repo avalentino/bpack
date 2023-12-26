@@ -10,10 +10,9 @@ from typing import Optional, Union
 from dataclasses import MISSING
 
 import bpack
-from bpack.typing import type_params_to_str
 from bpack.codecs import has_codec, get_codec_type, Codec
+from bpack.typing import type_params_to_str
 from bpack.descriptors import flat_fields_iterator, METADATA_KEY
-
 
 __all__ = [
     "FlatDescriptorCodeGenerator",
@@ -45,14 +44,30 @@ def method_or_property(x):
 
 
 class FlatDescriptorCodeGenerator:
-    """Source code generator for flat binary data descriptors."""
+    """Source code generator for flat binary data descriptors.
+
+    Generate the Python source code of a flat binary record descriptor
+    equivalent to a nested one provided as input.
+    """
 
     def __init__(
-            self,
-            descriptor,
-            name: Optional[str] = None,
-            indent: Union[int, str] = "    ",
+        self,
+        descriptor,
+        name: Optional[str] = None,
+        indent: Union[int, str] = "    ",
     ):
+        """Initialize a `FlatDescriptorCodeGenerator` instance.
+
+        Initialization arguments:
+
+        :param descriptor:
+            binary record descriptor (possibly nested)
+        :param name:
+            class name to be used for the generated flat record descriptor
+        :param indent:
+            string of number of blanks to be used for the indentation in the
+            generated code
+        """
         self._indent = " " * indent if isinstance(indent, int) else indent
         self._lines = []
         self._imports = collections.defaultdict(set)
@@ -163,7 +178,8 @@ class FlatDescriptorCodeGenerator:
             iter_descriptor_types(descriptor), [descriptor]
         ):
             targets = {
-                k: v for k, v in inspect.getmembers(klass, method_or_property)
+                k: v
+                for k, v in inspect.getmembers(klass, method_or_property)
                 if not k.startswith("_")
             }
             targets.pop("tobytes", None)
@@ -194,6 +210,12 @@ class FlatDescriptorCodeGenerator:
         return import_lines
 
     def get_code(self, imports: bool = False):
+        """Generate the Python source code.
+
+        By default only the code for the binary record descriptor is generated.
+        If the `imports` is set to `True`, also the import statements for all
+        types used by the descriptor are included in the generated code.
+        """
         lines = []
         if imports:
             lines.extend(self._import_lines)
