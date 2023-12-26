@@ -53,7 +53,7 @@ Issues = "https://github.com/avalentino/bpack/issues"
 
 
 [tool.setuptools]
-packages = ["bpack", "bpack.tests"]
+packages = ["bpack", "bpack.tests", "bpack.tests.data"]
 # zip-safe = true
 # license-files = ["LICENSE"]
 
