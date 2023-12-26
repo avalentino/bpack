@@ -682,10 +682,11 @@ def flat_fields_iterator(descriptor, offset: int = 0) -> Iterator[Field]:
     The nested descriptors are replaced by their fields and the
     returned sequence of fields is *flat*.
 
-    .. note:: please note that in case of nested descriptors, the
-    returned fields are copy of the original ones, with the `offset`
-    attribute adjusted to the relative to the beginning of the root
-    descriptor.
+    .. note::
+
+        please note that in case of nested descriptors, the returned fields
+        are copy of the original ones, with the `offset` attribute adjusted
+        to the relative to the beginning of the root descriptor.
     """
     for field_ in bpack.fields(descriptor):
         fd = get_field_descriptor(field_)
