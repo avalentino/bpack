@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Binary data structures (un-)packing library"
 readme = {file = "README.rst", content-type = "text/x-rst"}
-requires-python = ">=3.8.3"
+requires-python = ">=3.9"
 keywords = [
     "binary",
     "struct",
@@ -29,9 +29,6 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering",
     "Topic :: Utilities",
-]
-dependencies = [
-    "typing-extensions; python_version < '3.9'",
 ]
 dynamic = ["version"]
 

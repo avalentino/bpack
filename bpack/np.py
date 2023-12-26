@@ -303,7 +303,7 @@ class BitUnpackParams(NamedTuple):
     mask: np.ndarray
 
 
-@functools.lru_cache  # @COPMPATIBILITY with Python 3.7
+@functools.lru_cache
 def _unpackbits_params(
     nbits: int,
     bits_per_sample: int,
@@ -427,7 +427,7 @@ def unsigned_to_signed(
     return out
 
 
-@functools.lru_cache  # @COMPATIBILITY: parenteses not needed in Python>=3.8
+@functools.lru_cache
 def make_unsigned_to_signed_lut(
     bits_per_sample: int,
     dtype=None,

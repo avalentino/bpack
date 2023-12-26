@@ -1,7 +1,15 @@
 """bpack support for type annotations."""
 
 import re
-from typing import NamedTuple, Optional, Type, Union
+from typing import (
+    Annotated,
+    NamedTuple,
+    Optional,
+    Type,
+    Union,
+    get_args,
+    get_origin,
+)
 
 # @COMPATIBILITY: available in Python 3.7 ... 3.11
 try:
@@ -11,12 +19,6 @@ except ImportError:
     def _tp_cache(x):
         return x
 
-
-# @COMPATIBILITY: Python < 3.9
-try:  # pragma: no cover
-    from typing_extensions import Annotated, get_args, get_origin
-except ImportError:  # pragma: no cover
-    from typing import Annotated, get_args, get_origin
 
 from .enums import EByteOrder
 
