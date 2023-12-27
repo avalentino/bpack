@@ -48,6 +48,7 @@ def method_or_property(x):
 @functools.cache
 def _is_stdlib_module(module: str):
     import sys
+
     module = module.split(".", 1)[0]
     # @COMPATIBILITY: new in Python 3.10
     if hasattr(sys, "stdlib_module_names"):
@@ -55,6 +56,7 @@ def _is_stdlib_module(module: str):
     else:
         import pathlib
         import sysconfig
+
         platstdlib = pathlib.Path(sysconfig.get_path("platstdlib"))
         return bool(platstdlib.glob(f"{module}*"))
 
@@ -120,8 +122,8 @@ class FlatDescriptorCodeGenerator:
 
         byteorder = bpack.byteorder(descriptor).name
         if bpack.byteorder(descriptor) != bpack.EByteOrder.DEFAULT:
-            descriptor_args.append(f"byteorder=EByteorder.{byteorder}")
-            self._imports["bpack"].add("EByteorder")
+            descriptor_args.append(f"byteorder=EByteOrder.{byteorder}")
+            self._imports["bpack"].add("EByteOrder")
 
         # TODO: bitorder
 
@@ -342,7 +344,7 @@ class FlatDescriptorCodeGenerator:
         else:
             mode = black.Mode(
                 target_versions={black.TargetVersion.PY311},
-                line_length=line_length
+                line_length=line_length,
             )
             code = black.format_str(code, mode=mode)
 
