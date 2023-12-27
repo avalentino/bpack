@@ -4,6 +4,8 @@ import enum
 import typing
 import inspect
 import textwrap
+import warnings
+import functools
 import itertools
 import collections
 from typing import Optional, Union
@@ -43,6 +45,31 @@ def method_or_property(x):
     return inspect.isfunction(x) or inspect.isdatadescriptor(x)
 
 
+@functools.cache
+def _is_stdlib_module(module: str):
+    import sys
+    module = module.split(".", 1)[0]
+    # @COMPATIBILITY: new in Python 3.10
+    if hasattr(sys, "stdlib_module_names"):
+        return module in sys.stdlib_module_names
+    else:
+        import pathlib
+        import sysconfig
+        platstdlib = pathlib.Path(sysconfig.get_path("platstdlib"))
+        return bool(platstdlib.glob(f"{module}*"))
+
+
+def _classify_modules(modules):
+    stdlib = []
+    others = []
+    for module in modules:
+        if _is_stdlib_module(module):
+            stdlib.append(module)
+        else:
+            others.append(module)
+    return stdlib, others
+
+
 class FlatDescriptorCodeGenerator:
     """Source code generator for flat binary data descriptors.
 
@@ -69,16 +96,15 @@ class FlatDescriptorCodeGenerator:
             generated code
         """
         self._indent = " " * indent if isinstance(indent, int) else indent
-        self._lines = []
-        self._imports = collections.defaultdict(set)
+        self._filed_names = set()
+        self._imports: dict = collections.defaultdict(set)
         self._imports[None].add("bpack")
-        self._import_lines = []
+        self._lines = []
 
         self._setup_class_declaration(descriptor, name)
         self._setup_fields(descriptor)
         self._lines.append("")
         self._setup_methods(descriptor)
-        self._import_lines.extend(self._get_imports())
 
     def _setup_class_declaration(self, descriptor, name: Optional[str] = None):
         if has_codec(descriptor):
@@ -169,18 +195,23 @@ class FlatDescriptorCodeGenerator:
 
             auto_offset = offset + size
 
+            self._filed_names.add(fld.name)
             self._lines.append(
                 f"{self._indent}{fld.name}: {typestr}{field_str}"
             )
 
     def _setup_methods(self, descriptor):
+        global_ctx = vars(inspect.getmodule(descriptor))
+
         for klass in itertools.chain(
             iter_descriptor_types(descriptor), [descriptor]
         ):
+            local_ctx = vars(klass)
+
             targets = {
                 k: v
                 for k, v in inspect.getmembers(klass, method_or_property)
-                if not k.startswith("_")
+                if not k.startswith("__")
             }
             targets.pop("tobytes", None)
             targets.pop("frombytes", None)
@@ -193,23 +224,99 @@ class FlatDescriptorCodeGenerator:
                     textwrap.indent(inspect.getsource(method), "")
                 )
 
-    def _get_imports(self):
+                annotations = inspect.get_annotations(method)
+                for var in annotations.values():
+                    module = inspect.getmodule(var)
+                    if module is not None:
+                        self._imports[module.__name__].add(var.__name__)
+                    else:
+                        warnings.warn(
+                            f"(annotations) unable to determine the module of "
+                            f"{var!r}"
+                        )
+
+                variables = inspect.getclosurevars(method)
+                for var_type in ("nonlocals", "globals"):
+                    for name, var in getattr(variables, var_type).items():
+                        try:
+                            name = (
+                                var if isinstance(var, str) else var.__name__
+                            )
+                        except AttributeError:
+                            module = descriptor.__module__
+                            self._imports[module].add(name)
+                        else:
+                            module = inspect.getmodule(var)
+                            if module is not None:
+                                if module.__name__ == name:
+                                    self._imports[None].add(name)
+                                else:
+                                    self._imports[module.__name__].add(name)
+                            elif name in global_ctx:
+                                self._imports[descriptor.__module__].add(name)
+                            elif name not in local_ctx:
+                                warnings.warn(
+                                    f"({var_type}) unable to determine the "
+                                    f"module of {name!r}"
+                                )
+
+    def _get_classified_imports(self):
+        if self._imports.get(None):
+            stdlib, others = _classify_modules(self._imports[None])
+        else:
+            stdlib = others = None
+
+        from_stdlib, from_others = _classify_modules(
+            key for key in self._imports if key and key != "builtins"
+        )
+
+        return stdlib, others, from_stdlib, from_others
+
+    def _get_import_lines(
+        self, stdlib, others, from_stdlib, from_others, line_length: int = 80
+    ):
         import_lines = []
 
-        if self._imports.get(None):
-            self._import_lines.extend(
-                f"import {name}" for name in sorted(self._imports[None])
+        if stdlib:
+            import_lines.extend(
+                f"import {name}" for name in sorted(sorted(stdlib), key=len)
             )
+        if from_stdlib:
+            for key in sorted(sorted(from_stdlib), key=len):
+                values = sorted(self._imports[key])
+                s = f"from {key} import {', '.join(values)}"
+                if len(s) < line_length:
+                    import_lines.append(s)
+                else:
+                    import_lines.append(f"from {key} import (")
+                    import_lines.extend(
+                        f"{self._indent}{value}," for value in values
+                    )
+                    import_lines.append(")")
 
-        import_lines.extend(
-            f"from {key} import {', '.join(sorted(values))}"
-            for key, values in self._imports.items()
-            if key and key != "builtins"
-        )
+        if others or from_others:
+            import_lines.append("")
+
+        if others:
+            import_lines.extend(
+                f"import {name}" for name in sorted(sorted(others), key=len)
+            )
+        if from_others:
+            for key in sorted(sorted(from_others), key=len):
+                values = sorted(self._imports[key])
+                s = f"from {key} import {', '.join(values)}"
+                if len(s) < line_length:
+                    import_lines.append(s)
+                else:
+                    import_lines.append(f"from {key} import (")
+                    import_lines.extend(
+                        f"{self._indent}{value}," for value in values
+                    )
+                    import_lines.append(")")
 
         return import_lines
 
-    def get_code(self, imports: bool = False):
+    def get_code(self, imports: bool = False, line_length: int = 80):
         """Generate the Python source code.
 
         By default only the code for the binary record descriptor is generated.
@@ -218,9 +325,25 @@ class FlatDescriptorCodeGenerator:
         """
         lines = []
         if imports:
-            lines.extend(self._import_lines)
+            import_lines = self._get_import_lines(
+                *self._get_classified_imports(), line_length=line_length
+            )
+            lines.extend(import_lines)
             lines.append("")
             lines.append("")
         lines.extend(self._lines)
 
-        return "\n".join(lines)
+        code = "\n".join(lines)
+
+        try:
+            import black
+        except ImportError:
+            pass
+        else:
+            mode = black.Mode(
+                target_versions={black.TargetVersion.PY311},
+                line_length=line_length
+            )
+            code = black.format_str(code, mode=mode)
+
+        return code

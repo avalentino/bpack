@@ -37,8 +37,9 @@ dynamic = ["version"]
 bs = ["bitstruct"]
 ba = ["bitarray>=1.5.1"]
 np = ["numpy"]
+codegen = ["black"]
 test = ["pytest", "bpack[bs]", "bpack[ba]", "bpack[np]"]
-full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[test]"]
+full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[codegen]", "bpack[test]"]
 
 
 [project.urls]
