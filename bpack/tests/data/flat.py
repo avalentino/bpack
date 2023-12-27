@@ -7,7 +7,7 @@ from bpack.enums import EByteOrder
 class Flat:
     """Docstring."""
 
-    magic: T["u24"] = b'abc'
+    magic: T["u24"] = b"abc"
     count: T["u8"] = 0
     byteorder: T["S8"] = EByteOrder.NATIVE
     field_a_1: T["u3"] = 0

@@ -16,6 +16,7 @@ def test_flat_descriptor_code_generator():
         Nested, name="Flat"
     )
     code = codegen.get_code()
+    code = code.replace("b'abc'", 'b"abc"')
     assert code.strip() == inspect.getsource(Flat).strip()
 
 
@@ -24,4 +25,5 @@ def test_flat_descriptor_code_generator_with_includes():
         Nested, name="Flat"
     )
     code = codegen.get_code(imports=True)
+    code = code.replace("b'abc'", 'b"abc"')
     assert code.strip() == flat_data.strip()
