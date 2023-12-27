@@ -14,7 +14,8 @@ bpack v1.2.0 (UNRELEASED)
   - :func:`bpack.typing.type_params_to_str`
   - :func:`bpack.descriptors.flat_fields_iterator`
 * New :mod:`bpack.tools.codegen` module. It includes tool to generate flat
-  binary record descriptors starting from nested ones.
+  binary record descriptors starting from nested ones
+  (requires Python >= 3.10).
 
 .. _flake8: https://github.com/pycqa/flake8
 .. _PyPy3: https://www.pypy.org
