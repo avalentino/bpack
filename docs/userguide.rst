@@ -603,7 +603,7 @@ The result is directly mapped into Python enum values: ``EColor:BLACK`` and
       @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
       class Record:
          field: EType = bpack.field(size=8, default=EType.A)  # ERROR!
-   
+
    The above code will result in the following error::
 
       1 @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)

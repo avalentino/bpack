@@ -1,13 +1,14 @@
-typing-extensions # ; python_version < "3.9"
-bitstruct
-numpy
 bitarray >= 1.5.1
+bitstruct
+flake8
+isort
+numpy
+pydocstyle
 pytest
 pytest-cov
-tox >= 4
-flake8
+python-build
 sphinx
 sphinx_rtd_theme
 sphinxcontrib-spelling
-build
+tox >= 4
 twine

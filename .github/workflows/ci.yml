@@ -24,7 +24,7 @@ jobs:
           submodules: 'true'
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
@@ -33,13 +33,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build twine
 
-      - name: Build package
+      - name: Build the package
         run: |
           python -m build
           python -m twine check dist/*
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: |
@@ -57,13 +57,13 @@ jobs:
 
     steps:
       - name: Get distribution
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.8
         with:
           name: dist
           path: dist
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 

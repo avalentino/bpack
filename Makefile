@@ -28,7 +28,7 @@ dist:
 	$(PYTHON) -m twine check dist/*.tar.gz dist/*.whl
 
 check:
-	$(PYTHON) -m pytest
+	$(PYTHON) -m pytest $(TARGET)
 
 fullcheck:
 	$(PYTHON) -m tox run
@@ -42,6 +42,7 @@ lint:
 	$(PYTHON) -m isort --check $(TARGET)
 	$(PYTHON) -m black --check $(TARGET)
 	# $(PYTHON) -m mypy --check-untyped-defs --ignore-missing-imports $(TARGET)
+	# ruff check $(TARGET)
 
 api:
 	$(RM) -r docs/api
@@ -50,18 +51,22 @@ api:
 	  $(TARGET) $(TARGET)/tests
 
 docs:
+	mkdir -p docs/_static
 	$(MAKE) -C docs html
 
 clean:
 	$(RM) -r *.*-info build
 	find . -name __pycache__ -type d -exec $(RM) -r {} +
 	# $(RM) -r __pycache__ */__pycache__ */*/__pycache__ */*/*/__pycache__
-	$(RM) $(TARGET)/_*.c $(TARGET)/*.so $(TARGET)/*.o
-	if [ -f docs/makefile ] ; then $(MAKE) -C docs clean; fi
+	$(RM) $(TARGET)/*.c $(TARGET)/*.cpp $(TARGET)/*.so $(TARGET)/*.o
+	if [ -f docs/Makefile ] ; then $(MAKE) -C docs clean; fi
 	$(RM) -r docs/_build
 
 cleaner: clean
-	$(RM) -r .coverage htmlcov .pytest_cache .mypy_cache .tox .ipynb_checkpoints
+	$(RM) -r .coverage htmlcov
+	$(RM) -r .pytest_cache .tox
+	$(RM) -r .mypy_cache .ruff_cache
+	$(RM) -r .ipynb_checkpoints
 
 distclean: cleaner
 	$(RM) -r dist

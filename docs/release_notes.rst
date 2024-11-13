@@ -36,7 +36,7 @@ bpack v1.1.0 (15/04/2023)
   are now supported.
 * Use uppercase enums in `s1isp.py` example.
 * Improved docstrings in  :mod:`bpack.np`.
-* Fixed several typos. 
+* Fixed several typos.
 
 
 bpack v1.0.0 (05/02/2023)

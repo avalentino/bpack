@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "bpack"
-copyright = "2020-2023, Antonio Valentino"  # noqa: D100
+copyright = "2020-2024, Antonio Valentino"  # noqa: D100
 author = "Antonio Valentino"
 
 # The full version, including alpha/beta/rc tags
