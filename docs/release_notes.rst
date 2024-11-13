@@ -5,6 +5,13 @@ bpack v1.2.0 (UNRELEASED)
 -------------------------
 
 * Drop support to Python 3.7 and 3.8. Now `bpack` requires Python >= 3.9.
+* Add support to Python 3.13.
+* The internal :func:`bpack.utils.create_fn` functioon has been removed
+  and replaced by the new :func:`bpack.utils.add_function_to_class`
+  internal function.
+  Since the change is on utility functions that are considered internal and
+  not part of the public package API, this is not considered a backward
+  incompatible change.
 * New 'full' installation option added to `pyproject.toml`.
 * No longer use deprecated syntax in sphinx configuration.
 * Improved documentation and fixed typos.

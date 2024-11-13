@@ -1,4 +1,4 @@
-"""Utility functions and classes."""
+"""Internal utility functions and classes."""
 
 import enum
 import typing
@@ -29,7 +29,8 @@ def classdecorator(func):
     return wrapper
 
 
-def create_fn(
+def add_function_to_class(
+    cls,
     name,
     args,
     body,
@@ -37,16 +38,35 @@ def create_fn(
     globals=None,  # noqa: A002
     locals=None,  # noqa: A002
     return_type=dataclasses.MISSING,
+    is_classmethod: bool = False,
 ):
-    """Create a function object."""
-    return dataclasses._create_fn(
-        name,
-        args,
-        body,
-        globals=globals,
-        locals=locals,
-        return_type=return_type,
-    )
+    """Create a function object and add it to the specified class."""
+    if hasattr(dataclasses, "_create_fn"):
+        func = dataclasses._create_fn(
+            name,
+            args,
+            body,
+            globals=globals,
+            locals=locals,
+            return_type=return_type,
+        )
+        if is_classmethod:
+            func = classmethod(func)
+        dataclasses._set_new_attribute(cls, name, func)
+    else:
+        import textwrap
+
+        body = textwrap.indent("\n".join(body), "    ").splitlines(True)
+        func_builder = dataclasses._FuncBuilder(globals)
+        func_builder.add_fn(
+            name,
+            args,
+            body,
+            locals=locals,
+            return_type=return_type,
+            decorator="@classmethod" if is_classmethod else None,
+        )
+        func_builder.add_fns_to_class(cls)
 
 
 def set_new_attribute(cls, name, value):

@@ -86,21 +86,21 @@ def make_codec_decorator(codec_type: Type[CodecType]):
         bpack.utils.set_new_attribute(cls, CODEC_ATTR_NAME, codec_)
 
         if isinstance(codec_, Decoder):
-            decode_func = bpack.utils.create_fn(
+            bpack.utils.add_function_to_class(
+                cls,
                 name="frombytes",
                 args=("cls", "data"),
                 body=[f"return cls.{CODEC_ATTR_NAME}.decode(data)"],
+                is_classmethod=True,
             )
-            decode_func = classmethod(decode_func)
-            bpack.utils.set_new_attribute(cls, "frombytes", decode_func)
 
         if isinstance(codec_, Encoder):
-            encode_func = bpack.utils.create_fn(
+            bpack.utils.add_function_to_class(
+                cls,
                 name="tobytes",
                 args=("self",),
                 body=[f"return self.{CODEC_ATTR_NAME}.encode(self)"],
             )
-            bpack.utils.set_new_attribute(cls, "tobytes", encode_func)
 
         return cls
 
