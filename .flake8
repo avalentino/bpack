@@ -19,7 +19,7 @@ per-file-ignores =
     bpack/utils.py: D103
 statistics = True
 count = True
-# extend-exclude = packagename/subpackage/*
+extend-exclude = examples/*
 
 # flake8-cognitive-complexity
 # max-cognitive-complexity = 7  # default

@@ -19,7 +19,7 @@ copyright = "2020-2024, Antonio Valentino"  # noqa: D100
 author = "Antonio Valentino"
 
 # The full version, including alpha/beta/rc tags
-import bpack
+import bpack  # noqa: E402
 
 release = bpack.__version__
 

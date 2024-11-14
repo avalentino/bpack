@@ -81,7 +81,7 @@ line_length = 79
 
 
 [tool.pydocstyle]
-match-dir='[^\.d].*'
+match-dir='bpack|tools'
 match='(?!test_).*\.py'
 # add-ignore = ["D105", "D107"]
 
