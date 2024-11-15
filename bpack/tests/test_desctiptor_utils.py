@@ -2,7 +2,6 @@
 
 import dataclasses
 import collections.abc
-from typing import List
 
 import pytest
 
@@ -87,7 +86,7 @@ def test_calcsize():
     class Record:
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=8, default=1 / 3)
-        field_3: List[int] = bpack.field(size=1, default=0, repeat=4)
+        field_3: list[int] = bpack.field(size=1, default=0, repeat=4)
 
     assert bpack.baseunits(Record) is EBaseUnits.BYTES
     assert bpack.calcsize(Record) == 16
@@ -102,7 +101,7 @@ def test_calcsize():
         field_1: int = bpack.field(size=4, default=0)
         field_2: float = bpack.field(size=16, default=1 / 3)
         field_3: int = bpack.field(size=4, default=3)
-        field_4: List[int] = bpack.field(size=4, default=0, repeat=2)
+        field_4: list[int] = bpack.field(size=4, default=0, repeat=2)
 
     assert bpack.baseunits(Record) is EBaseUnits.BITS
     assert bpack.calcsize(Record) == 4 * 8

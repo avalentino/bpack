@@ -6,7 +6,8 @@ import math
 import types
 import warnings
 import dataclasses
-from typing import Iterator, Optional, Sequence, Type, Union
+from typing import Optional, Union
+from collections.abc import Iterator, Sequence
 
 import bpack.utils
 import bpack.typing
@@ -61,15 +62,16 @@ def _resolve_type(type_):
     not-annotated ones.
     """
     if bpack.utils.is_sequence_type(type_):
+        etype = bpack.utils.effective_type(type_)
         try:
-            etype = bpack.utils.effective_type(type_)
+            # this is fpr typing.List and typing.Sequence
             rtype = copy.copy(type_)
             rtype.__args__ = (etype,)
         except AttributeError as exc:
             # if the `list[T]` syntax is used then `type_.__args__` is readonly
             if "readonly" not in str(exc):
                 raise
-            rtype = type_
+            rtype = type_.__class_getitem__(etype)
     elif bpack.typing.is_annotated(type_):
         rtype = bpack.utils.effective_type(type_)
     else:
@@ -87,7 +89,7 @@ class BinFieldDescriptor:
 
     """
 
-    type: Optional[Type] = None  # noqa: A003
+    type: Optional[type] = None  # noqa: A003
     size: Optional[int] = None  #: item size
     offset: Optional[int] = None
     signed: Optional[bool] = None
@@ -197,7 +199,7 @@ class BinFieldDescriptor:
             return False
         return True
 
-    def update_from_type(self, type_: Type):
+    def update_from_type(self, type_: type):
         """Update the field descriptor according to the specified type."""
         if self.type is not None:
             raise TypeError("the type attribute is already set")

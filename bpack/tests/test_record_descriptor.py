@@ -1,7 +1,8 @@
 """Test bpack (record) descriptors."""
 
+import typing
 import dataclasses
-from typing import List, Sequence, Tuple
+from collections.abc import Sequence
 
 import pytest
 
@@ -226,7 +227,7 @@ def test_inconsistent_field_type_and_signed():
 def test_repeat_typing():
     @bpack.descriptor
     class Record:
-        field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+        field_1: typing.List[int] = bpack.field(size=4, default=0, repeat=2)
         field_2: float = bpack.field(size=8, default=1 / 3)
 
     assert bpack.calcsize(Record()) == 16
@@ -246,7 +247,7 @@ def test_no_repeat_typing():
 
         @bpack.descriptor
         class Record:
-            field_1: List[int] = bpack.field(size=4, default=0)
+            field_1: typing.List[int] = bpack.field(size=4, default=0)
             field_2: float = bpack.field(size=8, default=1 / 3)
 
 
@@ -305,7 +306,9 @@ class TestExplicitSize:
 
             @bpack.descriptor(size=12)
             class Record:
-                field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+                field_1: typing.List[int] = bpack.field(
+                    size=4, default=0, repeat=2
+                )
                 field_2: float = bpack.field(size=8, default=1 / 3)
 
     @staticmethod
@@ -324,7 +327,7 @@ class TestExplicitSize:
             @bpack.descriptor(size=20)
             class Record:
                 field_1: int = bpack.field(size=4, default=0)
-                field_2: List[float] = bpack.field(
+                field_2: typing.List[float] = bpack.field(
                     size=8, default=1 / 3, offset=8, repeat=2
                 )
 
@@ -395,7 +398,9 @@ class TestSize:
     def test_len_with_repeat_01_typing():
         @bpack.descriptor
         class Record:
-            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
+            field_1: typing.List[int] = bpack.field(
+                size=4, default=0, repeat=2
+            )
             field_2: float = bpack.field(size=8, default=1 / 3)
 
         assert bpack.calcsize(Record) == 16
@@ -413,8 +418,12 @@ class TestSize:
     def test_len_with_repeat_02_typing():
         @bpack.descriptor
         class Record:
-            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
-            field_2: List[float] = bpack.field(size=8, default=1 / 3, repeat=2)
+            field_1: typing.List[int] = bpack.field(
+                size=4, default=0, repeat=2
+            )
+            field_2: typing.List[float] = bpack.field(
+                size=8, default=1 / 3, repeat=2
+            )
 
         assert bpack.calcsize(Record) == 24
 
@@ -431,10 +440,12 @@ class TestSize:
     def test_len_with_repeat_and_offset_01_typing():
         @bpack.descriptor
         class Record:
-            field_1: List[int] = bpack.field(
+            field_1: typing.List[int] = bpack.field(
                 size=4, default=0, repeat=2, offset=6
             )
-            field_2: List[float] = bpack.field(size=8, default=1 / 3, repeat=2)
+            field_2: typing.List[float] = bpack.field(
+                size=8, default=1 / 3, repeat=2
+            )
 
         assert bpack.calcsize(Record) == 30
 
@@ -453,8 +464,10 @@ class TestSize:
     def test_len_with_repeat_and_offset_02_typing():
         @bpack.descriptor
         class Record:
-            field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
-            field_2: List[float] = bpack.field(
+            field_1: typing.List[int] = bpack.field(
+                size=4, default=0, repeat=2
+            )
+            field_2: typing.List[float] = bpack.field(
                 size=8, default=1 / 3, repeat=2, offset=14
             )
 
@@ -477,8 +490,10 @@ class TestSize:
 
             @bpack.descriptor
             class Record:
-                field_1: List[int] = bpack.field(size=4, default=0, repeat=2)
-                field_2: List[float] = bpack.field(
+                field_1: typing.List[int] = bpack.field(
+                    size=4, default=0, repeat=2
+                )
+                field_2: typing.List[float] = bpack.field(
                     size=8, default=1 / 3, repeat=2, offset=6
                 )
 
@@ -497,10 +512,18 @@ class TestSize:
 def test_sequence_type_typing():
     @bpack.descriptor
     class Record:
-        field_1: List[int] = bpack.field(size=1, repeat=4)
+        field_1: list[int] = bpack.field(size=1, repeat=4)
 
     field_1 = bpack.fields(Record)[0]
-    assert field_1.type is List[int]
+    assert field_1.type == list[int]
+    assert bpack.calcsize(Record) == 4
+
+    @bpack.descriptor
+    class Record:
+        field_1: typing.List[int] = bpack.field(size=1, repeat=4)
+
+    field_1 = bpack.fields(Record)[0]
+    assert field_1.type is typing.List[int]
     assert bpack.calcsize(Record) == 4
 
     @bpack.descriptor
@@ -508,13 +531,19 @@ def test_sequence_type_typing():
         field_1: Sequence[int] = bpack.field(size=1, repeat=4)
 
     field_1 = bpack.fields(Record)[0]
-    assert field_1.type is Sequence[int]
+    assert field_1.type == Sequence[int]
 
     with pytest.raises(TypeError):
 
         @bpack.descriptor
         class Record:
-            field_1: Tuple[int, int] = bpack.field(size=1, repeat=2)
+            field_1: tuple[int, int] = bpack.field(size=1, repeat=2)
+
+    with pytest.raises(TypeError):
+
+        @bpack.descriptor
+        class Record:
+            field_1: typing.Tuple[int, int] = bpack.field(size=1, repeat=2)
 
     with pytest.raises(TypeError):
 
@@ -537,7 +566,7 @@ def test_sequence_type():
         field_1: Sequence[int] = bpack.field(size=1, repeat=4)
 
     field_1 = bpack.fields(Record)[0]
-    assert field_1.type is Sequence[int]
+    assert field_1.type == Sequence[int]
 
     with pytest.raises(TypeError):
 
