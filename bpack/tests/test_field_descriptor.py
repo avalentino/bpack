@@ -2,7 +2,7 @@
 
 import sys
 import enum
-from typing import List
+import typing
 
 import pytest
 
@@ -74,13 +74,17 @@ class TestRecordFields:
         class Record:
             field_1: int = bpack.field(size=4, default=0, signed=True)
             field_2: float = bpack.field(size=8, default=1 / 3)
-            field_3: List[int] = bpack.field(size=1, default=1, repeat=1)
+            field_3: list[int] = bpack.field(size=1, default=1, repeat=1)
+            field_4: typing.List[int] = bpack.field(
+                size=1, default=1, repeat=1
+            )
 
         # name, type, size, offset, repeat
         field_data = [
             ("field_1", int, 4, 0, True, None),
             ("field_2", float, 8, 4, None, None),
-            ("field_3", List[int], 1, 12, None, 1),
+            ("field_3", list[int], 1, 12, None, 1),
+            ("field_4", typing.List[int], 1, 13, None, 1),
         ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
@@ -102,13 +106,17 @@ class TestRecordFields:
                 size=4, offset=1, default=0, signed=False
             )
             field_2: float = bpack.field(size=8, default=1 / 3)
-            field_3: List[int] = bpack.field(size=1, default=1, repeat=1)
+            field_3: list[int] = bpack.field(size=1, default=1, repeat=1)
+            field_4: typing.List[int] = bpack.field(
+                size=1, default=1, repeat=1
+            )
 
         # name, type, size, offset, repeat
         field_data = [
             ("field_1", int, 4, 1, False, None),
             ("field_2", float, 8, 5, None, None),
-            ("field_3", List[int], 1, 13, None, 1),
+            ("field_3", list[int], 1, 13, None, 1),
+            ("field_4", typing.List[int], 1, 14, None, 1),
         ]
 
         for field_, data in zip(bpack.fields(Record), field_data):
@@ -315,7 +323,12 @@ class TestFieldDescriptor:
         descr = bpack.descriptors.BinFieldDescriptor(int, 1, 2, True)
         descr.validate()
 
-        descr = bpack.descriptors.BinFieldDescriptor(List[int], 1, 2, True, 1)
+        descr = bpack.descriptors.BinFieldDescriptor(list[int], 1, 2, True, 1)
+        descr.validate()
+
+        descr = bpack.descriptors.BinFieldDescriptor(
+            typing.List[int], 1, 2, True, 1
+        )
         descr.validate()
 
     @staticmethod
@@ -402,7 +415,15 @@ class TestFieldDescriptor:
             descr.validate()
 
         descr = bpack.descriptors.BinFieldDescriptor(
-            List[int], 1, 2, signed=True, repeat=2
+            list[int], 1, 2, signed=True, repeat=2
+        )
+        descr.validate()
+        descr.repeat = 0
+        with pytest.raises(ValueError):
+            descr.validate()
+
+        descr = bpack.descriptors.BinFieldDescriptor(
+            typing.List[int], 1, 2, signed=True, repeat=2
         )
         descr.validate()
         descr.repeat = 0
@@ -422,13 +443,29 @@ class TestFieldDescriptor:
         assert not descr.is_sequence_type()
         assert not descr.is_enum_type()
 
-        descr = bpack.descriptors.BinFieldDescriptor(List[int], 1, repeat=10)
+        descr = bpack.descriptors.BinFieldDescriptor(list[int], 1, repeat=10)
         descr.validate()
         assert descr.is_int_type()
         assert descr.is_sequence_type()
         assert not descr.is_enum_type()
 
-        descr = bpack.descriptors.BinFieldDescriptor(List[float], 1, repeat=10)
+        descr = bpack.descriptors.BinFieldDescriptor(list[float], 1, repeat=10)
+        descr.validate()
+        assert not descr.is_int_type()
+        assert descr.is_sequence_type()
+        assert not descr.is_enum_type()
+
+        descr = bpack.descriptors.BinFieldDescriptor(
+            typing.List[int], 1, repeat=10
+        )
+        descr.validate()
+        assert descr.is_int_type()
+        assert descr.is_sequence_type()
+        assert not descr.is_enum_type()
+
+        descr = bpack.descriptors.BinFieldDescriptor(
+            typing.List[float], 1, repeat=10
+        )
         descr.validate()
         assert not descr.is_int_type()
         assert descr.is_sequence_type()
@@ -507,18 +544,35 @@ class TestAnnotatedType:
         assert fields["field_5"].repeat is None
 
     @staticmethod
+    def test_list_with_annotated_type_typing():
+        typestr = "i4"
+
+        @bpack.descriptor
+        class Record:
+            field_1: typing.List[bpack.T[typestr]] = bpack.field(repeat=2)
+
+        field = bpack.fields(Record)[0]
+        assert field.type == typing.List[bpack.T[typestr]]
+
+        field_descr = get_field_descriptor(field)
+        assert field_descr.type == typing.List[int]
+        assert field_descr.size == 4
+        assert field_descr.signed is True
+        assert field_descr.repeat == 2
+
+    @staticmethod
     def test_list_with_annotated_type():
         typestr = "i4"
 
         @bpack.descriptor
         class Record:
-            field_1: List[bpack.T[typestr]] = bpack.field(repeat=2)
+            field_1: list[bpack.T[typestr]] = bpack.field(repeat=2)
 
         field = bpack.fields(Record)[0]
-        assert field.type == List[bpack.T[typestr]]
+        assert field.type == list[bpack.T[typestr]]
 
         field_descr = get_field_descriptor(field)
-        assert field_descr.type == List[int]
+        assert field_descr.type == list[int]
         assert field_descr.size == 4
         assert field_descr.signed is True
         assert field_descr.repeat == 2

@@ -5,7 +5,7 @@ import typing
 import functools
 import dataclasses
 import collections.abc
-from typing import Type, Union
+from typing import Union
 
 from .typing import is_annotated, get_origin, get_args, Annotated
 
@@ -74,7 +74,7 @@ def set_new_attribute(cls, name, value):
     return dataclasses._set_new_attribute(cls, name, value)
 
 
-def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
+def sequence_type(type_: type, error: bool = False) -> Union[type, None]:
     """Return the sequence type associated to a typed sequence.
 
     The function return :class:`list` or :class:`tuple` if the input is
@@ -111,7 +111,7 @@ def sequence_type(type_: Type, error: bool = False) -> Union[Type, None]:
     return sequence_type_
 
 
-def is_sequence_type(type_: Type, error: bool = False) -> bool:
+def is_sequence_type(type_: type, error: bool = False) -> bool:
     """Return True if the input is an homogeneous typed sequence.
 
     Please note that fields annotated with :class:`typing.Tuple` are not
@@ -122,12 +122,12 @@ def is_sequence_type(type_: Type, error: bool = False) -> bool:
     return seq_type is not None
 
 
-def is_enum_type(type_: Type) -> bool:
+def is_enum_type(type_: type) -> bool:
     """Return True if the input is and :class:`enum.Enum`."""
     return get_origin(type_) is None and issubclass(type_, enum.Enum)
 
 
-def enum_item_type(enum_cls: Type[enum.Enum]) -> Type:
+def enum_item_type(enum_cls: type[enum.Enum]) -> type:
     """Return the type of the items of an enum.Enum.
 
     This function also checks that all items of an enum have the same
@@ -153,8 +153,8 @@ def enum_item_type(enum_cls: Type[enum.Enum]) -> Type:
 
 
 def effective_type(
-    type_: Union[Type, Type[enum.Enum], Type], keep_annotations: bool = False
-) -> Type:
+    type_: Union[type, type[enum.Enum], type], keep_annotations: bool = False
+) -> type:
     """Return the effective type.
 
     In case of enums or sequences return the item type.
@@ -172,7 +172,7 @@ def effective_type(
             etype, _ = get_args(type_)
     elif not issubclass(origin, typing.Sequence):
         etype = type_
-    elif issubclass(origin, typing.Tuple):
+    elif issubclass(origin, tuple):
         etype = type_
     else:
         # is a sequence
@@ -183,7 +183,7 @@ def effective_type(
     return etype
 
 
-def is_int_type(type_: Type) -> bool:
+def is_int_type(type_: type) -> bool:
     """Return true if the effective type is an integer."""
     if is_sequence_type(type_):
         etype = effective_type(type_)

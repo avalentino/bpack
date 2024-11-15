@@ -4,7 +4,7 @@ import sys
 import enum
 import struct
 import functools
-from typing import List, Sequence
+from collections.abc import Sequence
 
 import pytest
 
@@ -1166,7 +1166,7 @@ def test_decode_sequence(backend):
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
     class Record:
-        field_1: List[int] = bpack.field(size=size, repeat=repeat)
+        field_1: list[int] = bpack.field(size=size, repeat=repeat)
         field_2: Sequence[int] = bpack.field(size=size, repeat=repeat)
 
     ref_record = Record([3, 3], (4, 4))
@@ -1177,7 +1177,7 @@ def test_decode_sequence(backend):
     assert type(record.field_2) is tuple
 
     for field, sequence_type in zip(
-        bpack.fields(Record), (List[int], Sequence[int])
+        bpack.fields(Record), (list[int], Sequence[int])
     ):
         assert field.type == sequence_type
 
@@ -1208,7 +1208,7 @@ def test_encode_sequence(backend):
     @backend.encoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)
     class Record:
-        field_1: List[int] = bpack.field(size=size, repeat=repeat)
+        field_1: list[int] = bpack.field(size=size, repeat=repeat)
         field_2: Sequence[int] = bpack.field(size=size, repeat=repeat)
 
     record = Record([3, 3], (4, 4))

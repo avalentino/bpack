@@ -1,7 +1,7 @@
 """Base classes and utility functions for codecs."""
 
 import abc
-from typing import Callable, NamedTuple, Optional, Type, Union
+from typing import Callable, NamedTuple, Optional, Union
 
 import bpack.utils
 import bpack.descriptors
@@ -71,7 +71,7 @@ class Codec(Decoder, Encoder, abc.ABC):
 CodecType = Union[Decoder, Encoder, Codec]
 
 
-def make_codec_decorator(codec_type: Type[CodecType]):
+def make_codec_decorator(codec_type: type[CodecType]):
     """Generate a codec decorator for the input decoder class."""
 
     @bpack.utils.classdecorator
@@ -108,7 +108,7 @@ def make_codec_decorator(codec_type: Type[CodecType]):
 
 
 def has_codec(
-    descriptor, codec_type: Optional[Type[CodecType]] = None
+    descriptor, codec_type: Optional[type[CodecType]] = None
 ) -> bool:
     """Return True if the input descriptor has a codec attached.
 
@@ -148,7 +148,7 @@ def get_codec(descriptor) -> CodecType:
 
 
 # TODO: remove
-def get_codec_type(descriptor) -> Type[CodecType]:
+def get_codec_type(descriptor) -> type[CodecType]:
     """Return the type of the codec attached to the input descriptor."""
     codec_ = getattr(descriptor, CODEC_ATTR_NAME, None)
     if codec_ is not None:

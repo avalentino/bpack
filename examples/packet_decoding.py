@@ -19,7 +19,7 @@ class PacketDescriptor:
 
 def decode_packet(
     data: bytes, descr: PacketDescriptor
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     if descr.header_size > 0:
         headers = unpackbits(
             data,

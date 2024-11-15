@@ -1,15 +1,7 @@
 """bpack support for type annotations."""
 
 import re
-from typing import (
-    Annotated,
-    NamedTuple,
-    Optional,
-    Type,
-    Union,
-    get_args,
-    get_origin,
-)
+from typing import Annotated, NamedTuple, Optional, Union, get_args, get_origin
 
 # @COMPATIBILITY: available in Python 3.7 ... 3.11
 try:
@@ -30,7 +22,7 @@ _DTYPE_RE = re.compile(
 )
 
 
-FieldTypes = Type[Union[bool, int, float, complex, bytes, str]]
+FieldTypes = type[Union[bool, int, float, complex, bytes, str]]
 
 
 class TypeParams(NamedTuple):
@@ -246,7 +238,7 @@ class T:
         raise TypeError(f"Cannot subclass {cls.__module__}.{cls.__name__}")
 
 
-def is_annotated(type_: Type) -> bool:
+def is_annotated(type_: type) -> bool:
     """Return True if the input is an annotated numeric type.
 
     An *annotated numeric type* is assumed to be a :class:`typing.Annotated`

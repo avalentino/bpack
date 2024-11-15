@@ -73,6 +73,9 @@ def test_effective_type():
     assert bpack.utils.effective_type(None) is None
 
     for type_ in (
+        type[typing.Any],
+        tuple[int, float],
+        tuple[int],
         typing.Type[typing.Any],
         typing.Tuple[int, float],
         typing.Tuple[int],
@@ -107,6 +110,11 @@ def test_effective_enum():
 
 
 def test_effective_type_from_seq():
+    assert bpack.utils.effective_type(list[bool]) is bool
+    assert bpack.utils.effective_type(list[int]) is int
+    assert bpack.utils.effective_type(list[str]) is str
+    assert bpack.utils.effective_type(list[bytes]) is bytes
+    assert bpack.utils.effective_type(list[float]) is float
     assert bpack.utils.effective_type(typing.List[bool]) is bool
     assert bpack.utils.effective_type(typing.List[int]) is int
     assert bpack.utils.effective_type(typing.List[str]) is str
@@ -134,11 +142,19 @@ def test_effective_type_keep_annotations():
 
 
 def test_get_sequence_type():
+    type_ = list[int]
+    assert bpack.utils.sequence_type(type_) is list
+
     type_ = typing.List[int]
     assert bpack.utils.sequence_type(type_) is list
 
     type_ = typing.Sequence[int]
     assert bpack.utils.sequence_type(type_) is tuple
+
+    type_ = tuple[int, int]
+    assert bpack.utils.sequence_type(type_) is None
+    with pytest.raises(TypeError):
+        bpack.utils.sequence_type(type_, error=True)
 
     type_ = typing.Tuple[int, int]
     assert bpack.utils.sequence_type(type_) is None
@@ -148,12 +164,17 @@ def test_get_sequence_type():
     assert bpack.utils.sequence_type(list) is None
     assert bpack.utils.sequence_type(typing.List) is None
     assert bpack.utils.sequence_type(typing.Sequence) is None
+    assert bpack.utils.sequence_type(tuple) is None
     assert bpack.utils.sequence_type(typing.Tuple) is None
+    assert bpack.utils.sequence_type(type[typing.Any]) is None
     assert bpack.utils.sequence_type(typing.Type[typing.Any]) is None
 
 
 def test_get_sequence_type_from_annotated_type():
     typestr = "i8"
+
+    type_ = list[bpack.T[typestr]]
+    assert bpack.utils.sequence_type(type_) is list
 
     type_ = typing.List[bpack.T[typestr]]
     assert bpack.utils.sequence_type(type_) is list
@@ -163,11 +184,19 @@ def test_get_sequence_type_from_annotated_type():
 
 
 def test_is_sequence_type():
+    type_ = list[int]
+    assert bpack.utils.is_sequence_type(type_)
+
     type_ = typing.List[int]
     assert bpack.utils.is_sequence_type(type_)
 
     type_ = typing.Sequence[int]
     assert bpack.utils.is_sequence_type(type_)
+
+    type_ = tuple[int, int]
+    assert not bpack.utils.is_sequence_type(type_)
+    with pytest.raises(TypeError):
+        bpack.utils.is_sequence_type(type_, error=True)
 
     type_ = typing.Tuple[int, int]
     assert not bpack.utils.is_sequence_type(type_)
@@ -177,11 +206,15 @@ def test_is_sequence_type():
     assert not bpack.utils.is_sequence_type(list)
     assert not bpack.utils.is_sequence_type(typing.List)
     assert not bpack.utils.is_sequence_type(typing.Sequence)
+    assert not bpack.utils.is_sequence_type(tuple)
     assert not bpack.utils.is_sequence_type(typing.Tuple)
 
 
 def test_is_sequence_type_from_annotated_type():
     typestr = "i8"
+
+    type_ = list[bpack.T[typestr]]
+    assert bpack.utils.is_sequence_type(type_)
 
     type_ = typing.List[bpack.T[typestr]]
     assert bpack.utils.is_sequence_type(type_)

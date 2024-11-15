@@ -1,6 +1,6 @@
 """Specific tests for the bitarray based decoder."""
 
-from typing import List, Sequence
+from collections.abc import Sequence
 
 import pytest
 
@@ -87,7 +87,7 @@ def test_sequence():
         @codec
         @bpack.descriptor(baseunits=bpack.EBaseUnits.BITS)
         class Record:
-            field_1: List[int] = bpack.field(
+            field_1: list[int] = bpack.field(
                 size=4, signed=False, repeat=2, default=3
             )
             field_2: Sequence[int] = bpack.field(

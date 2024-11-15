@@ -1,7 +1,7 @@
 """Unit tests for packbit and unpackbut functions."""
 
 import math
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 import pytest
 
@@ -29,7 +29,7 @@ except ImportError:  # pragma: no cover
 
 def _sample_data(
     bits_per_sample: int, nsamples: int = 256
-) -> Tuple[bytes, Sequence[int]]:
+) -> tuple[bytes, Sequence[int]]:
     """Generate a packed data block having spb samples bps bits each."""
     # fmt: off
     elementary_range = {
