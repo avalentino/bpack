@@ -61,9 +61,15 @@ def _resolve_type(type_):
     not-annotated ones.
     """
     if bpack.utils.is_sequence_type(type_):
-        etype = bpack.utils.effective_type(type_)
-        rtype = copy.copy(type_)
-        rtype.__args__ = (etype,)
+        try:
+            etype = bpack.utils.effective_type(type_)
+            rtype = copy.copy(type_)
+            rtype.__args__ = (etype,)
+        except AttributeError as exc:
+            # if the `list[T]` syntax is used then `type_.__args__` is readonly
+            if "readonly" not in str(exc):
+                raise
+            rtype = type_
     elif bpack.typing.is_annotated(type_):
         rtype = bpack.utils.effective_type(type_)
     else:

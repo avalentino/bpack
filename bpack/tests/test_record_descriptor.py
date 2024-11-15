@@ -493,6 +493,7 @@ class TestSize:
                     size=8, default=1 / 3, repeat=2, offset=6
                 )
 
+
 def test_sequence_type_typing():
     @bpack.descriptor
     class Record:
@@ -528,7 +529,7 @@ def test_sequence_type():
         field_1: list[int] = bpack.field(size=1, repeat=4)
 
     field_1 = bpack.fields(Record)[0]
-    assert field_1.type is list[int]
+    assert field_1.type == list[int]
     assert bpack.calcsize(Record) == 4
 
     @bpack.descriptor
