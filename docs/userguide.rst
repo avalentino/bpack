@@ -288,7 +288,7 @@ Currently supported data types are:
     used to define fields containing a sequence of homogeneous values
     (i.e. values having the same data type). A *sequence* data type in *bpack*
     can be defined using the standard type annotations classes like
-    :class:`typing.Sequence` or :class:`typing.List`.
+    :class:`typing.Sequence` or :class:`typing.List`, or directly `list[...]`.
     Please refer to the `Sequence fields`_ section for more details about
     features and limitations
 :descriptors:
@@ -621,26 +621,28 @@ Sequence fields
 fields containing a sequence of values having the same data type.
 
 The sequence is specified using the standard Python type annotation classes
-:class:`typing.Sequence` or :class:`typing.List`.
+:class:`typing.Sequence` or :class:`typing.List`, or directly using the
+`list[...]` notation.
 
 The data type of a sequence item can be any of the basic data types described
 in `Type`_.
 
 .. testcode::
 
-   from typing import Sequence, List
+   from typing import Sequence
 
    @bpack.descriptor
    class BinaryRecord:
        sequence: Sequence[int] = bpack.field(size=1, repeat=2)
-       list: List[float] = bpack.field(size=4, repeat=3)
+       list_: list[float] = bpack.field(size=4, repeat=3)
 
 Please note that the *size* parameter of the :func:`bpack.descriptors.field`
 factory function describes the size of the sequence *item*, while the *repeat*
 parameter described the number of elements in the *sequence*.
 
 The :mod:`bpack.bs` and :mod:`bpack.st` backend map ``Sequence[T]`` onto
-Python :class:`tuple` instances and ``List[T]`` onto :class:`list` instances.
+Python :class:`tuple` instances and ``List[T]`` or ``list[T]`` onto
+:class:`list` instances.
 The :mod:`bpack.np` instead maps all kind of sequences onto
 :class:`numpy.ndarray` instances.
 
