@@ -25,7 +25,7 @@ bpack v1.2.0 (UNRELEASED)
   (requires Python >= 3.10).
 
 .. _flake8: https://github.com/pycqa/flake8
-.. _PyPy3: https://www.pypy.org
+.. _PyPy3: https://pypy.org
 
 
 bpack v1.1.0 (15/04/2023)
