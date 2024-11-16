@@ -52,7 +52,13 @@ Issues = "https://github.com/avalentino/bpack/issues"
 
 
 [tool.setuptools]
-packages = ["bpack", "bpack.tools", "bpack.tests", "bpack.tests.data"]
+packages = [
+    "bpack",
+    "bpack.tests",
+    "bpack.tools",
+    "bpack.tools.tests",
+    "bpack.tools.tests.data",
+]
 # zip-safe = true
 # license-files = ["LICENSE"]
 
@@ -68,7 +74,7 @@ addopts = "--ignore=examples/"
 [tool.black]
 line-length = 79
 # target-version = ['py311']
-extend-exclude = "bpack/tests/data"
+extend-exclude = "bpack/tools/tests/data"
 
 
 [tool.isort]
