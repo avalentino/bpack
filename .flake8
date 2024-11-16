@@ -17,13 +17,15 @@ per-file-ignores =
     */tests/test_*.py: D,T003
     */tests/data/*.py: D,T003,F821
     bpack/utils.py: D103
+    bpack/codecs.py: A005
+    bpack/typing.py: A005
 statistics = True
 count = True
 extend-exclude = examples/*
 
 # flake8-cognitive-complexity
 # max-cognitive-complexity = 7  # default
-# max-cognitive-complexity = 11
+max-cognitive-complexity = 12
 
 # flake8-noqa
 noqa-require-code = True
