@@ -21,11 +21,17 @@ repos:
 #         args: [ --fix ]
 #     -   id: ruff-format
 
-# -   repo: https://github.com/asottile/pyupgrade
-#     rev: v3.19.0
-#     hooks:
-#     -   id: pyupgrade
-#         args: [--py39-plus]
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.0
+    hooks:
+    -   id: pyupgrade
+        args: [--py39-plus]
+        exclude: |
+            (?x)^(
+                bpack/tests/test_field_descriptor.py|
+                bpack/tests/test_record_descriptor.py|
+                bpack/tests/test_utils.py
+            )
 
 -   repo: https://github.com/pycqa/flake8
     rev: 7.1.1
