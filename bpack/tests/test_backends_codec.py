@@ -1335,10 +1335,10 @@ class TestNestedRecord:
     def test_nested_record_decoder_with_order(self, backend):
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
         if backend.Decoder.baseunits is bpack.EBaseUnits.BITS:
-            kwargs = dict(bitorder=">", byteorder=">")
+            kwargs = {"bitorder": ">", "byteorder": ">"}
         else:
             # TODO: use the default byteorder (see get_encoded_data)
-            kwargs = dict(byteorder=bpack.EByteOrder.LE)
+            kwargs = {"byteorder": bpack.EByteOrder.LE}
 
         @backend.decoder  # NOTE: this is a decoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits, **kwargs)
@@ -1359,10 +1359,10 @@ class TestNestedRecord:
     def test_nested_record_encoder_with_order(self, backend):
         encoded_data = self.get_encoded_data(backend.Decoder.baseunits)
         if backend.Decoder.baseunits is bpack.EBaseUnits.BITS:
-            kwargs = dict(bitorder=">", byteorder=">")
+            kwargs = {"bitorder": ">", "byteorder": ">"}
         else:
             # TODO: use the default byteorder (see get_encoded_data)
-            kwargs = dict(byteorder=bpack.EByteOrder.LE)
+            kwargs = {"byteorder": bpack.EByteOrder.LE}
 
         @backend.encoder  # NOTE: this is a encoder
         @bpack.descriptor(baseunits=backend.Decoder.baseunits, **kwargs)

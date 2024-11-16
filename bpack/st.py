@@ -127,7 +127,7 @@ def _to_fmt(
 
 
 def _enum_decode_converter_factory(type_, converters_map=None):
-    converters_map = converters_map if converters_map is not None else dict()
+    converters_map = converters_map if converters_map is not None else {}
     enum_item_type = bpack.utils.enum_item_type(type_)
     if enum_item_type in converters_map:
         base_converter = converters_map[enum_item_type]
@@ -142,7 +142,7 @@ def _enum_decode_converter_factory(type_, converters_map=None):
 
 
 def _enum_encode_converter_factory(type_, converters_map=None):
-    converters_map = converters_map if converters_map is not None else dict()
+    converters_map = converters_map if converters_map is not None else {}
     enum_item_type = bpack.utils.enum_item_type(type_)
     if enum_item_type in converters_map:
         base_converter = converters_map[enum_item_type]

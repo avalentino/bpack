@@ -430,9 +430,10 @@ def test_asdict():
         field_2: float = bpack.field(size=4, default=0.1)
 
     record = Record()
-    assert bpack.asdict(record) == dict(
-        field_1=record.field_1, field_2=record.field_2
-    )
+    assert bpack.asdict(record) == {
+        "field_1": record.field_1,
+        "field_2": record.field_2,
+    }
 
 
 def test_astuple():
