@@ -397,7 +397,7 @@ def _get_effective_byteorder(
 
 
 @classdecorator
-def descriptor(
+def descriptor(  # noqa: CCR001
     cls,
     *,
     size: Optional[int] = None,

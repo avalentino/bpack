@@ -445,7 +445,7 @@ def make_unsigned_to_signed_lut(
     )
 
 
-def unpackbits(
+def unpackbits(  # noqa: CCR001
     data: bytes,
     bits_per_sample: int,
     samples_per_block: Optional[int] = None,

@@ -143,7 +143,7 @@ class FlatDescriptorCodeGenerator:
             self._lines.append(f'{self._indent}"""{descriptor.__doc__}"""')
             self._lines.append("")
 
-    def _setup_fields(self, descriptor):
+    def _setup_fields(self, descriptor):  # noqa: CCR001
         auto_offset = 0
         for fld in flat_fields_iterator(descriptor):
             if bpack.typing.is_annotated(fld.type):
@@ -206,7 +206,7 @@ class FlatDescriptorCodeGenerator:
                 f"{self._indent}{fld.name}: {typestr}{field_str}"
             )
 
-    def _setup_methods(self, descriptor):
+    def _setup_methods(self, descriptor):  # noqa: CCR001
         global_ctx = vars(inspect.getmodule(descriptor))
 
         for klass in itertools.chain(
@@ -278,17 +278,17 @@ class FlatDescriptorCodeGenerator:
 
         return stdlib, others, from_stdlib, from_others
 
-    def _get_import_lines(
+    def _get_import_lines(  # noqa: CCR001
         self, stdlib, others, from_stdlib, from_others, line_length: int = 80
     ):
         import_lines = []
 
         if stdlib:
             import_lines.extend(
-                f"import {name}" for name in sorted(sorted(stdlib), key=len)
+                f"import {name}" for name in sorted(stdlib, key=len)
             )
         if from_stdlib:
-            for key in sorted(sorted(from_stdlib), key=len):
+            for key in sorted(from_stdlib, key=len):
                 values = sorted(self.imports[key])
                 s = f"from {key} import {', '.join(values)}"
                 if len(s) < line_length:
@@ -305,10 +305,10 @@ class FlatDescriptorCodeGenerator:
 
         if others:
             import_lines.extend(
-                f"import {name}" for name in sorted(sorted(others), key=len)
+                f"import {name}" for name in sorted(others, key=len)
             )
         if from_others:
-            for key in sorted(sorted(from_others), key=len):
+            for key in sorted(from_others, key=len):
                 values = sorted(self.imports[key])
                 s = f"from {key} import {', '.join(values)}"
                 if len(s) < line_length:
