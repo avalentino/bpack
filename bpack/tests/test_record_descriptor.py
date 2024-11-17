@@ -509,7 +509,7 @@ class TestSize:
                 )
 
 
-def test_sequence_type_typing():
+def test_sequence_type():
     @bpack.descriptor
     class Record:
         field_1: list[int] = bpack.field(size=1, repeat=4)
@@ -544,35 +544,6 @@ def test_sequence_type_typing():
         @bpack.descriptor
         class Record:
             field_1: typing.Tuple[int, int] = bpack.field(size=1, repeat=2)
-
-    with pytest.raises(TypeError):
-
-        @bpack.descriptor
-        class Record:
-            field_1: Sequence = bpack.field(size=1, repeat=2)
-
-
-def test_sequence_type():
-    @bpack.descriptor
-    class Record:
-        field_1: list[int] = bpack.field(size=1, repeat=4)
-
-    field_1 = bpack.fields(Record)[0]
-    assert field_1.type == list[int]
-    assert bpack.calcsize(Record) == 4
-
-    @bpack.descriptor
-    class Record:
-        field_1: Sequence[int] = bpack.field(size=1, repeat=4)
-
-    field_1 = bpack.fields(Record)[0]
-    assert field_1.type == Sequence[int]
-
-    with pytest.raises(TypeError):
-
-        @bpack.descriptor
-        class Record:
-            field_1: tuple[int, int] = bpack.field(size=1, repeat=2)
 
     with pytest.raises(TypeError):
 
