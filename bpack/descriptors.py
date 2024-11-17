@@ -4,6 +4,7 @@ import copy
 import enum
 import math
 import types
+import builtins
 import warnings
 import dataclasses
 from typing import Optional, Union
@@ -86,7 +87,7 @@ class BinFieldDescriptor:
 
     """
 
-    type: Optional[type] = None  # noqa: A003
+    type: Optional[builtins.type] = None  # noqa: A003
     size: Optional[int] = None  #: item size
     offset: Optional[int] = None
     signed: Optional[bool] = None
