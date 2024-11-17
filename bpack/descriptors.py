@@ -68,7 +68,7 @@ def _resolve_type(type_):
             # this is for typing.List and typing.Sequence
             rtype = type_.copy_with(etype)
         except AttributeError:
-            # if the `list[T]` syntax is used then `type_.__args__` is readonly
+            # if the `list[T]` syntax is used then `copy_with` is not available
             rtype = type_.__class_getitem__(etype)
     elif bpack.typing.is_annotated(type_):
         rtype = bpack.utils.effective_type(type_)
