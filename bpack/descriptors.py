@@ -96,7 +96,7 @@ class BinFieldDescriptor:
 
     def _validate_type(self):
         if self.type is None:
-            raise TypeError(f"invalid type '{self.type}'")
+            raise TypeError(f"invalid type '{self.type!r}'")
 
     def _validate_size(self):
         msg = f"invalid size: {self.size!r} (must be a positive integer)"
@@ -156,21 +156,21 @@ class BinFieldDescriptor:
             if not self.is_int_type():
                 warnings.warn(
                     f"the 'signed' parameter will be ignored for non-integer "
-                    f"type: '{self.type}'"
+                    f"type: '{self.type!r}'"
                 )
         if self.repeat is not None:
             self._validate_repeat()
             if not self.is_sequence_type() and self.repeat is not None:
                 raise TypeError(
                     f"repeat parameter specified for non-sequence type: "
-                    f"{self.type}"
+                    f"{self.type!r}"
                 )
         if bpack.utils.is_enum_type(self.type):
             self._validate_enum_type()
         elif self.is_sequence_type() and self.repeat is None:
             raise TypeError(
                 f"no 'repeat' parameter specified for sequence type "
-                f"{self.type}"
+                f"{self.type!r}"
             )
 
     def is_int_type(self) -> bool:
