@@ -276,7 +276,7 @@ def field(
 
 def is_field(obj) -> bool:
     """Return true if an ``obj`` can be considered is a field descriptor."""
-    return (
+    return bool(
         isinstance(obj, Field)
         and obj.metadata
         and METADATA_KEY in obj.metadata
