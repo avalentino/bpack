@@ -155,7 +155,7 @@ class TestRecordFields:
             assert field_descr.repeat == repeat
 
     @staticmethod
-    def test_finvalid_field_type():
+    def test_invalid_field_type():
         with pytest.raises(TypeError):
 
             @bpack.descriptor
