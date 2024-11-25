@@ -7,7 +7,7 @@ import types
 import builtins
 import warnings
 import dataclasses
-from typing import Optional, Union
+from typing import Optional, Union, get_type_hints
 from collections.abc import Iterator, Sequence
 
 import bpack.utils
@@ -62,6 +62,11 @@ def _resolve_type(type_):
     Replace :class:`typing.Annotated` types with the corresponding
     not-annotated ones.
     """
+    if isinstance(type_, str):
+        raise TypeError(
+            f"the 'type_' parameter cannot be a string (type_: {type_!r})"
+        )
+
     if bpack.utils.is_sequence_type(type_):
         etype = bpack.utils.effective_type(type_)
         try:
@@ -97,6 +102,10 @@ class BinFieldDescriptor:
     def _validate_type(self):
         if self.type is None:
             raise TypeError(f"invalid type '{self.type!r}'")
+        elif isinstance(self.type, str):
+            raise TypeError(
+                f"'{self.__class__.__name__}.type' cannot be a string"
+            )
 
     def _validate_size(self):
         msg = f"invalid size: {self.size!r} (must be a positive integer)"
@@ -133,6 +142,12 @@ class BinFieldDescriptor:
 
     def __post_init__(self):
         """Finalize BinFieldDescriptor instance initialization."""
+        if isinstance(self.type, str):
+            raise TypeError(
+                f"the 'type' parameter cannot be a string "
+                f"(type_: {self.type!r})"
+            )
+
         if self.offset is not None:
             self._validate_offset()
 
@@ -201,6 +216,11 @@ class BinFieldDescriptor:
         """Update the field descriptor according to the specified type."""
         if self.type is not None:
             raise TypeError("the type attribute is already set")
+        if isinstance(type_, str):
+            raise TypeError(
+                f"the 'type_' parameter cannot be a string (type_: {type_!r})"
+            )
+
         if bpack.typing.is_annotated(type_):
             _, params = bpack.typing.get_args(type_)
             valid = True
@@ -221,7 +241,11 @@ class BinFieldDescriptor:
                 self.size = params.size
         elif bpack.utils.is_sequence_type(type_):
             etype = bpack.utils.effective_type(type_, keep_annotations=True)
+
+            # this is needed to set "signed" and "size"
             self.update_from_type(etype)
+
+            # restore the proper sequence type
             self.type = _resolve_type(type_)
         else:
             self.type = type_
@@ -284,6 +308,12 @@ def is_field(obj) -> bool:
 
 
 def _update_field_metadata(field_, **kwargs):
+    type_ = kwargs.get("type")
+    if isinstance(type_, str):
+        raise TypeError(
+            f"the 'type' parameter cannot be a string (type_: {type_!r})"
+        )
+
     metadata = field_.metadata.copy() if field_.metadata is not None else {}
     metadata.update(**kwargs)
     field_.metadata = types.MappingProxyType(metadata)
@@ -444,6 +474,9 @@ def descriptor(  # noqa: CCR001
     else:
         cls = dataclasses.dataclass(cls, **kwargs)
 
+    # import inspect
+    # types_ = inspect.get_annotations(cls)
+    types_ = get_type_hints(cls, include_extras=True)
     fields_ = dataclasses.fields(cls)
 
     # Initialize to a dummy value with initial offset + size = 0
@@ -456,6 +489,10 @@ def descriptor(  # noqa: CCR001
 
         # NOTE: this is ensured by dataclasses but not by attr
         assert field_.type is not None
+
+        # resolve all types
+        if isinstance(field_.type, str):
+            field_.type = types_[field_.name]
 
         if bpack.typing.is_annotated(field_.type):
             # check byteorder
@@ -476,6 +513,7 @@ def descriptor(  # noqa: CCR001
         except NotFieldDescriptorError:
             field_descr = BinFieldDescriptor()
             if isinstance(field_, Field):
+                # set "type", "size" and "signed"
                 field_descr.update_from_type(field_.type)
 
         if field_descr.size is None:

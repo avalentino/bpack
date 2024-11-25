@@ -30,7 +30,8 @@ repos:
             (?x)^(
                 bpack/tests/test_field_descriptor.py|
                 bpack/tests/test_record_descriptor.py|
-                bpack/tests/test_utils.py
+                bpack/tests/test_utils.py|
+                bpack/tests/test_future_annotations.py
             )
 
 -   repo: https://github.com/pycqa/flake8

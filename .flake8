@@ -18,6 +18,7 @@ per-file-ignores =
     bpack/utils.py: D103
     bpack/codecs.py: A005
     bpack/typing.py: A005
+    bpack/tests/test_future_annotations.py: D,T003,NQA102
 statistics = True
 count = True
 extend-exclude = examples/*

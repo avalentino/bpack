@@ -156,7 +156,7 @@ class TestRecordFields:
 
     @staticmethod
     def test_invalid_field_type():
-        with pytest.raises(TypeError):
+        with pytest.raises((TypeError, NameError)):
 
             @bpack.descriptor
             class Record:
