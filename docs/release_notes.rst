@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v1.2.0 (UNRELEASED)
+bpack v1.2.0 (26/11/2024)
 -------------------------
 
 * Drop support to Python 3.7 and 3.8. Now `bpack` requires Python >= 3.9.
