@@ -1,10 +1,22 @@
 Release Notes
 =============
 
-bpack v1.2.1 (UNRELEASED)
+bpack v1.3.0 (06/01/2025)
 -------------------------
 
-* TBW
+* Support for annotations saved in string form (see also `PEP-563`_).
+  Is some circumstances Python typing annotations are stored
+  as strings. E.g. this happens when people uses::
+
+    from __future__ import annotations
+
+  Starting from v1.3.0, `bpack` is compatible with this way of storing
+  annotations.
+  Please note, anyway, that `bpack` still need to evaluate the annotations
+  at compile time so the "Postponed Evaluation of Annotations" described in
+  `PEP-563`_ is not really supported.
+
+.. _`PEP-563`: https://peps.python.org/pep-0563
 
 
 bpack v1.2.0 (26/11/2024)
