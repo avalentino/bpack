@@ -4,7 +4,7 @@ Binary data structures (un-)Packing library
 
 .. badges
 
-|PyPI Status| |GHA Status| |Documentation Status|
+|PyPI Status| |GHA Status| |Documentation Status| |Python Versions| |License|
 
 .. |PyPI Status| image:: https://img.shields.io/pypi/v/bpack.svg
     :target: https://pypi.org/project/bpack
@@ -15,6 +15,12 @@ Binary data structures (un-)Packing library
 .. |Documentation Status| image:: https://readthedocs.org/projects/bpack/badge/?version=latest
     :target: https://bpack.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+.. |Python Versions| image:: https://img.shields.io/pypi/pyversions/bpack
+    :target: https://pypi.org/project/bpack
+    :alt: Supported Python versions
+.. |License| image:: https://img.shields.io/pypi/l/${packagename}
+    :target: https://pypi.org/project/${packagename}
+    :alt: License
 
 .. description
 
@@ -52,7 +58,7 @@ Encoders/decoders (*backends*) rely on well known Python packages like:
 License
 -------
 
-:Copyright: 2020-2024, Antonio Valentino <antonio.valentino@tiscali.it>
+:Copyright: 2020-2025, Antonio Valentino <antonio.valentino@tiscali.it>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
