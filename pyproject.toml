@@ -55,7 +55,6 @@ Issues = "https://github.com/avalentino/bpack/issues"
 packages = [
     "bpack",
     "bpack.tests",
-    "bpack.tests.future_annotations",
     "bpack.tools",
     "bpack.tools.tests",
     "bpack.tools.tests.data",
