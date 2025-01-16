@@ -18,8 +18,8 @@ Binary data structures (un-)Packing library
 .. |Python Versions| image:: https://img.shields.io/pypi/pyversions/bpack
     :target: https://pypi.org/project/bpack
     :alt: Supported Python versions
-.. |License| image:: https://img.shields.io/pypi/l/${packagename}
-    :target: https://pypi.org/project/${packagename}
+.. |License| image:: https://img.shields.io/pypi/l/bpack
+    :target: https://pypi.org/project/bpack
     :alt: License
 
 .. description
