@@ -232,14 +232,21 @@ class FlatDescriptorCodeGenerator:
 
                 annotations = inspect.get_annotations(method)
                 for var in annotations.values():
-                    module = inspect.getmodule(var)
-                    if module is not None:
-                        self.imports[module.__name__].add(var.__name__)
+                    if hasattr(var, "__name__"):
+                        vars_ = [var]
                     else:
-                        warnings.warn(
-                            f"(annotations) unable to determine the module of "
-                            f"{var!r}"
-                        )
+                        # typing.Union
+                        vars_ = typing.get_args(var)
+
+                    for var_ in vars_:
+                        module = inspect.getmodule(var_)
+                        if module is not None:
+                            self.imports[module.__name__].add(var_.__name__)
+                        else:
+                            warnings.warn(
+                                "(annotations) unable to determine the "
+                                f"module of {var_!r}"
+                            )
 
                 variables = inspect.getclosurevars(method)
                 for var_type in ("nonlocals", "globals"):
