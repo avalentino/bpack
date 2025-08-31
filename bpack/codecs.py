@@ -1,7 +1,8 @@
 """Base classes and utility functions for codecs."""
 
 import abc
-from typing import Callable, NamedTuple, Optional, Union
+from typing import NamedTuple, Union
+from collections.abc import Callable
 
 import bpack.utils
 import bpack.descriptors
@@ -107,9 +108,7 @@ def make_codec_decorator(codec_type: type[CodecType]):
     return codec
 
 
-def has_codec(
-    descriptor, codec_type: Optional[type[CodecType]] = None
-) -> bool:
+def has_codec(descriptor, codec_type: type[CodecType] | None = None) -> bool:
     """Return True if the input descriptor has a codec attached.
 
     A descriptor decorated with a *codec* decorator has an attached codec
@@ -169,8 +168,8 @@ def _get_flat_len(descriptor):
 
 class ConverterInfo(NamedTuple):
     func: Callable
-    src: Union[int, slice]
-    dst: Union[int, slice]
+    src: int | slice
+    dst: int | slice
 
 
 class BaseStructCodec(Codec):

@@ -3,7 +3,6 @@
 import math
 import warnings
 import functools
-from typing import Optional
 
 try:
     import cbitstruct as bitstruct
@@ -43,7 +42,7 @@ BACKEND_TYPE = EBaseUnits.BITS
 
 class BitStruct:
     @staticmethod
-    def _simplified_fmt(format_: str) -> Optional[str]:
+    def _simplified_fmt(format_: str) -> str | None:
         fmt = format_.replace(">", "")
         if "<" in fmt:
             return None
@@ -99,8 +98,8 @@ def _to_fmt(
     size: int,
     bitorder: str = "",
     byteorder: str = "",
-    signed: Optional[bool] = None,
-    repeat: Optional[int] = None,
+    signed: bool | None = None,
+    repeat: int | None = None,
 ) -> str:
     assert size > 0, f"invalid size: {size:r}"
     assert bitorder in ("", ">", "<"), f"invalid order: {bitorder:r}"

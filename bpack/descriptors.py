@@ -7,7 +7,7 @@ import types
 import builtins
 import warnings
 import dataclasses
-from typing import Optional, Union, get_type_hints
+from typing import get_type_hints
 from collections.abc import Iterator, Sequence
 
 import bpack.utils
@@ -92,11 +92,11 @@ class BinFieldDescriptor:
 
     """
 
-    type: Optional[builtins.type] = None  # noqa: A003
-    size: Optional[int] = None  #: item size
-    offset: Optional[int] = None
-    signed: Optional[bool] = None
-    repeat: Optional[int] = None  #: number of items
+    type: builtins.type | None = None  # noqa: A003
+    size: int | None = None  #: item size
+    offset: int | None = None
+    signed: bool | None = None
+    repeat: int | None = None  #: number of items
     # converter: Optional[Callable] = None
 
     def _validate_type(self):
@@ -256,10 +256,10 @@ Field = dataclasses.Field
 
 def field(
     *,
-    size: Optional[int] = None,
-    offset: Optional[int] = None,
-    signed: Optional[bool] = None,
-    repeat: Optional[int] = None,
+    size: int | None = None,
+    offset: int | None = None,
+    signed: bool | None = None,
+    repeat: int | None = None,
     metadata=None,
     **kwargs,
 ) -> Field:
@@ -375,7 +375,7 @@ _DEFAULT_SIZE_MAP = {
 }
 
 
-def _get_default_size(type_, baseunits: EBaseUnits) -> Union[int, None]:
+def _get_default_size(type_, baseunits: EBaseUnits) -> int | None:
     if is_descriptor(type_):
         return calcsize(type_, baseunits)
 
@@ -428,9 +428,9 @@ def _get_effective_byteorder(
 def descriptor(  # noqa: CCR001
     cls,
     *,
-    size: Optional[int] = None,
-    byteorder: Union[str, EByteOrder] = EByteOrder.DEFAULT,
-    bitorder: Optional[Union[str, EBitOrder]] = None,
+    size: int | None = None,
+    byteorder: str | EByteOrder = EByteOrder.DEFAULT,
+    bitorder: str | EBitOrder | None = None,
     baseunits: EBaseUnits = EBaseUnits.BYTES,
     **kwargs,
 ):
@@ -625,7 +625,7 @@ def astuple(obj, *, tuple_factory=tuple) -> Sequence:
     return dataclasses.astuple(obj, tuple_factory=tuple_factory)
 
 
-def calcsize(obj, units: Optional[EBaseUnits] = None) -> int:
+def calcsize(obj, units: EBaseUnits | None = None) -> int:
     """Return the size of the ``obj`` record.
 
     If the *units* parameter is not specified (default) then the returned
@@ -666,7 +666,7 @@ def byteorder(obj) -> EByteOrder:
         raise TypeError(f'"{obj}" is not a descriptor')
 
 
-def bitorder(obj) -> Union[EBitOrder, None]:
+def bitorder(obj) -> EBitOrder | None:
     """Return the bit order of a binary record descriptor."""
     try:
         return getattr(obj, BITORDER_ATTR_NAME)

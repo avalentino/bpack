@@ -1,7 +1,7 @@
 """bpack support for type annotations."""
 
 import re
-from typing import Annotated, NamedTuple, Optional, Union, get_args, get_origin
+from typing import Annotated, NamedTuple, Union, get_args, get_origin
 
 # @COMPATIBILITY: available in Python 3.7 ... 3.11
 try:
@@ -28,10 +28,10 @@ FieldTypes = type[Union[bool, int, float, complex, bytes, str]]
 class TypeParams(NamedTuple):
     """Named tuple describing type parameters."""
 
-    byteorder: Optional[EByteOrder]
+    byteorder: EByteOrder | None
     type: FieldTypes  # noqa: A003
-    size: Optional[int]
-    signed: Optional[bool]
+    size: int | None
+    signed: bool | None
 
     def __repr__(self):
         """Return the string representation of the TypeParams object."""

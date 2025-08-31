@@ -2,7 +2,8 @@
 
 import struct
 import itertools
-from typing import Any, Callable, Optional
+from typing import Any
+from collections.abc import Callable
 
 import bitarray
 from bitarray.util import ba2int
@@ -49,7 +50,7 @@ def ba_to_float_factory(
 
 def converter_factory(
     type_,
-    size: Optional[int] = None,
+    size: int | None = None,
     signed: bool = False,
     byteorder: str = ">",
     bitorder: str = "big",

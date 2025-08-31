@@ -3,7 +3,7 @@
 import enum
 import functools
 import collections
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 import numpy as np
 
@@ -448,9 +448,9 @@ def make_unsigned_to_signed_lut(
 def unpackbits(  # noqa: CCR001
     data: bytes,
     bits_per_sample: int,
-    samples_per_block: Optional[int] = None,
+    samples_per_block: int | None = None,
     bit_offset: int = 0,
-    blockstride: Optional[int] = None,
+    blockstride: int | None = None,
     sign_mode: ESignMode = ESignMode.UNSIGNED,
     byteorder: str = ">",
     use_lut: bool = True,

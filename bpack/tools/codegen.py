@@ -8,7 +8,6 @@ import warnings
 import functools
 import itertools
 import collections
-from typing import Optional, Union
 from dataclasses import MISSING
 
 import bpack
@@ -50,15 +49,7 @@ def _is_stdlib_module(module: str):
     import sys
 
     module = module.split(".", 1)[0]
-    # @COMPATIBILITY: new in Python 3.10
-    if hasattr(sys, "stdlib_module_names"):
-        return module in sys.stdlib_module_names
-    else:
-        import pathlib
-        import sysconfig
-
-        platstdlib = pathlib.Path(sysconfig.get_path("platstdlib"))
-        return bool(platstdlib.glob(f"{module}*"))
+    return module in sys.stdlib_module_names
 
 
 def _classify_modules(modules):
@@ -82,8 +73,8 @@ class FlatDescriptorCodeGenerator:
     def __init__(
         self,
         descriptor,
-        name: Optional[str] = None,
-        indent: Union[int, str] = "    ",
+        name: str | None = None,
+        indent: int | str = "    ",
     ):
         """Initialize a `FlatDescriptorCodeGenerator` instance.
 
@@ -111,7 +102,7 @@ class FlatDescriptorCodeGenerator:
         self._lines.append("")
         self._setup_methods(descriptor)
 
-    def _setup_class_declaration(self, descriptor, name: Optional[str] = None):
+    def _setup_class_declaration(self, descriptor, name: str | None = None):
         if has_codec(descriptor):
             backend = get_codec_type(descriptor).__module__
             codec_type = "codec" if has_codec(descriptor, Codec) else "decoder"

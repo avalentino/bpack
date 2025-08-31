@@ -1,7 +1,6 @@
 """Struct based codec for binary data structures."""
 
 import struct
-from typing import Optional
 
 import bpack
 import bpack.utils
@@ -87,10 +86,10 @@ def _format_string_without_order(fmt: str, order: str) -> str:
 
 def _to_fmt(
     type_,
-    size: Optional[int] = None,
+    size: int | None = None,
     order: str = "",
-    signed: Optional[bool] = None,
-    repeat: Optional[int] = None,
+    signed: bool | None = None,
+    repeat: int | None = None,
 ) -> str:
     size = _DEFAULT_SIZE.get(type_, size) if size is None else size
 

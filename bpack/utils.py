@@ -5,9 +5,8 @@ import typing
 import functools
 import dataclasses
 import collections.abc
-from typing import Union
 
-from .typing import is_annotated, get_origin, get_args, Annotated
+from .typing import get_origin, get_args, Annotated
 
 
 def classdecorator(func):
@@ -74,7 +73,7 @@ def set_new_attribute(cls, name, value):
     return dataclasses._set_new_attribute(cls, name, value)
 
 
-def sequence_type(type_: type, error: bool = False) -> Union[type, None]:
+def sequence_type(type_: type, error: bool = False) -> type | None:
     """Return the sequence type associated to a typed sequence.
 
     The function return :class:`list` or :class:`tuple` if the input is
@@ -97,11 +96,6 @@ def sequence_type(type_: type, error: bool = False) -> Union[type, None]:
             raise TypeError(f"{type_} is not supported")
         else:
             return None
-
-    if not is_annotated(args[0]) and not isinstance(args[0], type):
-        # COMPATIBILITY: with typing_extensions and Python v3.7
-        # need to be a concrete type
-        return None  # pragma: no cover
 
     if not issubclass(sequence_type_, collections.abc.MutableSequence):
         sequence_type_ = tuple
@@ -153,7 +147,7 @@ def enum_item_type(enum_cls: type[enum.Enum]) -> type:
 
 
 def effective_type(
-    type_: Union[type, type[enum.Enum], type], keep_annotations: bool = False
+    type_: type | type[enum.Enum] | type, keep_annotations: bool = False
 ) -> type:
     """Return the effective type.
 

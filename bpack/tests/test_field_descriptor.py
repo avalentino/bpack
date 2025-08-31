@@ -326,9 +326,7 @@ class TestFieldDescriptor:
         descr = bpack.descriptors.BinFieldDescriptor(list[int], 1, 2, True, 1)
         descr.validate()
 
-        descr = bpack.descriptors.BinFieldDescriptor(
-            typing.List[int], 1, 2, True, 1
-        )
+        descr = bpack.descriptors.BinFieldDescriptor(list[int], 1, 2, True, 1)
         descr.validate()
 
     @staticmethod
@@ -423,7 +421,7 @@ class TestFieldDescriptor:
             descr.validate()
 
         descr = bpack.descriptors.BinFieldDescriptor(
-            typing.List[int], 1, 2, signed=True, repeat=2
+            list[int], 1, 2, signed=True, repeat=2
         )
         descr.validate()
         descr.repeat = 0
@@ -455,17 +453,13 @@ class TestFieldDescriptor:
         assert descr.is_sequence_type()
         assert not descr.is_enum_type()
 
-        descr = bpack.descriptors.BinFieldDescriptor(
-            typing.List[int], 1, repeat=10
-        )
+        descr = bpack.descriptors.BinFieldDescriptor(list[int], 1, repeat=10)
         descr.validate()
         assert descr.is_int_type()
         assert descr.is_sequence_type()
         assert not descr.is_enum_type()
 
-        descr = bpack.descriptors.BinFieldDescriptor(
-            typing.List[float], 1, repeat=10
-        )
+        descr = bpack.descriptors.BinFieldDescriptor(list[float], 1, repeat=10)
         descr.validate()
         assert not descr.is_int_type()
         assert descr.is_sequence_type()
@@ -549,13 +543,13 @@ class TestAnnotatedType:
 
         @bpack.descriptor
         class Record:
-            field_1: typing.List[bpack.T[typestr]] = bpack.field(repeat=2)
+            field_1: list[bpack.T[typestr]] = bpack.field(repeat=2)
 
         field = bpack.fields(Record)[0]
-        assert field.type == typing.List[bpack.T[typestr]]
+        assert field.type == list[bpack.T[typestr]]
 
         field_descr = get_field_descriptor(field)
-        assert field_descr.type == typing.List[int]
+        assert field_descr.type == list[int]
         assert field_descr.size == 4
         assert field_descr.signed is True
         assert field_descr.repeat == 2
