@@ -220,7 +220,7 @@ class T:
         raise TypeError(f"Type '{cls.__name__}' cannot be instantiated.")
 
     @_tp_cache
-    def __class_getitem__(cls, params):  # noqa: D105, N805
+    def __class_getitem__(cls, params):  # noqa: D105
         if not isinstance(params, str):
             raise TypeError(
                 f"{cls.__name__}[...] should be used with a single argument "
