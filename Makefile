@@ -47,8 +47,10 @@ clean:
 
 cleaner: clean
 	$(RM) -r .coverage htmlcov
-	$(RM) -r .pytest_cache .tox
-	$(RM) -r .mypy_cache .ruff_cache
+	$(RM) -r .pytest_cache
+	$(RM) -r .tox
+	$(RM) -r .mypy_cache
+	$(RM) -r .ruff_cache
 	$(RM) -r .ipynb_checkpoints
 
 distclean: cleaner
@@ -59,12 +61,16 @@ lint:
 	$(PYTHON) -m pydocstyle --count $(TARGET)
 	$(PYTHON) -m isort --check $(TARGET)
 	$(PYTHON) -m black --check $(TARGET)
+	# $(PYTHON) -m fawltydeps
 	# $(PYTHON) -m mypy --check-untyped-defs --ignore-missing-imports $(TARGET)
 	# ruff check $(TARGET)
+	codespell
 
 docs:
 	mkdir -p docs/_static
 	$(MAKE) -C docs html
+	$(MAKE) -C docs linkcheck
+	$(MAKE) -C docs spelling
 
 api:
 	$(RM) -r docs/api

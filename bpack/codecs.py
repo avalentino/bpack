@@ -31,7 +31,7 @@ class BaseCodec:
         if bpack.baseunits(descriptor) is not cls.baseunits:
             raise ValueError(
                 f"{cls.__module__}.{cls.__name__} "
-                f"only accepts descriptors with base units "
+                "only accepts descriptors with base units "
                 f"'{cls.baseunits.value}'"
             )
 

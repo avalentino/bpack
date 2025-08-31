@@ -431,7 +431,7 @@ Indeed, since ``field_2`` has not been specified, for the computation of
 the offset of ``field_3`` *bpack* assumes that the previous field is
 ``field_1`` and performs the computation accordingly::
 
-   field_3.offest = fielf_1.offset + field_i.size == 4 != 8  # INCORRECT
+   field_3.offset = fielf_1.offset + field_i.size == 4 != 8  # INCORRECT
 
 The incorrect offset of ``field_3`` causes the incorrect computation of the
 offset all the fields that follow.

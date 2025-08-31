@@ -128,7 +128,7 @@ def str_to_type_params(typestr: str) -> TypeParams:
         # 'm', 'M': timedelta and datetime
         raise TypeError(
             f"type specifier '{stype}' is valid for the 'array protocol' but "
-            f"not supported by bpack"
+            "not supported by bpack"
         )
 
     return TypeParams(byteorder, type_, size, signed)
@@ -224,7 +224,7 @@ class T:
         if not isinstance(params, str):
             raise TypeError(
                 f"{cls.__name__}[...] should be used with a single argument "
-                f"(a string describing a basic numeric type)."
+                "(a string describing a basic numeric type)."
             )
         typestr = params
         metadata = str_to_type_params(typestr)
@@ -233,7 +233,7 @@ class T:
     def __init_subclass__(cls, *args, **kwargs):
         """Subclass initializer.
 
-        Alway raise a TypeError to prevent sub-classing.
+        Always raise a TypeError to prevent sub-classing.
         """
         raise TypeError(f"Cannot subclass {cls.__module__}.{cls.__name__}")
 

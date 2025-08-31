@@ -55,12 +55,10 @@ def test():
 
     values_per_block = 1 + descr.nsamples
     header_values = np.asarray(values[::values_per_block])
-    sample_values = np.asarray(
-        [
-            values[start : start + descr.nsamples]
-            for start in range(1, len(values), values_per_block)
-        ]
-    ).ravel()
+    sample_values = np.asarray([
+        values[start : start + descr.nsamples]
+        for start in range(1, len(values), values_per_block)
+    ]).ravel()
     print("header_values:", header_values)
     print("sample_values:", sample_values)
 

@@ -129,7 +129,7 @@ bpack v0.6.0 (15/01/2021)
   numpy-like format strings.
 * Now it is no longer necessary to use the :func:`dataclasses.dataclass`
   decorator to define a descriptor.
-  That way to define descriptors is **depercated**.
+  That way to define descriptors is **deprecated**.
   All parameters previously specified via :func:`dataclasses.dataclass`
   (like e.g. *frozen*) shall now be passed directly to the
   :func:`bpack.descriptors.descriptor` decorator.

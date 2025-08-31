@@ -125,7 +125,7 @@ class BinFieldDescriptor:
         if not isinstance(self.signed, bool):
             raise TypeError(
                 f"invalid 'signed' parameter: {self.signed!r} "
-                f"(must be a bool or None)"
+                "(must be a bool or None)"
             )
 
     def _validate_repeat(self):
@@ -144,7 +144,7 @@ class BinFieldDescriptor:
         """Finalize BinFieldDescriptor instance initialization."""
         if isinstance(self.type, str):
             raise TypeError(
-                f"the 'type' parameter cannot be a string "
+                "the 'type' parameter cannot be a string "
                 f"(type_: {self.type!r})"
             )
 
@@ -170,21 +170,21 @@ class BinFieldDescriptor:
             self._validate_signed()
             if not self.is_int_type():
                 warnings.warn(
-                    f"the 'signed' parameter will be ignored for non-integer "
+                    "the 'signed' parameter will be ignored for non-integer "
                     f"type: '{self.type!r}'"
                 )
         if self.repeat is not None:
             self._validate_repeat()
             if not self.is_sequence_type() and self.repeat is not None:
                 raise TypeError(
-                    f"repeat parameter specified for non-sequence type: "
+                    "repeat parameter specified for non-sequence type: "
                     f"{self.type!r}"
                 )
         if bpack.utils.is_enum_type(self.type):
             self._validate_enum_type()
         elif self.is_sequence_type() and self.repeat is None:
             raise TypeError(
-                f"no 'repeat' parameter specified for sequence type "
+                "no 'repeat' parameter specified for sequence type "
                 f"{self.type!r}"
             )
 

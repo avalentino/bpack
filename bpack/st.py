@@ -73,7 +73,7 @@ def _format_string_without_order(fmt: str, order: str) -> str:
     if fmt[0] in {">", "<", "=", "@", "!"}:
         if order and fmt[0] != order:
             raise ValueError(
-                f"inconsistent byteorder for nested record: "
+                "inconsistent byteorder for nested record: "
                 f"record byteorder is '{order}', "
                 f"nested record byteorder is '{fmt[0]}'"
             )
@@ -119,7 +119,7 @@ def _to_fmt(
             return f"{order}{repeat}{_TYPE_SIGNED_AND_SIZE_TO_STR[key]}"
     except KeyError:
         raise TypeError(
-            f"unable to generate format string for "
+            "unable to generate format string for "
             f"type='{type_}', size='{size}', order='{order}', "
             f"signed='{signed}', repeat='{repeat}'"
         )

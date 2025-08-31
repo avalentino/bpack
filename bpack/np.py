@@ -403,7 +403,7 @@ def unsigned_to_signed(
         if not isinstance(data, np.ndarray):
             raise TypeError(
                 f"The input 'data' ({data!r}) parameter is not a "
-                f"'numpy.ndarray'"
+                "'numpy.ndarray'"
             )
         out = data
     else:

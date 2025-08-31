@@ -297,14 +297,12 @@ if __name__ == "__main__":
         "s1b-s3-raw-s-vv-20210530t130904-20210530t130929-027134-033dc1.dat"
     )
     if not os.path.exists(filename):
-        sys.exit(
-            """ERROR: sample product not available.
+        sys.exit("""ERROR: sample product not available.
 
 You can download it as follows (scihub.copernicus.eu authentication needed):
 
 $ sentinelsat --name 'S1B_S3_RAW__0SDV_20200615T162409_20200615T162435_022046_029D76*' --download
-"""
-        )
+""")
 
     df = sequential_stream_decoder(filename)  # , maxcount=10)
     # print()

@@ -1032,25 +1032,21 @@ def test_enum_decoding_bytes(backend):
         bitorder = None
         ssize = 1
         isize = 1
-        encoded_data = b"".join(
-            [
-                EStrEnumType.A.value.encode("ascii"),
-                EBytesEnumType.A.value,
-                EIntEnumType.A.value.to_bytes(1, "little", signed=False),
-                EFlagEnumType.A.value.to_bytes(1, "little", signed=False),
-            ]
-        )
+        encoded_data = b"".join([
+            EStrEnumType.A.value.encode("ascii"),
+            EBytesEnumType.A.value,
+            EIntEnumType.A.value.to_bytes(1, "little", signed=False),
+            EFlagEnumType.A.value.to_bytes(1, "little", signed=False),
+        ])
     else:
         bitorder = bpack.EBitOrder.MSB
         ssize = 8
         isize = 4
-        encoded_data = b"".join(
-            [
-                EStrEnumType.A.value.encode("ascii"),
-                EBytesEnumType.A.value,
-                bytes([0b00010001]),
-            ]
-        )
+        encoded_data = b"".join([
+            EStrEnumType.A.value.encode("ascii"),
+            EBytesEnumType.A.value,
+            bytes([0b00010001]),
+        ])
 
     @backend.decoder
     @bpack.descriptor(baseunits=backend.Decoder.baseunits, bitorder=bitorder)

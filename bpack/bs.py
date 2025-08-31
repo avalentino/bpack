@@ -234,7 +234,7 @@ def packbits(
     Please note that no check that the input values actually fits in the
     specified number of bits is performed is performed.
 
-    The function return a sting of bytes including same number of samples
+    The function return a string of bytes including same number of samples
     of the input plus possibly some padding bit (at the end) to fill an
     integer number of bytes.
 
@@ -244,7 +244,7 @@ def packbits(
     if (nsamples * bits_per_sample) % 8:
         warnings.warn(
             f"packing {nsamples} with {bits_per_sample} bits per "
-            f"sample requires padding"
+            "sample requires padding"
         )
     encoder_ = _get_sequence_codec(
         nsamples, bits_per_sample, signed=signed, byteorder=byteorder
