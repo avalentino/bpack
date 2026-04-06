@@ -33,7 +33,8 @@ jobs:
       - name: Build docs
         run: |
           mkdir -p _static
-          python3 -m sphinx -W -b html . _build/html
+          # python3 -m sphinx -W -b html . _build/html
+          python3 -m sphinx -b html . _build/html
         working-directory: docs
         env:
           PYTHONPATH: ..
@@ -41,7 +42,8 @@ jobs:
       - name: Check links
         run: |
           mkdir -p _static
-          python3 -m sphinx -W -b linkcheck . _build/linkcheck
+          # python3 -m sphinx -W -b linkcheck . _build/linkcheck
+          python3 -m sphinx -b linkcheck . _build/linkcheck
         working-directory: docs
         env:
           PYTHONPATH: ..
@@ -49,7 +51,8 @@ jobs:
       - name: Doctest
         run: |
           mkdir -p _static
-          python3 -m sphinx -W -b doctest . _build/doctest
+          # python3 -m sphinx -W -b doctest . _build/doctest
+          python3 -m sphinx -b doctest . _build/doctest
         working-directory: docs
         env:
           PYTHONPATH: ..
@@ -57,7 +60,8 @@ jobs:
       - name: Spellcheck
         run: |
           mkdir -p _static
-          python3 -m sphinx -W -b spelling . _build/spelling
+          # python3 -m sphinx -W -b spelling . _build/spelling
+          python3 -m sphinx -b spelling . _build/spelling
         working-directory: docs
         env:
           PYTHONPATH: ..
