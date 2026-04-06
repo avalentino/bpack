@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0.0"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 
@@ -20,11 +20,11 @@ keywords = [
     "unpack",
     "pack"
 ]
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
@@ -39,8 +39,7 @@ bs = ["bitstruct"]
 ba = ["bitarray>=1.5.1"]
 np = ["numpy"]
 codegen = ["black"]
-test = ["pytest", "bpack[bs]", "bpack[ba]", "bpack[np]"]
-full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[codegen]", "bpack[test]"]
+full = ["bpack[bs]", "bpack[ba]", "bpack[np]", "bpack[codegen]"]
 
 
 [project.urls]
@@ -51,16 +50,32 @@ Changelog = "https://github.com/avalentino/bpack/blob/main/docs/release_notes.rs
 Issues = "https://github.com/avalentino/bpack/issues"
 
 
-[tool.setuptools]
-packages = [
-    "bpack",
-    "bpack.tests",
-    "bpack.tools",
-    "bpack.tools.tests",
-    "bpack.tools.tests.data",
+[dependency-groups]
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinxcontrib-spelling",
 ]
-# zip-safe = true
-# license-files = ["LICENSE"]
+alldeps = ["bitstruct", "bitarray>=1.5.1", "numpy", "black"]
+test = ["pytest>=6", "pytest-doctestplus", {include-group = "alldeps"}]
+coverage = ["pytest-cov", "coverage[toml]", {include-group = "test"}]
+lint = ["flake8", "pydocstyle", "isort", "black", "ruff", "mypy", "codespell"]
+dev = [
+    "python-build",
+    "twine",
+    "setuptools >=77.0.3",
+    "tox",
+    {include-group = "alldeps"},
+    {include-group = "docs"},
+    {include-group = "test"},
+    {include-group = "coverage"},
+    {include-group = "lint"},
+]
+
+
+[tool.setuptools.packages.find]
+include = ["bpack*"]
+namespaces = false
 
 
 [tool.setuptools.dynamic]
@@ -83,7 +98,7 @@ enable-unstable-feature = [
     "string_processing",
     "wrap_long_dict_values_in_parens",
 ]
-# target-version = ['py311']
+# target-version = ['py310']
 extend-exclude = "bpack/tools/tests/data"
 
 
@@ -220,6 +235,7 @@ docstring-code-format = true
 
 [tool.ruff.lint.isort]
 length-sort = true
+known-first-party = ["bpack"]
 
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]

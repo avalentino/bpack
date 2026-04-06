@@ -26,7 +26,7 @@ Pip based environment
 
   $ python3 -m venv --prompt venv .venv
   $ source .venv/bin/activate
-  (venv) $ python3 -m pip install -r requirements-dev-txt
+  (venv) $ python3 -m pip install --group dev
 
 
 Conda based environment
@@ -34,8 +34,8 @@ Conda based environment
 
 .. code-block:: shell
 
-  $ conda create -c conda-forge -n bpack \
-      --file requirements-dev.txt python=3
+  $ conda create -c conda-forge -n bpack python=3 numpy bitstruct bitarray \
+      pytest pytest-cov sphinx sphinx-rtd-theme
 
 
 Debian/Ubuntu

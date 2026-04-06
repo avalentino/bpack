@@ -29,9 +29,8 @@ jobs:
       - name: Install lint dependencies
         shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install flake8 pydocstyle isort black
-          if [ -f requirements-lint.txt ]; then pip install -r requirements-lint.txt; fi
+          python -m pip install --upgrade pip setuptools
+          python -m pip install --group lint
 
       - name: Lint (flake8)
         run: |
@@ -63,3 +62,8 @@ jobs:
       #   run: |
       #     ruff --version
       #     ruff check ${PACKAGE}
+
+      - name: Lint (codespell)
+        run: |
+          codespell --version
+          codespell --count ${PACKAGE} tests

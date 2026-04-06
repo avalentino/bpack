@@ -31,7 +31,7 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools
           python -m pip install build twine
 
       - name: Build the package
@@ -72,14 +72,13 @@ jobs:
         shell: bash
         run: |
           VERSION=$(echo dist/*.whl | cut -d '-' -f 2)
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools
           python -m pip install dist/${PACKAGE}-${VERSION}-py3-none-any.whl[full]
 
       - name: Install test dependencies
         shell: bash
         run: |
           python -m pip install pytest pytest-cov
-          if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
 
       - name: Test
         shell: bash
