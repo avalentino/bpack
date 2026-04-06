@@ -94,7 +94,7 @@ line-length = 79
 preview = true
 enable-unstable-feature = [
     "hug_parens_with_braces_and_square_brackets",
-    "multiline_string_handling",
+    # "multiline_string_handling",
     "string_processing",
     "wrap_long_dict_values_in_parens",
 ]
@@ -124,7 +124,7 @@ match='(?!test_).*\.py'
 
 
 [tool.codespell]
-skip = "*.pdf,*.pp,*.ipynb,./docs/spelling_wordlist.txt"
+skip = "*.pdf,*.pp,*.ipynb,./docs/spelling_wordlist.txt,./docs/_build/*,./htmlcov/*"
 count = true
 quiet-level = 3
 ignore-words-list = "nd"
