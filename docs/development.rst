@@ -160,6 +160,6 @@ Update the API documentation
 .. _Tox: https://tox.readthedocs.io
 .. _Python: https://www.python.org
 .. _flake8: https://flake8.pycqa.org
-.. _pydocstyle: http://www.pydocstyle.org
+.. _pydocstyle: https://github.com/PyCQA/pydocstyle
 .. _black: https://black.readthedocs.io
 .. _isort: https://pycqa.github.io/isort
