@@ -22,7 +22,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          submodules: 'true'
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -71,14 +70,13 @@ jobs:
       - name: Install
         shell: bash
         run: |
-          VERSION=$(echo dist/*.whl | cut -d '-' -f 2)
           python -m pip install --upgrade pip setuptools
-          python -m pip install dist/${PACKAGE}-${VERSION}-py3-none-any.whl[full]
+          python -m pip install --pre --find-links dist/ bpack[full]
 
       - name: Install test dependencies
         shell: bash
         run: |
-          python -m pip install --group coverage
+          python -m pip install pytest pytest-cov
 
       - name: Test
         shell: bash
