@@ -314,7 +314,7 @@ def _update_field_metadata(field_, **kwargs):
             f"the 'type' parameter cannot be a string (type_: {type_!r})"
         )
 
-    metadata = field_.metadata.copy() if field_.metadata is not None else {}
+    metadata = dict(field_.metadata) if field_.metadata is not None else {}
     metadata.update(**kwargs)
     field_.metadata = types.MappingProxyType(metadata)
     return field_
