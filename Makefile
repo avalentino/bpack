@@ -52,6 +52,7 @@ cleaner: clean
 	$(RM) -r .mypy_cache
 	$(RM) -r .ruff_cache
 	$(RM) -r .ipynb_checkpoints
+	$(RM) -r .hypothesis
 
 distclean: cleaner
 	$(RM) -r dist
@@ -69,6 +70,7 @@ lint:
 docs:
 	mkdir -p docs/_static
 	$(MAKE) -C docs html
+	$(MAKE) -C docs doctest
 	$(MAKE) -C docs linkcheck
 	$(MAKE) -C docs spelling
 

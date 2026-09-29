@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "bpack"
-copyright = "2020-2025, Antonio Valentino"  # noqa: D100
+copyright = "2020-2026, Antonio Valentino"  # noqa: D100
 author = "Antonio Valentino"
 
 # The full version, including alpha/beta/rc tags
@@ -61,7 +61,11 @@ else:
     extensions.append("sphinxcontrib.spelling")
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -85,6 +89,8 @@ html_last_updated_fmt = ""
 
 
 # -- Options for LaTeX output ------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
+
 latex_documents = [
     # (startdocname, targetname, title, author, theme, toctree_only)
     (
@@ -139,6 +145,7 @@ intersphinx_mapping = {
 
 
 # -- Options for extlinks extension ------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/extlinks.html#module-sphinx.ext.extlinks
 
 extlinks = {
     "issue": ("https://github.com/avalentino/bpack/issues/%s", "gh-%s"),

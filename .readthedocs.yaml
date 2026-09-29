@@ -9,11 +9,11 @@ build:
   os: ubuntu-lts-latest
   tools:
     python: "latest"
-    jobs:
-      install:
-         # Since the install step is overridden, pip is no longer updated automatically.
-         - pip install --upgrade pip setuptools
-         - pip install --group docs
+  jobs:
+    install:
+      # Since the install step is overridden, pip is no longer updated automatically.
+      - pip install --upgrade pip setuptools
+      - pip install --group docs
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:

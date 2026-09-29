@@ -4,7 +4,7 @@ Release Notes
 bpack v1.3.1 (UNRELEASED)
 -------------------------
 
-* Python >= 3.10 is now required.
+* Python >= 3.11 is now required.
 
 
 bpack v1.3.0 (06/01/2025)
