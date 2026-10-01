@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-bpack v1.3.1 (UNRELEASED)
+bpack v1.3.1 (01/10/2026)
 -------------------------
 
 * Fix support for Python 3.15.
