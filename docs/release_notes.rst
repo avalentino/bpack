@@ -4,6 +4,7 @@ Release Notes
 bpack v1.3.1 (UNRELEASED)
 -------------------------
 
+* Fix support for Python 3.15.
 * Python >= 3.11 is now required.
 
 
