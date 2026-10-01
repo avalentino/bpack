@@ -157,7 +157,7 @@ Update the API documentation
       bpack bpack/tests
 
 
-.. _Tox: https://tox.readthedocs.io
+.. _Tox: https://tox.wiki/en/stable
 .. _Python: https://www.python.org
 .. _flake8: https://flake8.pycqa.org
 .. _pydocstyle: https://github.com/PyCQA/pydocstyle
